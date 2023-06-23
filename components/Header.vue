@@ -1,0 +1,45 @@
+<template>
+  <v-app-bar color="primary" prominent>
+    <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+    <v-app-bar-title>Matrícula On-line</v-app-bar-title>
+    <v-spacer />
+  </v-app-bar>
+
+  <v-navigation-drawer
+    v-model="drawer"
+    location="left"
+    temporary
+  >
+    <v-list>
+      <v-list-item
+        v-for="(item, i) in items"
+        :key="i"
+        :to="item.to"
+        router
+        exact
+      >
+        <v-list-item-title>
+          <v-icon>{{ item.icon }}</v-icon>
+          {{ item.title }}
+        </v-list-item-title>
+      </v-list-item>
+    </v-list>
+  </v-navigation-drawer>
+</template>
+
+<script setup>
+  const drawer = ref(false);
+
+  const items = ref([
+    {
+      icon: 'mdi-apps',
+      title: 'Início',
+      to: '/',
+    },
+    {
+      icon: 'mdi-chart-bubble',
+      title: 'Sobre',
+      to: '/about',
+    }
+  ]);
+</script>
