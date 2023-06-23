@@ -4,12 +4,7 @@
 
     <v-row class="pa-3">
       <v-col cols="6">
-        <v-text-field
-          v-model="count"
-          label="Count"
-          variant="outlined"
-          
-        />
+        <v-text-field v-model="count" label="Count" variant="outlined" />
       </v-col>
       <v-col cols="6">
         <v-text-field
@@ -21,16 +16,15 @@
       </v-col>
     </v-row>
     <v-row justify="center">
-      <v-btn prepend-icon="mdi-plus" @click="increment" color="primary">Increment counter</v-btn>
+      <v-btn prepend-icon="mdi-plus" color="primary" @click="increment"
+        >Increment counter</v-btn
+      >
     </v-row>
-    
   </div>
 </template>
 
 <script setup>
-
-  const count = ref(0);
-  const double = computed(() => count.value * 2);
-  const increment = () => count.value++;
-
+const count = ref(0);
+const double = computed(() => count.value * 2);
+const increment = () => count.value++;
 </script>
