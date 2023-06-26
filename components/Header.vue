@@ -1,15 +1,14 @@
 <template>
   <v-app-bar color="primary" prominent>
-    <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+    <v-app-bar-nav-icon
+      variant="text"
+      @click.stop="drawer = !drawer"
+    ></v-app-bar-nav-icon>
     <v-app-bar-title>Matrícula On-line</v-app-bar-title>
     <v-spacer />
   </v-app-bar>
 
-  <v-navigation-drawer
-    v-model="drawer"
-    location="left"
-    temporary
-  >
+  <v-navigation-drawer v-model="drawer" location="left" temporary>
     <v-list>
       <v-list-item
         v-for="(item, i) in items"
@@ -28,18 +27,23 @@
 </template>
 
 <script setup>
-  const drawer = ref(false);
+const drawer = ref(false);
 
-  const items = ref([
-    {
-      icon: 'mdi-apps',
-      title: 'Início',
-      to: '/',
-    },
-    {
-      icon: 'mdi-chart-bubble',
-      title: 'Sobre',
-      to: '/about',
-    }
-  ]);
+const items = ref([
+  {
+    icon: "mdi-apps",
+    title: "Início",
+    to: "/",
+  },
+  {
+    icon: "mdi-clipboard-text",
+    title: "Inscrição",
+    to: "/enrollment",
+  },
+  {
+    icon: "mdi-chart-bubble",
+    title: "Sobre",
+    to: "/about",
+  },
+]);
 </script>
