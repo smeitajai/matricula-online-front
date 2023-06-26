@@ -1,30 +1,54 @@
 <template>
-  <div>
-    <h1>Bem-vindo ao sistema de matrícula on-line</h1>
-
-    <v-row class="pa-3">
-      <v-col cols="6">
-        <v-text-field v-model="count" label="Count" variant="outlined" />
-      </v-col>
-      <v-col cols="6">
-        <v-text-field
-          v-model="double"
-          label="Double"
-          variant="outlined"
-          readonly
-        />
-      </v-col>
-    </v-row>
+  <v-container fluid class="login-page fill-height">
     <v-row justify="center">
-      <v-btn prepend-icon="mdi-plus" color="primary" @click="increment"
-        >Increment counter</v-btn
-      >
+      <v-col align-self="center" cols="12" md="8">
+        <v-card class="elevation-12" rounded="lg">
+          <v-toolbar color="primary">
+            <v-toolbar-title>Matrícula On-line</v-toolbar-title>
+          </v-toolbar>
+          <v-card-text>
+            <h2>
+              Seja bem-vindo(a) ao novo sistema de Matrículas On-line do
+              município de Itajaí/SC!
+            </h2>
+            <br />
+            <p>
+              Agora, matricular seus filhos na escola nunca foi tão simples e
+              conveniente. Com apenas alguns cliques, você pode realizar o
+              processo de forma simples, segura e sem sair de casa. Evite filas
+              e burocracias, faça a matrícula do conforto do seu lar.
+            </p>
+            <br />
+            <p class="font-weight-bold">
+              Matrícula Interna - XX/XX/XXXX até XX/XX/XXXX
+            </p>
+            <p>Transferência Interna - XX/XX/XXXX até XX/XX/XXXX</p>
+            <p>Matrículas Novas - XX/XX/XXXX até XX/XX/XXXX</p>
+            <br />
+            <a
+              href="https://drive.google.com/file/d/1C6uFVd71HnQxWkg8czDpsYFu5Mk5poLM/view"
+              target="_blank"
+              class="text-h5"
+              >Clique aqui para acessar o edital de matrícula
+              {{ new Date().getFullYear() + 1 }}</a
+            >
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col cols="12" class="mt-5">
+        <v-row justify="center">
+          <v-btn rounded="xl" size="x-large" color="primary" to="/enrollment"
+            >Clique aqui para começar</v-btn
+          >
+        </v-row>
+      </v-col>
     </v-row>
-  </div>
+  </v-container>
 </template>
 
-<script setup>
-const count = ref(0);
-const double = computed(() => count.value * 2);
-const increment = () => count.value++;
-</script>
+<style scoped>
+.login-page {
+  background: url("/background_mo.jpg") no-repeat center center;
+  background-size: 100% 100%;
+}
+</style>
