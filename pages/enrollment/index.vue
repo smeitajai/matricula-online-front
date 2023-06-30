@@ -17,6 +17,9 @@
         <v-chip color="green" text-color="white" variant="outlined">{{
           pokemon || "Waiting"
         }}</v-chip>
+        <v-chip color="red" text-color="red" variant="outlined"
+          >Um outro Chip de Teste</v-chip
+        >
       </v-col>
     </v-row>
     <v-row>
