@@ -1,5 +1,5 @@
 {
-  "name": "matricula-online",
+  "name": "matricula-online-front",
   "private": true,
   "scripts": {
     "build": "nuxt build",
