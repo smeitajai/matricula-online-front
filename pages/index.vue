@@ -11,19 +11,19 @@
               Seja bem-vindo(a) ao novo sistema de Matrículas On-line do
               município de Itajaí/SC!
             </h2>
+
             <br />
             <p>
-              Agora, matricular seus filhos na escola nunca foi tão simples e
-              conveniente. Com apenas alguns cliques, você pode realizar o
-              processo de forma simples, segura e sem sair de casa. Evite filas
-              e burocracias, faça a matrícula do conforto do seu lar.
+              Com apenas alguns cliques, você pode realizar o processo de forma
+              simples e segura.
             </p>
             <br />
+
             <p class="font-weight-bold">
-              Matrícula Interna - XX/XX/XXXX até XX/XX/XXXX
+              Matrícula Interna - 07/11/2023 até 10/11/2023
             </p>
-            <p>Transferência Interna - XX/XX/XXXX até XX/XX/XXXX</p>
-            <p>Matrículas Novas - XX/XX/XXXX até XX/XX/XXXX</p>
+            <p>Transferência Interna - 21/11/2023 até 24/11/2023</p>
+            <p>Matrículas Novas - 05/12/2023 até 08/12/2023</p>
             <br />
             <a
               href="https://drive.google.com/file/d/1C6uFVd71HnQxWkg8czDpsYFu5Mk5poLM/view"
