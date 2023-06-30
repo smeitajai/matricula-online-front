@@ -1,4 +1,4 @@
-export default function validarCPF(cpf) {
+export default function validateCPF(cpf) {
   let numeros, digitos, soma, i, resultado, digitos_iguais;
   digitos_iguais = 1;
   if (cpf.length != 11) {

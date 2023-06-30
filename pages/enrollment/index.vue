@@ -111,8 +111,6 @@
 </template>
 
 <script setup>
-import validarCPF from "@/plugins/validateCPF";
-import validarEmail from "@/plugins/validateEmail";
 import { useDisplay } from "vuetify";
 const runtimeConfig = useRuntimeConfig();
 
@@ -157,7 +155,7 @@ const onInputCPF = () => {
   showAllInputs.value = false;
 
   if (dadosForm.value.cpf && dadosForm.value.cpf.length == 11) {
-    return validarCPF(dadosForm.value.cpf)
+    return validateCPF(dadosForm.value.cpf)
       ? carregarPessoa()
       : ((snackbarMessage.value = "CPF Inválido. Tente novamente."),
         (snackbar.value = true));
@@ -175,7 +173,7 @@ const onClickBuscarVaga = () => {
   if (
     dadosForm.value.email &&
     dadosForm.value.email.length &&
-    !validarEmail(dadosForm.value.email)
+    !validateEmail(dadosForm.value.email)
   ) {
     return (
       (snackbarMessage.value = "E-mail inválido. Tente novamente."),
