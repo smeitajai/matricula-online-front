@@ -37,7 +37,7 @@
       </v-col>
       <v-col cols="12" class="mt-5">
         <v-row justify="center">
-          <v-btn rounded="xl" size="x-large" color="primary" to="/enrollment"
+          <v-btn rounded="xl" size="x-large" color="primary" to="/cadastro"
             >Clique aqui para começar</v-btn
           >
         </v-row>

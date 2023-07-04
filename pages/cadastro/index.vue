@@ -3,28 +3,6 @@
     <v-row>
       <v-col cols="12" class="pa-0 mb-5">
         <v-text-field
-          v-model="pokemonName"
-          label="nome pokemon"
-          variant="outlined"
-        />
-        <v-btn
-          color="primary"
-          prepend-icon="mdi-magnify"
-          rounded="xl"
-          @click="onClickBuscarPokemon()"
-          >Buscar Pokemon</v-btn
-        >
-        <v-chip color="green" text-color="white" variant="outlined">{{
-          pokemon || "Waiting"
-        }}</v-chip>
-        <v-chip color="red" text-color="red" variant="outlined"
-          >Um outro Chip de Teste</v-chip
-        >
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" class="pa-0 mb-5">
-        <v-text-field
           v-model="dadosForm.cpf"
           :counter="11"
           hint="Digite apenas números"
@@ -59,12 +37,10 @@
       </v-col>
       <v-col cols="12" md="6" class="pa-0">
         <v-text-field
-          v-model="dadosForm.data_nascimento"
+          v-model="dadosForm.dataNascimento"
           :class="[{ 'ml-2': !mobile }]"
           label="Data de nascimento*"
-          persistent-placeholder
-          placeholder="01/01/2023"
-          type="text"
+          type="date"
           variant="outlined"
         />
       </v-col>
@@ -115,7 +91,10 @@
 
 <script setup>
 import { useDisplay } from "vuetify";
-const runtimeConfig = useRuntimeConfig();
+import { useRouter } from "vue-router";
+
+const { mobile } = useDisplay();
+const router = useRouter();
 
 const dadosForm = ref({
   cpf: null,
@@ -130,6 +109,7 @@ const showAllInputs = ref(false);
 const snackbar = ref(false);
 const snackbarMessage = ref("");
 
+// Mock de Dados
 const unidades = ["CE DE CORDEIROS", "CE PEDRO RIZZI", "EB ANTÔNIO RAMOS"];
 const etapas = ["1° ano", "2° ano", "3° ano"];
 const pessoa = {
@@ -139,20 +119,7 @@ const pessoa = {
   unidade: "CE PEDRO RIZZI",
   etapa: "2° ano",
 };
-
-const pokemon = ref(null);
-const pokemonName = ref("");
-
-const onClickBuscarPokemon = async () => {
-  const { name, types } = await $fetch(
-    `https://pokeapi.co/api/v2/pokemon/${pokemonName.value}`
-  ).catch((error) => error.data);
-  pokemon.value = types
-    ? { name, type: types[0].type.name }
-    : { name: "Não encontrado", type: "Undefined" };
-};
-
-const { mobile } = useDisplay();
+// Fim dos mocks
 
 const onInputCPF = () => {
   showAllInputs.value = false;
@@ -166,9 +133,9 @@ const onInputCPF = () => {
 };
 
 const carregarPessoa = () => {
-  console.log("Runtime config:", runtimeConfig);
-  //Chamada para a API carregando os dados da pessoa pelo CPF informado
-  dadosForm.value = { ...pessoa };
+  //Chamada para a API "do Erudio" carregando os dados da pessoa pelo CPF informado
+  //Se já ouver uma inscrição para o CPF informado, deveria verificar no BackEnd também
+  //dadosForm.value = { ...pessoa };
   showAllInputs.value = true;
 };
 
@@ -183,6 +150,12 @@ const onClickBuscarVaga = () => {
       (snackbar.value = true)
     );
   }
-  console.log("Escolher vaga...");
+
+  router.push({
+    path: "/cadastro/vagas",
+    query: {
+      cpf: dadosForm.value.cpf,
+    },
+  });
 };
 </script>

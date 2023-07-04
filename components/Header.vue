@@ -38,7 +38,7 @@ const items = ref([
   {
     icon: "mdi-clipboard-text",
     title: "Inscrição",
-    to: "/enrollment",
+    to: "/cadastro",
   },
   {
     icon: "mdi-chart-bubble",
