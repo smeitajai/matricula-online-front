@@ -17,8 +17,10 @@ export default defineNuxtConfig({
     apiSecret: "123",
     // Keys within public, will be also exposed to the client-side
     public: {
-      apiBase: "/api",
-      apiTest: "https://pokeapi.co/api/v2/",
+      baseURL:
+        process.env.NODE_ENV === "production"
+          ? process.env.NUXT_PUBLIC_API_PROD
+          : process.env.NUXT_PUBLIC_API_DEV,
     },
   },
 

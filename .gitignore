@@ -13,5 +13,4 @@ logs
 .DS_Store
 
 # Local env files
-.env.*
-!.env.example
+.env
