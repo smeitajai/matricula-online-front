@@ -91,8 +91,6 @@
 
 <script setup>
 import { useDisplay } from "vuetify";
-import { useRouter } from "vue-router";
-
 const { mobile } = useDisplay();
 const router = useRouter();
 

@@ -41,6 +41,11 @@ const items = ref([
     to: "/cadastro",
   },
   {
+    icon: "mdi-warehouse",
+    title: "Unidades",
+    to: "/unidades",
+  },
+  {
     icon: "mdi-chart-bubble",
     title: "Sobre",
     to: "/about",
