@@ -29,26 +29,25 @@
               href="https://drive.google.com/file/d/1C6uFVd71HnQxWkg8czDpsYFu5Mk5poLM/view"
               target="_blank"
               class="text-h5"
-              >Clique aqui para acessar o edital de matrícula
-              {{ new Date().getFullYear() + 1 }}</a
+              >Clique aqui para acessar o edital de matrícula {{ anoEdital }}</a
             >
           </v-card-text>
         </v-card>
       </v-col>
       <v-col cols="12" class="mt-5">
         <v-row justify="center">
-          <v-btn rounded="xl" size="x-large" color="primary" to="/cadastro"
-            >Clique aqui para começar</v-btn
-          >
+          <CoreButton
+            label="clique aqui para começar"
+            link="/cadastro"
+            rounded="xl"
+            size="x-large"
+          />
         </v-row>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
-<style scoped>
-.login-page {
-  background: url("/background_mo.jpg") no-repeat center center;
-  background-size: 100% 100%;
-}
-</style>
+<script setup>
+const anoEdital = new Date().getFullYear() + 1;
+</script>
