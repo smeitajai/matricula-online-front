@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="login-page fill-height">
+  <v-container fluid class="fill-height">
     <v-row justify="center">
       <v-col align-self="center" cols="12" md="8">
         <CoreCard rounded="lg" title="Matrícula On-line" toolbar>
