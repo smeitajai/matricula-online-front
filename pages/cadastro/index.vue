@@ -39,30 +39,24 @@
         @input="dadosForm.dataNascimento = $event"
       />
 
-      <v-col cols="12" md="6" class="pa-0">
-        <v-select
-          v-model="dadosForm.unidade"
-          :class="[{ 'mr-2': !mobile }]"
-          label="Unidade de ensino*"
-          variant="outlined"
-          :items="unidades"
-        />
-      </v-col>
-      <v-col cols="12" md="6" class="pa-0">
-        <v-select
-          v-model="dadosForm.etapa"
-          :class="[{ 'ml-2': !mobile }]"
-          label="Etapa*"
-          variant="outlined"
-          :items="etapas"
-        />
-      </v-col>
+      <CoreSelect
+        v-model="dadosForm.unidade"
+        :items="unidades"
+        label="Unidade de Ensino*"
+        @input="dadosForm.unidade = $event"
+      />
+
+      <CoreSelect
+        v-model="dadosForm.etapa"
+        :items="etapas"
+        label="Etapa*"
+        @input="dadosForm.etapa = $event"
+      />
 
       <v-row justify="end" class="ma-0">
         <CoreButton
           label="buscar vaga"
           icon="mdi-magnify"
-          rounded="xl"
           @click="onClickBuscarVaga()"
         />
       </v-row>
@@ -82,8 +76,6 @@
 </template>
 
 <script setup>
-import { useDisplay } from "vuetify";
-const { mobile } = useDisplay();
 const router = useRouter();
 
 const dadosForm = ref({
@@ -100,8 +92,16 @@ const snackbar = ref(false);
 const snackbarMessage = ref("");
 
 // Mock de Dados
-const unidades = ["CE DE CORDEIROS", "CE PEDRO RIZZI", "EB ANTÔNIO RAMOS"];
-const etapas = ["1° ano", "2° ano", "3° ano"];
+const unidades = [
+  { title: "CE DE CORDEIROS", value: 100 },
+  { title: "CE PEDRO RIZZI", value: 200 },
+  { title: "EB ANTÔNIO RAMOS", value: 300 },
+];
+const etapas = [
+  { title: "1° ano", value: 1 },
+  { title: "2° ano", value: 2 },
+  { title: "3° ano", value: 3 },
+];
 const pessoa = {
   cpf: "06632196985",
   nome: "João da Silva",
