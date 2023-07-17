@@ -1,49 +1,44 @@
 <template>
   <v-form class="pa-10">
-    <v-row>
-      <v-col cols="12" class="pa-0 mb-5">
-        <v-text-field
-          v-model="dadosForm.cpf"
-          :counter="11"
-          hint="Digite apenas números"
-          label="CPF do aluno"
-          persistent-hint
-          placeholder="123456789000"
-          type="number"
-          variant="outlined"
-          @input="onInputCPF()"
-        />
-      </v-col>
+    <v-row class="mb-3">
+      <CoreInput
+        v-model="dadosForm.cpf"
+        :counter="11"
+        clearable
+        full-width
+        hint="Digite apenas números"
+        label="CPF do aluno(a)"
+        persistent-hint
+        placeholder="123456789000"
+        type="number"
+        @input="(dadosForm.cpf = $event), onInputCPF()"
+      />
     </v-row>
     <v-row v-if="showAllInputs">
-      <v-col cols="12" class="pa-0">
-        <v-text-field
-          v-model="dadosForm.email"
-          autofocus
-          label="E-mail do responsável"
-          placeholder="email@email.com"
-          type="text"
-          variant="outlined"
-        />
-      </v-col>
-      <v-col cols="12" md="6" class="pa-0">
-        <v-text-field
-          v-model="dadosForm.nome"
-          :class="[{ 'mr-2': !mobile }]"
-          label="Nome do aluno(a)*"
-          type="text"
-          variant="outlined"
-        />
-      </v-col>
-      <v-col cols="12" md="6" class="pa-0">
-        <v-text-field
-          v-model="dadosForm.dataNascimento"
-          :class="[{ 'ml-2': !mobile }]"
-          label="Data de nascimento*"
-          type="date"
-          variant="outlined"
-        />
-      </v-col>
+      <CoreInput
+        v-model="dadosForm.email"
+        autofocus
+        clearable
+        full-width
+        label="E-mail do responsável"
+        placeholder="email@email.com"
+        @input="dadosForm.email = $event"
+      />
+
+      <CoreInput
+        v-model="dadosForm.nome"
+        clearable
+        label="Nome do aluno(a)*"
+        @input="dadosForm.nome = $event"
+      />
+
+      <CoreInput
+        v-model="dadosForm.dataNascimento"
+        label="Data de nascimento*"
+        type="date"
+        @input="dadosForm.dataNascimento = $event"
+      />
+
       <v-col cols="12" md="6" class="pa-0">
         <v-select
           v-model="dadosForm.unidade"
@@ -63,17 +58,14 @@
         />
       </v-col>
 
-      <v-col cols="12" class="pa-0">
-        <v-row justify="end" class="ma-0">
-          <v-btn
-            color="primary"
-            prepend-icon="mdi-magnify"
-            rounded="xl"
-            @click="onClickBuscarVaga()"
-            >Buscar Vaga</v-btn
-          >
-        </v-row>
-      </v-col>
+      <v-row justify="end" class="ma-0">
+        <CoreButton
+          label="buscar vaga"
+          icon="mdi-magnify"
+          rounded="xl"
+          @click="onClickBuscarVaga()"
+        />
+      </v-row>
     </v-row>
 
     <v-snackbar
