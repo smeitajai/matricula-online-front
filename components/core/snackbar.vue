@@ -23,7 +23,7 @@ const props = defineProps({
     default: "right top",
   },
   message: {
-    type: String,
+    type: [String, Error],
     default: "",
   },
   modelValue: {

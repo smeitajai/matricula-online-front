@@ -26,55 +26,37 @@
     </v-col>
   </v-row>
 
-  <v-row justify="center">
-    <v-dialog v-model="dialog" persistent width="720">
-      <v-card>
-        <v-card-title>
-          <span class="text-h5">Adicionar Unidade</span>
-        </v-card-title>
-        <v-card-text>
-          <v-container>
-            <v-row>
-              <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="dadosUnidade.nome"
-                  label="Nome da unidade*"
-                  type="text"
-                  variant="outlined"
-                  :rules="[(v) => !!v || 'Campo obrigatório']"
-                  required
-                />
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="dadosUnidade.idExterno"
-                  label="ID do Erudio*"
-                  type="number"
-                  variant="outlined"
-                  :rules="[(v) => !!v || 'Campo obrigatório']"
-                  required
-                />
-              </v-col>
-            </v-row>
-          </v-container>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="red-darken-1" variant="text" @click="dialog = false">
-            Cancelar
-          </v-btn>
-          <v-btn
-            color="green-darken-1"
-            variant="text"
-            :loading="loading"
-            @click="onClickSalvar()"
-          >
-            Salvar
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </v-row>
+  <CoreDialog v-model="dialog" persistent :title="dialogTitle" toolbar>
+    <v-row class="mt-1">
+      <CoreInput
+        v-model="dadosUnidade.nome"
+        clearable
+        label="Nome da unidade*"
+        @input="dadosUnidade.nome = $event"
+      />
+      <CoreInput
+        v-model="dadosUnidade.idExterno"
+        clearable
+        label="ID Externo*"
+        type="number"
+        @input="dadosUnidade.idExterno = $event"
+      />
+    </v-row>
+    <template #dialogActions>
+      <CoreButton
+        text-color="red-darken-1"
+        label="cancelar"
+        variant="text"
+        @click="dialog = false"
+      />
+      <CoreButton
+        text-color="green-darken-1"
+        label="salvar"
+        variant="text"
+        @click="onClickSalvar"
+      />
+    </template>
+  </CoreDialog>
 
   <v-tooltip text="Adicionar Unidade">
     <template #activator="{ props }">
@@ -93,22 +75,22 @@
     </template>
   </v-tooltip>
 
-  <v-snackbar
-    v-model="snackbarError"
-    class="mr-5"
-    timeout="4000"
-    rounded="xl"
+  <CoreSnackbar
+    v-model="showMessage"
     color="red"
-    location="right top"
-  >
-    {{ snackbarError }}
-  </v-snackbar>
+    :message="message"
+    @hide="showMessage = $event"
+  />
 </template>
 
 <script setup>
 const dadosUnidade = ref({});
 const dialog = ref(false);
-const loading = ref(false);
+const dialogTitle = computed(() =>
+  dadosUnidade.value.id ? "Editar Unidade" : "Adicionar Unidade"
+);
+const message = ref("");
+const showMessage = ref(false);
 
 const { data: unidades, error: snackbarError } = useGET("unidades-ensino");
 
@@ -119,8 +101,8 @@ const onClickItem = (item) => {
 
 const onClickSalvar = () => {
   if (!dadosUnidade.value.nome || !dadosUnidade.value.idExterno) {
-    return (snackbarError.value =
-      "Verifique os campos obrigatórios e tente novamente!");
+    message.value = "Verifique os campos obrigatórios e tente novamente!";
+    return (showMessage.value = true);
   }
 
   dadosUnidade.value.id ? editarUnidade() : criarUnidade();
@@ -136,7 +118,8 @@ const editarUnidade = async () => {
   );
 
   if (error.value) {
-    return (snackbarError.value = error.value);
+    message.value = error.value;
+    return (showMessage.value = true);
   }
 
   const indexUnidade = unidades.value.findIndex(
@@ -153,7 +136,8 @@ const criarUnidade = async () => {
   });
 
   if (error.value) {
-    return (snackbarError.value = error.value);
+    message.value = error.value;
+    return (showMessage.value = true);
   }
 
   unidades.value.push(unidadeCriada.value);

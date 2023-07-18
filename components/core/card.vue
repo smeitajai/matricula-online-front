@@ -1,6 +1,6 @@
 <template>
   <v-card :elevation="elevation" :rounded="rounded">
-    <v-toolbar v-if="toolbar" :color="color">
+    <v-toolbar v-if="toolbar" :color="color" :density="density">
       <v-toolbar-title>{{ title }}</v-toolbar-title>
     </v-toolbar>
     <v-card-title v-else>
@@ -27,6 +27,10 @@ defineProps({
   color: {
     type: String,
     default: "primary",
+  },
+  density: {
+    type: String,
+    default: "compact",
   },
   elevation: {
     type: Number,
