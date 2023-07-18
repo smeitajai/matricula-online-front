@@ -62,16 +62,12 @@
       </v-row>
     </v-row>
 
-    <v-snackbar
-      v-model="snackbar"
-      class="mr-5"
-      timeout="4000"
-      rounded="xl"
+    <CoreSnackbar
+      v-model="showMessage"
       color="red"
-      location="right top"
-    >
-      {{ snackbarMessage }}
-    </v-snackbar>
+      :message="message"
+      @hide="showMessage = $event"
+    />
   </v-form>
 </template>
 
@@ -88,8 +84,8 @@ const dadosForm = ref({
 });
 
 const showAllInputs = ref(false);
-const snackbar = ref(false);
-const snackbarMessage = ref("");
+const showMessage = ref(false);
+const message = ref("");
 
 // Mock de Dados
 const unidades = [
@@ -117,8 +113,7 @@ const onInputCPF = () => {
   if (dadosForm.value.cpf && dadosForm.value.cpf.length == 11) {
     return validateCPF(dadosForm.value.cpf)
       ? carregarPessoa()
-      : ((snackbarMessage.value = "CPF Inválido. Tente novamente."),
-        (snackbar.value = true));
+      : ((message.value = "Erro: CPF Inválido."), (showMessage.value = true));
   }
 };
 
@@ -136,8 +131,7 @@ const onClickBuscarVaga = () => {
     !validateEmail(dadosForm.value.email)
   ) {
     return (
-      (snackbarMessage.value = "E-mail inválido. Tente novamente."),
-      (snackbar.value = true)
+      (message.value = "Erro: E-mail inválido."), (showMessage.value = true)
     );
   }
 
