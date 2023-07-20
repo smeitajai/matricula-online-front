@@ -5,24 +5,14 @@
     </v-col>
 
     <v-col cols="12">
-      <v-card elevation="2">
-        <v-toolbar color="primary" density="compact">
-          <v-toolbar-title> Unidades Cadastradas </v-toolbar-title>
-        </v-toolbar>
-        <v-list v-if="unidades && unidades.length">
-          <v-list-item
-            v-for="(item, i) in unidades"
-            :key="i"
-            :value="item"
-            @click="onClickItem(item)"
-          >
-            <v-list-item-title
-              >{{ item.nome }} [{{ item.idExterno }}]</v-list-item-title
-            >
-          </v-list-item>
-        </v-list>
-        <span v-else class="pa-2">Nenhuma unidade encontrada</span>
-      </v-card>
+      <CoreList
+        :item-text-sub="(i) => `ID: ${i.idExterno}`"
+        :item-text="(i) => i.nome"
+        :items="unidades"
+        header="Unidades Cadastradas"
+        toolbar
+        @click="onClickItem($event)"
+      />
     </v-col>
   </v-row>
 
@@ -86,16 +76,16 @@
 <script setup>
 const dadosUnidade = ref({});
 const dialog = ref(false);
+const message = ref("");
+const showMessage = ref(false);
 const dialogTitle = computed(() =>
   dadosUnidade.value.id ? "Editar Unidade" : "Adicionar Unidade"
 );
-const message = ref("");
-const showMessage = ref(false);
 
 const { data: unidades, error: snackbarError } = useGET("unidades-ensino");
 
-const onClickItem = (item) => {
-  dadosUnidade.value = { ...item };
+const onClickItem = (unidade) => {
+  dadosUnidade.value = { ...unidade };
   dialog.value = true;
 };
 
