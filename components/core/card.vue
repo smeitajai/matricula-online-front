@@ -6,7 +6,7 @@
     <v-card-title v-else>
       {{ title }}
     </v-card-title>
-    <v-card-text>
+    <v-card-text :class="[{ 'pa-0': paddingNone }]">
       <slot />
     </v-card-text>
     <v-card-actions v-if="slots.actions">
@@ -35,6 +35,10 @@ defineProps({
   elevation: {
     type: Number,
     default: 10,
+  },
+  paddingNone: {
+    type: Boolean,
+    default: false,
   },
   rounded: {
     type: [String, Number, Boolean],
