@@ -1,8 +1,6 @@
 <template>
   <v-row class="ma-5">
-    <v-col cols="12">
-      <span class="text-h4">Unidades de Ensino</span>
-    </v-col>
+    <PageTitle title="Unidades de Ensino" />
 
     <v-col cols="12">
       <CoreList
