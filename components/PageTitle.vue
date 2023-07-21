@@ -1,6 +1,6 @@
 <template>
   <v-col :cols="mobile ? 9 : 11">
-    <span class="text-h4">{{ title }}</span>
+    <span :class="mobile ? 'text-h5' : 'text-h4'">{{ title }}</span>
   </v-col>
   <v-col :cols="mobile ? 3 : 1">
     <CoreButton
