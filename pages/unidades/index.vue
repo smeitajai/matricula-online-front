@@ -46,22 +46,11 @@
     </template>
   </CoreDialog>
 
-  <v-tooltip text="Adicionar Unidade">
-    <template #activator="{ props }">
-      <v-btn
-        v-bind="props"
-        class="mr-5"
-        color="primary"
-        icon
-        location="right"
-        position="fixed"
-        size="x-large"
-        @click="(dadosUnidade = {}), (dialog = true)"
-      >
-        <v-icon>mdi-plus</v-icon>
-      </v-btn>
-    </template>
-  </v-tooltip>
+  <CoreFloatingButton
+    icon="mdi-plus"
+    tooltip="Adicionar Unidade"
+    @click="(dadosUnidade = {}), (dialog = true)"
+  />
 
   <CoreSnackbar
     v-model="showMessage"
