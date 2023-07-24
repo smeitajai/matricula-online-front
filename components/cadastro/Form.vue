@@ -7,9 +7,10 @@
         clearable
         full-width
         hint="Digite apenas números"
-        label="CPF do aluno(a)"
+        label="CPF do aluno(a)*"
         persistent-hint
         placeholder="123456789000"
+        required
         type="number"
         @input="(dadosForm.cpf = $event), onInputCPF()"
       />
