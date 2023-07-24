@@ -1,5 +1,5 @@
 <template>
-  <v-col cols="12" class="py-0 px-1" :md="fullWidth ? 12 : 6">
+  <v-col cols="12" class="py-1 px-1" :md="fullWidth ? 12 : 6">
     <v-text-field
       v-model="value"
       :autofocus="autofocus"
@@ -9,6 +9,7 @@
       :label="label"
       :persistent-hint="persistentHint"
       :placeholder="placeholder"
+      :rules="validationRules"
       :type="type"
       :variant="variant"
     />
@@ -53,9 +54,17 @@ const props = defineProps({
     type: String,
     default: "",
   },
+  required: {
+    type: Boolean,
+    default: false,
+  },
   type: {
     type: String,
     default: "text",
+  },
+  validate: {
+    type: Array,
+    default: () => [],
   },
   variant: {
     type: String,
@@ -72,5 +81,13 @@ const value = computed({
   set(val) {
     emit("input", val);
   },
+});
+
+const validationRules = ref([]);
+
+onMounted(() => {
+  validationRules.value = props.required
+    ? [...props.validate, (v) => !!v || "Campo obrigatório"]
+    : [...props.validate];
 });
 </script>
