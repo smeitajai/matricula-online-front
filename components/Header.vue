@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar color="grey-lighten-2" prominent>
+  <v-app-bar color="grey-lighten-2" density="comfortable">
     <v-app-bar-nav-icon
       variant="text"
       @click.stop="drawer = !drawer"
@@ -46,7 +46,7 @@ const items = ref([
     to: "/unidades",
   },
   {
-    icon: "mdi-chart-bubble",
+    icon: "mdi-progress-question",
     title: "Sobre",
     to: "/about",
   },
