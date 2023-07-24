@@ -5,6 +5,7 @@
       :clearable="clearable"
       :items="items"
       :label="label"
+      :rules="validationRules"
       :variant="variant"
     />
   </v-col>
@@ -32,6 +33,14 @@ const props = defineProps({
     type: [String, Number],
     default: "",
   },
+  required: {
+    type: Boolean,
+    default: false,
+  },
+  validate: {
+    type: Array,
+    default: () => [],
+  },
   variant: {
     type: String,
     default: "outlined",
@@ -47,5 +56,13 @@ const value = computed({
   set(val) {
     emit("input", val);
   },
+});
+
+const validationRules = ref([]);
+
+onMounted(() => {
+  validationRules.value = props.required
+    ? [...props.validate, (v) => !!v || "Campo obrigatório"]
+    : [...props.validate];
 });
 </script>
