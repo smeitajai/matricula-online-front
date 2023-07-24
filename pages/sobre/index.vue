@@ -1,3 +1,3 @@
 <template>
-  <AboutCard />
+  <SobreCard />
 </template>

@@ -46,9 +46,14 @@ const items = ref([
     to: "/unidades",
   },
   {
+    icon: "mdi-clock-outline",
+    title: "Turno",
+    to: "/turno",
+  },
+  {
     icon: "mdi-progress-question",
     title: "Sobre",
-    to: "/about",
+    to: "/sobre",
   },
 ]);
 </script>
