@@ -51,6 +51,11 @@ const items = ref([
     to: "/turno",
   },
   {
+    icon: "mdi-format-list-numbered",
+    title: "Etapa",
+    to: "/etapa",
+  },
+  {
     icon: "mdi-progress-question",
     title: "Sobre",
     to: "/sobre",
