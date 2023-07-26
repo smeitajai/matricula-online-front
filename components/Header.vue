@@ -41,19 +41,24 @@ const items = ref([
     to: "/cadastro",
   },
   {
+    icon: "mdi-chart-timeline",
+    title: "Processos",
+    to: "/processo",
+  },
+  {
     icon: "mdi-warehouse",
     title: "Unidades",
     to: "/unidades",
   },
   {
-    icon: "mdi-clock-outline",
-    title: "Turno",
-    to: "/turno",
-  },
-  {
     icon: "mdi-format-list-numbered",
     title: "Etapa",
     to: "/etapa",
+  },
+  {
+    icon: "mdi-clock-outline",
+    title: "Turno",
+    to: "/turno",
   },
   {
     icon: "mdi-progress-question",
