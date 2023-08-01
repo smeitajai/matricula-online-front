@@ -36,7 +36,7 @@ const items = ref([
     to: "/",
   },
   {
-    icon: "mdi-clipboard-text",
+    icon: "mdi-clipboard-text-outline",
     title: "Inscrição",
     to: "/cadastro",
   },
@@ -46,7 +46,12 @@ const items = ref([
     to: "/processo",
   },
   {
-    icon: "mdi-warehouse",
+    icon: "mdi-bulletin-board",
+    title: "Quadro de Vagas",
+    to: "/quadro",
+  },
+  {
+    icon: "mdi-home-variant-outline",
     title: "Unidades",
     to: "/unidades",
   },

@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="form" class="pa-10" @submit.prevent="onSubmit()">
+  <v-form ref="form" class="pa-10">
     <v-row class="mb-3">
       <CoreInput
         v-model="dadosForm.cpf"
@@ -59,7 +59,7 @@
       />
     </v-row>
     <v-row justify="end">
-      <CoreButton label="buscar vaga" icon="mdi-magnify" type="submit" />
+      <CoreButton label="buscar vaga" icon="mdi-magnify" @click="onSubmit()" />
     </v-row>
 
     <CoreSnackbar

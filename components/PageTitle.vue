@@ -12,9 +12,14 @@
       @click="router.back()"
     />
   </v-col>
+  <v-col v-if="slots.subtitle" cols="12" class="py-0">
+    <slot name="subtitle" />
+  </v-col>
 </template>
 
 <script setup>
+const slots = useSlots();
+
 defineProps({
   title: {
     type: String,
