@@ -1,21 +1,26 @@
 <template>
-  <v-btn
-    :color="color"
-    :rounded="rounded"
-    :size="size"
-    :variant="variant"
-    :to="link || null"
-    @click="!link ? onClick($event) : false"
-  >
-    <v-icon v-if="icon" :color="iconColor" :left="label != null">{{
-      icon
-    }}</v-icon>
-    <span :class="`text-${textColor}`">{{ label }}</span>
-  </v-btn>
+  <v-tooltip :text="tooltip" location="top" :disabled="hideTooltip()">
+    <template #activator="{ props }">
+      <v-btn
+        v-bind="props"
+        :color="color"
+        :rounded="rounded"
+        :size="size"
+        :variant="variant"
+        :to="link || null"
+        @click="!link ? onClick($event) : false"
+      >
+        <v-icon v-if="icon" :color="iconColor" :left="label != null">{{
+          icon
+        }}</v-icon>
+        <span :class="`text-${textColor}`">{{ label }}</span>
+      </v-btn>
+    </template>
+  </v-tooltip>
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   color: {
     type: String,
     default: "#6200EE", // primary
@@ -44,6 +49,10 @@ defineProps({
     type: String,
     default: "white",
   },
+  tooltip: {
+    type: String,
+    default: null,
+  },
   link: {
     type: String,
     default: null,
@@ -53,6 +62,10 @@ defineProps({
     default: "elevated",
   },
 });
+
+const hideTooltip = () => {
+  return !props.tooltip ? true : false;
+};
 
 const emit = defineEmits(["click"]);
 
