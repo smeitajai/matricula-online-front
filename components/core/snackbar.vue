@@ -44,14 +44,14 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["hide"]);
+const emit = defineEmits(["update:modelValue"]);
 
 const value = computed({
   get() {
     return props.modelValue;
   },
-  set(val) {
-    emit("hide", val);
+  set(value) {
+    emit("update:modelValue", value);
   },
 });
 </script>

@@ -2,7 +2,7 @@
   <v-row class="ma-5">
     <PageTitle title="Turno" />
 
-    <v-col cols="12">
+    <v-col cols="12" v-if="turnos">
       <CoreList
         :item-text="(i) => i.nome"
         :items="turnos"
@@ -26,18 +26,20 @@
     tooltip="Adicionar Turno"
     @click="(dadosTurno = {}), (dialog = true)"
   />
+
+  <CoreSnackbar
+    v-if="error"
+    v-model="error"
+    color="error"
+    :message="error.message"
+  />
 </template>
 
 <script setup>
 const dadosTurno = ref({});
 const dialog = ref(false);
 
-// const { data: turnos } = await useGET("turnos");
-const turnos = ref([
-  { id: 1, nome: "Matutino" },
-  { id: 2, nome: "Vespertino" },
-  { id: 3, nome: "Noturno" },
-]);
+const { data: turnos, error } = await useGET("turnos");
 
 const onClickItem = (turno) => {
   dadosTurno.value = { ...turno };

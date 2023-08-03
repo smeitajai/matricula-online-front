@@ -4,9 +4,15 @@
       <CoreInput
         v-model="dadosTurno.nome"
         clearable
-        full-width
         label="Nome do turno*"
         @input="dadosTurno.nome = $event"
+      />
+      <CoreInput
+        v-model="dadosTurno.idExterno"
+        clearable
+        label="ID Externo*"
+        type="number"
+        @input="dadosTurno.idExterno = $event"
       />
     </v-row>
     <template #dialogActions>
@@ -81,9 +87,10 @@ const onClickSalvar = () => {
 
 const editarTurno = async () => {
   const { data: turnoAtualizado, error } = await usePUT(
-    `turno/${dadosTurno.value.id}`,
+    `turnos/${dadosTurno.value.id}`,
     {
       nome: dadosTurno.value.nome,
+      idExterno: dadosTurno.value.idExterno
     }
   );
 
@@ -96,8 +103,9 @@ const editarTurno = async () => {
 };
 
 const criarTurno = async () => {
-  const { data: turnoCriado, error } = await usePOST("turno", {
+  const { data: turnoCriado, error } = await usePOST("turnos", {
     nome: dadosTurno.value.nome,
+    idExterno: dadosTurno.value.idExterno
   });
 
   if (error.value) {
