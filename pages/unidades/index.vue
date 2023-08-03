@@ -33,7 +33,7 @@
 const dadosUnidade = ref({});
 const dialog = ref(false);
 
-const { data: unidades } = await useGET("unidades-ensino");
+const { data: unidades, pending, error, refresh } = await useGET("unidades-ensino");
 
 const onClickItem = (unidade) => {
   dadosUnidade.value = { ...unidade };
