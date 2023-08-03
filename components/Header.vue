@@ -56,6 +56,11 @@ const items = ref([
     to: "/unidades",
   },
   {
+    icon: "mdi-progress-question",
+    title: "Teste",
+    to: "/unidades/teste",
+  },
+  {
     icon: "mdi-format-list-numbered",
     title: "Etapa",
     to: "/etapa",
