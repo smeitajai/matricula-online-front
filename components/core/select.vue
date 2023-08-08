@@ -4,6 +4,8 @@
       v-model="value"
       :clearable="clearable"
       :items="items"
+      :item-title="itemTitle"
+      :item-value="itemValue"
       :label="label"
       :rules="validationRules"
       :variant="variant"
@@ -24,6 +26,14 @@ const props = defineProps({
   items: {
     type: Array,
     default: () => [],
+  },
+  itemTitle: {
+    type: String,
+    default: "title",
+  },
+  itemValue: {
+    type: String,
+    default: "value",
   },
   label: {
     type: String,
