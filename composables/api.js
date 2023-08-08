@@ -21,6 +21,8 @@ export const usePOST = (route, body) => {
 export const usePUT = (route, body) => {
   const config = useRuntimeConfig();
 
+  delete body.id;
+
   return useFetch(route, {
     baseURL: config.public.baseURL,
     method: "PUT",
