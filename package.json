@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@mdi/font": "^7.2.96",
+    "date-fns": "^2.30.0",
     "sass": "^1.63.5",
     "vuetify": "^3.3.5"
   }
