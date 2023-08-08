@@ -1,54 +1,10 @@
 <template>
   <CoreDialog v-model="showDialog" persistent :title="dialogTitle" toolbar>
-    <v-form ref="form">
-      <v-row class="ma-0">
-        <CoreInput
-          v-model="dadosProcesso.nome"
-          clearable
-          label="Nome*"
-          required
-          @input="dadosProcesso.nome = $event"
-        />
-        <CoreInput
-          v-model="dadosProcesso.edital"
-          clearable
-          label="Edital"
-          @input="dadosProcesso.edital = $event"
-        />
-
-        <CoreFormSubtitle label="Fase Inicial" class="pt-0" />
-        <CoreInput
-          v-model="dadosProcesso.faseInicialDataInicio"
-          label="Data Inicial*"
-          type="date"
-          required
-          @input="dadosProcesso.faseInicialDataInicio = $event"
-        />
-        <CoreInput
-          v-model="dadosProcesso.faseInicialDataFim"
-          label="Data Final*"
-          type="date"
-          required
-          @input="dadosProcesso.faseInicialDataFim = $event"
-        />
-
-        <CoreFormSubtitle label="Fase Final" class="pt-0" />
-        <CoreInput
-          v-model="dadosProcesso.faseFinalDataInicio"
-          label="Data Inicial*"
-          type="date"
-          required
-          @input="dadosProcesso.faseFinalDataInicio = $event"
-        />
-        <CoreInput
-          v-model="dadosProcesso.faseFinalDataFim"
-          label="Data Final*"
-          type="date"
-          required
-          @input="dadosProcesso.faseFinalDataFim = $event"
-        />
-      </v-row>
-    </v-form>
+    <ProcessoForm
+      v-model="dadosProcesso"
+      :validate="validate"
+      @valid="onClickSalvar($event)"
+    />
     <template #dialogActions>
       <CoreButton
         text-color="red-darken-1"
@@ -60,7 +16,7 @@
         text-color="green-darken-1"
         label="salvar"
         variant="text"
-        @click="onClickSalvar()"
+        @click="validate = !validate"
       />
     </template>
   </CoreDialog>
@@ -74,6 +30,8 @@
 </template>
 
 <script setup>
+import { format, parseISO } from "date-fns";
+
 const props = defineProps({
   dialog: {
     type: Boolean,
@@ -87,16 +45,58 @@ const props = defineProps({
 
 const emit = defineEmits(["created", "updated", "close"]);
 
-const form = ref(null);
 const message = ref("");
 const showMessage = ref(false);
-const dadosProcesso = ref({});
+const validate = ref(false);
+
+const dadosProcesso = ref({
+  edital: null,
+  nome: null,
+  faseInicialDataInicio: null,
+  faseInicialDataFim: null,
+  faseFinalDataInicio: null,
+  faseFinalDataFim: null,
+});
+
 watch(
   () => props.processo,
   (newValue) => {
     dadosProcesso.value = newValue;
+    if (newValue.id) formatData(dadosProcesso.value);
   }
 );
+
+const formatData = (processo) => {
+  processo.faseInicialDataInicio = format(
+    parseISO(processo.faseInicialDataInicio),
+    "yyyy-MM-dd"
+  );
+  processo.faseInicialDataFim = format(
+    parseISO(processo.faseInicialDataFim),
+    "yyyy-MM-dd"
+  );
+  processo.faseFinalDataInicio = format(
+    parseISO(processo.faseFinalDataInicio),
+    "yyyy-MM-dd"
+  );
+  processo.faseFinalDataFim = format(
+    parseISO(processo.faseFinalDataFim),
+    "yyyy-MM-dd"
+  );
+};
+
+const formatISO = (processo) => {
+  processo.faseInicialDataInicio = new Date(
+    processo.faseInicialDataInicio
+  ).toISOString();
+  processo.faseInicialDataFim = new Date(
+    processo.faseInicialDataFim
+  ).toISOString();
+  processo.faseFinalDataInicio = new Date(
+    processo.faseFinalDataInicio
+  ).toISOString();
+  processo.faseFinalDataFim = new Date(processo.faseFinalDataFim).toISOString();
+};
 
 const showDialog = computed({
   get() {
@@ -111,8 +111,7 @@ const dialogTitle = computed(() =>
   dadosProcesso.value.id ? "Editar Processo" : "Adicionar Processo"
 );
 
-const onClickSalvar = async () => {
-  const { valid } = await form.value.validate();
+const onClickSalvar = (valid) => {
   if (!valid)
     return (
       (message.value = "Verifique os campos obrigatórios e tente novamente."),
@@ -125,13 +124,16 @@ const onClickSalvar = async () => {
       (showMessage.value = true)
     );
 
-  dadosProcesso.value.id ? editarProcesso() : criarProcesso();
+  let processo = { ...dadosProcesso.value };
+  formatISO(processo);
+
+  dadosProcesso.value.id ? editarProcesso(processo) : criarProcesso(processo);
 };
 
-const editarProcesso = async () => {
+const editarProcesso = async (processo) => {
   const { data: processoAtualizado, error } = await usePUT(
-    `processo/${dadosProcesso.value.id}`,
-    { ...dadosProcesso.value }
+    `processos/${processo.id}`,
+    { ...processo }
   );
 
   if (error.value) {
@@ -142,9 +144,9 @@ const editarProcesso = async () => {
   emit("updated", processoAtualizado);
 };
 
-const criarProcesso = async () => {
-  const { data: processoCriado, error } = await usePOST("processo", {
-    ...dadosProcesso.value,
+const criarProcesso = async (processo) => {
+  const { data: processoCriado, error } = await usePOST("processos", {
+    ...processo,
   });
 
   if (error.value) {
