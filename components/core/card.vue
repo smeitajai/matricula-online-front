@@ -3,7 +3,7 @@
     <v-toolbar v-if="toolbar" :color="color" :density="density">
       <v-toolbar-title>{{ title }}</v-toolbar-title>
     </v-toolbar>
-    <v-card-title v-else>
+    <v-card-title v-if="!toolbar && title">
       {{ title }}
     </v-card-title>
     <v-card-text :class="[{ 'pa-0': paddingNone }]">
@@ -46,7 +46,7 @@ defineProps({
   },
   title: {
     type: String,
-    default: "",
+    default: null,
   },
   toolbar: {
     type: Boolean,
