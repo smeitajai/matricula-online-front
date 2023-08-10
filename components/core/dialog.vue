@@ -1,6 +1,12 @@
 <template>
   <v-row justify="center">
-    <v-dialog v-model="value" :persistent="persistent" :width="width">
+    <v-dialog
+      v-model="value"
+      :persistent="persistent"
+      :height="height"
+      :width="width"
+      :transition="transition"
+    >
       <CoreCard :title="title" :toolbar="toolbar">
         <slot />
         <template v-if="slots.dialogActions" #actions>
@@ -15,6 +21,10 @@
 const slots = useSlots();
 
 const props = defineProps({
+  height: {
+    type: [String, Number],
+    default: undefined,
+  },
   modelValue: {
     type: Boolean,
     default: false,
@@ -31,8 +41,12 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  transition: {
+    type: String,
+    default: "slide-y-transition",
+  },
   width: {
-    type: Number,
+    type: [String, Number],
     default: 720,
   },
 });
