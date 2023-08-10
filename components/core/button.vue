@@ -17,7 +17,7 @@
           <v-icon :color="prependColor"></v-icon>
         </template>
 
-        <span v-if="label && !icon" :class="`text-${textColor}`">{{
+        <span v-if="label && !icon" :class="`text-${textColor} text-button`">{{
           label
         }}</span>
         <template v-else>
