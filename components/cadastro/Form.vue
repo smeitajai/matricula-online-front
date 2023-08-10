@@ -45,6 +45,8 @@
       <CoreSelect
         v-model="dadosForm.unidade"
         :items="unidades"
+        item-title="nome"
+        item-value="id"
         label="Unidade de Ensino*"
         required
         @input="dadosForm.unidade = $event"
@@ -53,13 +55,19 @@
       <CoreSelect
         v-model="dadosForm.etapa"
         :items="etapas"
+        item-title="nome"
+        item-value="id"
         label="Etapa*"
         required
         @input="dadosForm.etapa = $event"
       />
     </v-row>
     <v-row justify="end">
-      <CoreButton label="buscar vaga" icon="mdi-magnify" @click="onSubmit()" />
+      <CoreButton
+        label="buscar vaga"
+        prepend-icon="mdi-magnify"
+        @click="onSubmit()"
+      />
     </v-row>
 
     <CoreSnackbar
@@ -72,25 +80,8 @@
 </template>
 
 <script setup>
-// Mock de Dados
-const unidades = [
-  { title: "CE DE CORDEIROS", value: 100 },
-  { title: "CE PEDRO RIZZI", value: 200 },
-  { title: "EB ANTÔNIO RAMOS", value: 300 },
-];
-const etapas = [
-  { title: "1° ano", value: 1 },
-  { title: "2° ano", value: 2 },
-  { title: "3° ano", value: 3 },
-];
-const pessoa = {
-  cpf: "06632196985",
-  nome: "João da Silva",
-  dataNascimento: "2020-12-01",
-  unidade: "CE PEDRO RIZZI",
-  etapa: "2° ano",
-};
-// Fim dos mocks
+const { data: unidades } = await useGET("unidades-ensino");
+const { data: etapas } = await useGET("etapas");
 
 const props = defineProps({
   modelValue: {
@@ -140,15 +131,10 @@ const onSubmit = async () => {
       (showMessage.value = true)
     );
 
-  if (
-    dadosForm.value.email &&
-    dadosForm.value.email.length &&
-    !validateEmail(dadosForm.value.email)
-  ) {
+  if (dadosForm.value.email && !validateEmail(dadosForm.value.email))
     return (
       (message.value = "Erro: E-mail inválido."), (showMessage.value = true)
     );
-  }
 
   emit("submit");
 };

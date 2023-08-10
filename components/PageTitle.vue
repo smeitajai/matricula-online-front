@@ -6,9 +6,9 @@
     <v-row justify="end" class="ma-0">
       <CoreButton
         label="voltar"
-        icon="mdi-chevron-left"
+        prepend-color="grey"
+        prepend-icon="mdi-chevron-left"
         text-color="grey"
-        icon-color="grey"
         variant="text"
         @click="router.back()"
       />
