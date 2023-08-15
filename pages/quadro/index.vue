@@ -18,11 +18,17 @@
 </template>
 
 <script setup>
-const router = useRouter();
+//const router = useRouter();
 const { data: unidades, error } = useGET("unidades-ensino");
 
-const onClickItem = (unidade) => {
-  router.push({
+const onClickItem = async (unidade) => {
+  // router.push({
+  //   path: "/quadro/unidade",
+  //   query: {
+  //     id: unidade.id,
+  //   },
+  // });
+  await navigateTo({
     path: "/quadro/unidade",
     query: {
       id: unidade.id,

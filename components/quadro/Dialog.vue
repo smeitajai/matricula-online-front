@@ -1,20 +1,42 @@
 <template>
-  <CoreDialog
-    v-model="showDialog"
-    persistent
-    :title="`Vagas | ${dadosEtapa.nome}`"
-    toolbar
-  >
-    <v-row class="mt-1">
-      <CoreInput
-        v-for="item in turnos"
-        :key="item.id"
-        v-model="dadosEtapa[item.nome]"
-        clearable
-        :label="item.nome.toUpperCase()"
-        @input="dadosEtapa[item.nome] = $event"
-      />
-    </v-row>
+  <CoreDialog v-model="showDialog" persistent :title="dialogTitle" toolbar>
+    <v-form ref="form">
+      <v-row class="mt-1">
+        <v-col :cols="mobile ? 12 : 4" class="py-0">
+          <CoreSelect
+            v-model="dadosQuadro.etapa"
+            :items="etapas"
+            full-width
+            item-title="nome"
+            label="Etapa*"
+            required
+            @input="dadosQuadro.etapa = $event"
+          />
+        </v-col>
+        <v-col :cols="mobile ? 12 : 4" class="py-0">
+          <CoreSelect
+            v-model="dadosQuadro.turno"
+            :items="turnos"
+            full-width
+            item-title="nome"
+            label="Turno*"
+            required
+            @input="dadosQuadro.turno = $event"
+          />
+        </v-col>
+        <v-col :cols="mobile ? 12 : 4" class="py-0">
+          <CoreInput
+            v-model="dadosQuadro.quantidadeVaga"
+            clearable
+            full-width
+            label="Vagas*"
+            required
+            type="number"
+            @input="dadosQuadro.quantidadeVaga = $event"
+          />
+        </v-col>
+      </v-row>
+    </v-form>
     <template #dialogActions>
       <CoreButton
         text-color="red-darken-1"
@@ -45,30 +67,38 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  etapa: {
+  etapas: {
+    type: Array,
+    default: () => [],
+  },
+  quadro: {
+    type: Object,
+    default: () => ({}),
+  },
+  turnos: {
+    type: Array,
+    default: () => [],
+  },
+  unidade: {
     type: Object,
     default: () => ({}),
   },
 });
 
-// conts { data: turnos } = await useGET("turnos");
-const turnos = ref([
-  { id: "2", nome: "matutino" },
-  { id: "3", nome: "vespertino" },
-  { id: "4", nome: "noturno" },
-]);
-
+const mobile = useMobile();
 const emit = defineEmits(["created", "updated", "close"]);
 
 const message = ref("");
 const showMessage = ref(false);
-const dadosEtapa = ref({});
-watch(
-  () => props.etapa,
-  (newValue) => {
-    dadosEtapa.value = newValue;
-  }
-);
+const form = ref(null);
+const dadosQuadro = ref({});
+
+onMounted(() => {
+  dadosQuadro.value = {
+    ...props.quadro,
+    unidadeEnsino: { ...props.unidade },
+  };
+});
 
 const showDialog = computed({
   get() {
@@ -79,24 +109,42 @@ const showDialog = computed({
   },
 });
 
-const onClickSalvar = () => {
-  // if (!dadosEtapa.value.nome || !dadosEtapa.value.ordem) {
-  //   message.value = "Verifique os campos obrigatórios e tente novamente!";
-  //   return (showMessage.value = true);
-  // }
+const dialogTitle = computed(() =>
+  dadosQuadro.value.id ? "Editar Quadro" : "Adicionar Quadro"
+);
 
-  console.log("dadosEtapa.value :>> ", dadosEtapa.value);
+const onClickSalvar = async () => {
+  const { valid } = await form.value.validate();
+  if (!valid)
+    return (
+      (message.value = "Verifique os campos obrigatórios e tente novamente."),
+      (showMessage.value = true)
+    );
 
-  //editarVagas(); Atualizar a Quantidade de Vagas, Vai ser request Única? OU vai alterar um turno por vez?
+  console.log("dadosQuadro.value :>> ", dadosQuadro.value);
+  dadosQuadro.value.id ? editarQuadro() : criarQuadro();
 };
 
-const editarVagas = async () => {
-  const { data: etapaAtualizada, error } = await usePUT(
-    `etapas/${dadosEtapa.value.id}`,
+const criarQuadro = async () => {
+  const { data: quadroCadastrado, error } = await usePOST("quadros-vaga", {
+    ...dadosQuadro.value,
+    quantidadeVaga: parseInt(dadosQuadro.value.quantidadeVaga),
+  });
+
+  if (error.value) {
+    message.value = error.value;
+    return (showMessage.value = true);
+  }
+
+  emit("created", quadroCadastrado);
+};
+
+const editarQuadro = async () => {
+  const { data: quadroAtualizado, error } = await usePUT(
+    `quadros-vaga/${dadosQuadro.value.id}`,
     {
-      nome: dadosEtapa.value.nome,
-      ordem: parseInt(dadosEtapa.value.ordem),
-      idExterno: dadosEtapa.value.idExterno,
+      ...dadosQuadro.value,
+      quantidadeVaga: parseInt(dadosQuadro.value.quantidadeVaga),
     }
   );
 
@@ -105,6 +153,6 @@ const editarVagas = async () => {
     return (showMessage.value = true);
   }
 
-  emit("updated", etapaAtualizada);
+  emit("updated", quadroAtualizado);
 };
 </script>

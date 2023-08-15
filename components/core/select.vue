@@ -1,12 +1,12 @@
 <template>
-  <v-col cols="12" class="py-0 px-1" :md="fullWidth ? 12 : 6">
+  <v-col cols="12" class="py-1 px-1" :md="fullWidth ? 12 : 6">
     <v-select
       v-model="value"
       :clearable="clearable"
       :items="items"
       :item-title="itemTitle"
-      :item-value="itemValue"
       :label="label"
+      return-object
       :rules="validationRules"
       :variant="variant"
     />
@@ -31,16 +31,12 @@ const props = defineProps({
     type: String,
     default: "title",
   },
-  itemValue: {
-    type: String,
-    default: "value",
-  },
   label: {
     type: String,
     default: "",
   },
   modelValue: {
-    type: [String, Number],
+    type: [String, Number, Object],
     default: "",
   },
   required: {
