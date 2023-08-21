@@ -131,13 +131,13 @@ const onClickSalvar = (valid) => {
 };
 
 const editarProcesso = async (processo) => {
-  const { data: processoAtualizado, error } = await usePUT(
-    `processos/${processo.id}`,
-    { ...processo }
-  );
+  const { data: processoAtualizado } = await useFetch("/api/processos", {
+    method: "PUT",
+    body: processo,
+  });
 
-  if (error.value) {
-    message.value = error.value;
+  if (processoAtualizado.value.error) {
+    message.value = processoAtualizado.value.message;
     return (showMessage.value = true);
   }
 
@@ -145,12 +145,13 @@ const editarProcesso = async (processo) => {
 };
 
 const criarProcesso = async (processo) => {
-  const { data: processoCriado, error } = await usePOST("processos", {
-    ...processo,
+  const { data: processoCriado } = await useFetch("/api/processos", {
+    method: "POST",
+    body: processo,
   });
 
-  if (error.value) {
-    message.value = error.value;
+  if (processoCriado.value.error) {
+    message.value = processoCriado.value.message;
     return (showMessage.value = true);
   }
 
