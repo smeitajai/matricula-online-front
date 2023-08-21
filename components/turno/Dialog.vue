@@ -1,20 +1,24 @@
 <template>
   <CoreDialog v-model="showDialog" persistent :title="dialogTitle" toolbar>
-    <v-row class="mt-1">
-      <CoreInput
-        v-model="dadosTurno.nome"
-        clearable
-        label="Nome do turno*"
-        @input="dadosTurno.nome = $event"
-      />
-      <CoreInput
-        v-model="dadosTurno.idExterno"
-        clearable
-        label="ID Externo*"
-        type="number"
-        @input="dadosTurno.idExterno = $event"
-      />
-    </v-row>
+    <v-form ref="form">
+      <v-row class="mt-1">
+        <CoreInput
+          v-model="dadosTurno.nome"
+          clearable
+          label="Nome do turno*"
+          required
+          @input="dadosTurno.nome = $event"
+        />
+        <CoreInput
+          v-model="dadosTurno.idExterno"
+          clearable
+          label="ID Externo*"
+          type="number"
+          required
+          @input="dadosTurno.idExterno = $event"
+        />
+      </v-row>
+    </v-form>
     <template #dialogActions>
       <CoreButton
         text-color="red-darken-1"
@@ -55,6 +59,7 @@ const emit = defineEmits(["created", "updated", "close"]);
 
 const message = ref("");
 const showMessage = ref(false);
+const form = ref(null);
 const dadosTurno = ref({});
 watch(
   () => props.turno,
@@ -76,26 +81,25 @@ const dialogTitle = computed(() =>
   dadosTurno.value.id ? "Editar Turno" : "Adicionar Turno"
 );
 
-const onClickSalvar = () => {
-  if (!dadosTurno.value.nome) {
-    message.value = "Verifique os campos obrigatórios e tente novamente!";
-    return (showMessage.value = true);
-  }
+const onClickSalvar = async () => {
+  const { valid } = await form.value.validate();
+  if (!valid)
+    return (
+      (message.value = "Verifique os campos obrigatórios e tente novamente."),
+      (showMessage.value = true)
+    );
 
   dadosTurno.value.id ? editarTurno() : criarTurno();
 };
 
 const editarTurno = async () => {
-  const { data: turnoAtualizado, error } = await usePUT(
-    `turnos/${dadosTurno.value.id}`,
-    {
-      nome: dadosTurno.value.nome,
-      idExterno: dadosTurno.value.idExterno
-    }
-  );
+  const { data: turnoAtualizado } = await useFetch("/api/turnos", {
+    method: "PUT",
+    body: dadosTurno.value,
+  });
 
-  if (error.value) {
-    message.value = error.value;
+  if (turnoAtualizado.value.error) {
+    message.value = turnoAtualizado.value.message;
     return (showMessage.value = true);
   }
 
@@ -103,13 +107,13 @@ const editarTurno = async () => {
 };
 
 const criarTurno = async () => {
-  const { data: turnoCriado, error } = await usePOST("turnos", {
-    nome: dadosTurno.value.nome,
-    idExterno: dadosTurno.value.idExterno
+  const { data: turnoCriado } = await useFetch("/api/turnos", {
+    method: "POST",
+    body: dadosTurno.value,
   });
 
-  if (error.value) {
-    message.value = error.value;
+  if (turnoCriado.value.error) {
+    message.value = turnoCriado.value.message;
     return (showMessage.value = true);
   }
 
