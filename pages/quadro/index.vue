@@ -11,23 +11,20 @@
         @click="onClickItem($event)"
       />
     </v-col>
-    <v-col v-if="error">
-      {{ error }}
-    </v-col>
   </v-row>
+
+  <CoreSnackbar
+    v-if="unidades.error"
+    v-model="unidades.error"
+    color="error"
+    :message="unidades.message"
+  />
 </template>
 
 <script setup>
-//const router = useRouter();
-const { data: unidades, error } = useGET("unidades-ensino");
+const { data: unidades } = await useFetch("/api/unidades");
 
 const onClickItem = async (unidade) => {
-  // router.push({
-  //   path: "/quadro/unidade",
-  //   query: {
-  //     id: unidade.id,
-  //   },
-  // });
   await navigateTo({
     path: "/quadro/unidade",
     query: {
