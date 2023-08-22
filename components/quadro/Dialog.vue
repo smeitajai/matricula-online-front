@@ -126,13 +126,16 @@ const onClickSalvar = async () => {
 };
 
 const criarQuadro = async () => {
-  const { data: quadroCadastrado, error } = await usePOST("quadros-vaga", {
-    ...dadosQuadro.value,
-    quantidadeVaga: parseInt(dadosQuadro.value.quantidadeVaga),
+  const { data: quadroCadastrado } = await useFetch("/api/quadros-vaga", {
+    method: "POST",
+    body: {
+      ...dadosQuadro.value,
+      quantidadeVaga: parseInt(dadosQuadro.value.quantidadeVaga),
+    },
   });
 
-  if (error.value) {
-    message.value = error.value;
+  if (quadroCadastrado.value.error) {
+    message.value = quadroCadastrado.value.message;
     return (showMessage.value = true);
   }
 
@@ -140,16 +143,16 @@ const criarQuadro = async () => {
 };
 
 const editarQuadro = async () => {
-  const { data: quadroAtualizado, error } = await usePUT(
-    `quadros-vaga/${dadosQuadro.value.id}`,
-    {
+  const { data: quadroAtualizado } = await useFetch("/api/quadros-vaga", {
+    method: "PUT",
+    body: {
       ...dadosQuadro.value,
       quantidadeVaga: parseInt(dadosQuadro.value.quantidadeVaga),
-    }
-  );
+    },
+  });
 
-  if (error.value) {
-    message.value = error.value;
+  if (quadroAtualizado.value.error) {
+    message.value = quadroAtualizado.value.message;
     return (showMessage.value = true);
   }
 

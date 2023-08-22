@@ -1,20 +1,24 @@
 <template>
   <CoreDialog v-model="showDialog" persistent :title="dialogTitle" toolbar>
-    <v-row class="mt-1">
-      <CoreInput
-        v-model="dadosUnidade.nome"
-        clearable
-        label="Nome da unidade*"
-        @input="dadosUnidade.nome = $event"
-      />
-      <CoreInput
-        v-model="dadosUnidade.idExterno"
-        clearable
-        label="ID Externo*"
-        type="number"
-        @input="dadosUnidade.idExterno = $event"
-      />
-    </v-row>
+    <v-form ref="form">
+      <v-row class="mt-1">
+        <CoreInput
+          v-model="dadosUnidade.nome"
+          clearable
+          label="Nome da unidade*"
+          required
+          @input="dadosUnidade.nome = $event"
+        />
+        <CoreInput
+          v-model="dadosUnidade.idExterno"
+          clearable
+          label="ID Externo*"
+          type="number"
+          required
+          @input="dadosUnidade.idExterno = $event"
+        />
+      </v-row>
+    </v-form>
     <template #dialogActions>
       <CoreButton
         text-color="red-darken-1"
@@ -55,6 +59,7 @@ const emit = defineEmits(["created", "updated", "close"]);
 
 const message = ref("");
 const showMessage = ref(false);
+const form = ref(null);
 const dadosUnidade = ref({});
 watch(
   () => props.unidade,
@@ -76,26 +81,25 @@ const dialogTitle = computed(() =>
   dadosUnidade.value.id ? "Editar Unidade" : "Adicionar Unidade"
 );
 
-const onClickSalvar = () => {
-  if (!dadosUnidade.value.nome || !dadosUnidade.value.idExterno) {
-    message.value = "Verifique os campos obrigatórios e tente novamente!";
-    return (showMessage.value = true);
-  }
+const onClickSalvar = async () => {
+  const { valid } = await form.value.validate();
+  if (!valid)
+    return (
+      (message.value = "Verifique os campos obrigatórios e tente novamente."),
+      (showMessage.value = true)
+    );
 
   dadosUnidade.value.id ? editarUnidade() : criarUnidade();
 };
 
 const editarUnidade = async () => {
-  const { data: unidadeAtualizada, error } = await usePUT(
-    `unidades-ensino/${dadosUnidade.value.id}`,
-    {
-      nome: dadosUnidade.value.nome,
-      idExterno: dadosUnidade.value.idExterno,
-    }
-  );
+  const { data: unidadeAtualizada } = await useFetch("/api/unidades", {
+    method: "PUT",
+    body: dadosUnidade.value,
+  });
 
-  if (error.value) {
-    message.value = error.value;
+  if (unidadeAtualizada.value.error) {
+    message.value = unidadeAtualizada.value.message;
     return (showMessage.value = true);
   }
 
@@ -103,13 +107,13 @@ const editarUnidade = async () => {
 };
 
 const criarUnidade = async () => {
-  const { data: unidadeCriada, error } = await usePOST("unidades-ensino", {
-    nome: dadosUnidade.value.nome,
-    idExterno: dadosUnidade.value.idExterno,
+  const { data: unidadeCriada } = await useFetch("/api/unidades", {
+    method: "POST",
+    body: dadosUnidade.value,
   });
 
-  if (error.value) {
-    message.value = error.value;
+  if (unidadeCriada.value.error) {
+    message.value = unidadeCriada.value.message;
     return (showMessage.value = true);
   }
 

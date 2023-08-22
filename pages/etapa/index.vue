@@ -27,13 +27,20 @@
     tooltip="Adicionar Etapa"
     @click="(dadosEtapa = {}), (dialog = true)"
   />
+
+  <CoreSnackbar
+    v-if="etapas.error"
+    v-model="etapas.error"
+    color="error"
+    :message="etapas.message"
+  />
 </template>
 
 <script setup>
 const dadosEtapa = ref({});
 const dialog = ref(false);
 
-const { data: etapas } = await useGET("etapas");
+const { data: etapas } = await useFetch("/api/etapas");
 
 const onClickItem = (etapa) => {
   dadosEtapa.value = { ...etapa };

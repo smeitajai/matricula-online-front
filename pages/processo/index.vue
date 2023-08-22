@@ -27,13 +27,20 @@
     tooltip="Adicionar Processo"
     @click="(dadosProcesso = {}), (dialog = true)"
   />
+
+  <CoreSnackbar
+    v-if="processos.error"
+    v-model="processos.error"
+    color="error"
+    :message="processos.message"
+  />
 </template>
 
 <script setup>
 const dadosProcesso = ref({});
 const dialog = ref(false);
 
-const { data: processos } = await useGET("processos");
+const { data: processos } = await useFetch("/api/processos");
 
 const onClickItem = (processo) => {
   dadosProcesso.value = { ...processo };

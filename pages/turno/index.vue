@@ -2,7 +2,7 @@
   <v-row class="ma-5">
     <PageTitle title="Turno" />
 
-    <v-col cols="12" v-if="turnos">
+    <v-col v-if="turnos" cols="12">
       <CoreList
         :item-text="(i) => i.nome"
         :items="turnos"
@@ -28,10 +28,10 @@
   />
 
   <CoreSnackbar
-    v-if="error"
-    v-model="error"
+    v-if="turnos.error"
+    v-model="turnos.error"
     color="error"
-    :message="error.message"
+    :message="turnos.message"
   />
 </template>
 
@@ -39,7 +39,7 @@
 const dadosTurno = ref({});
 const dialog = ref(false);
 
-const { data: turnos, error } = await useGET("turnos");
+const { data: turnos } = await useFetch("/api/turnos");
 
 const onClickItem = (turno) => {
   dadosTurno.value = { ...turno };

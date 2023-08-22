@@ -27,13 +27,20 @@
     tooltip="Adicionar Unidade"
     @click="(dadosUnidade = {}), (dialog = true)"
   />
+
+  <CoreSnackbar
+    v-if="unidades.error"
+    v-model="unidades.error"
+    color="error"
+    :message="unidades.message"
+  />
 </template>
 
 <script setup>
 const dadosUnidade = ref({});
 const dialog = ref(false);
 
-const { data: unidades, pending, error, refresh } = await useGET("unidades-ensino");
+const { data: unidades } = await useFetch("/api/unidades");
 
 const onClickItem = (unidade) => {
   dadosUnidade.value = { ...unidade };

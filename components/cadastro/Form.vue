@@ -80,8 +80,20 @@
 </template>
 
 <script setup>
-const { data: unidades } = await useGET("unidades-ensino");
-const { data: etapas } = await useGET("etapas");
+const { data: unidades } = await useFetch("/api/unidades");
+const { data: etapas } = await useFetch("/api/etapas");
+
+onMounted(() => {
+  if (unidades.value && unidades.value.error) {
+    message.value = unidades.value.message;
+    return (showMessage.value = true);
+  }
+
+  if (etapas.value && etapas.value.error) {
+    message.value = etapas.value.message;
+    return (showMessage.value = true);
+  }
+});
 
 const props = defineProps({
   modelValue: {

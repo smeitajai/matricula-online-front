@@ -1,28 +1,33 @@
 <template>
   <CoreDialog v-model="showDialog" persistent :title="dialogTitle" toolbar>
-    <v-row class="mt-1">
-      <CoreInput
-        v-model="dadosEtapa.nome"
-        clearable
-        full-width
-        label="Nome da etapa*"
-        @input="dadosEtapa.nome = $event"
-      />
-      <CoreInput
-        v-model="dadosEtapa.ordem"
-        clearable
-        label="Ordem*"
-        type="number"
-        @input="dadosEtapa.ordem = $event"
-      />
-      <CoreInput
-        v-model="dadosEtapa.idExterno"
-        clearable
-        label="ID Externo*"
-        type="number"
-        @input="dadosEtapa.idExterno = $event"
-      />
-    </v-row>
+    <v-form ref="form">
+      <v-row class="mt-1">
+        <CoreInput
+          v-model="dadosEtapa.nome"
+          clearable
+          full-width
+          label="Nome da etapa*"
+          required
+          @input="dadosEtapa.nome = $event"
+        />
+        <CoreInput
+          v-model="dadosEtapa.ordem"
+          clearable
+          label="Ordem*"
+          type="number"
+          required
+          @input="dadosEtapa.ordem = $event"
+        />
+        <CoreInput
+          v-model="dadosEtapa.idExterno"
+          clearable
+          label="ID Externo*"
+          type="number"
+          required
+          @input="dadosEtapa.idExterno = $event"
+        />
+      </v-row>
+    </v-form>
     <template #dialogActions>
       <CoreButton
         text-color="red-darken-1"
@@ -63,6 +68,7 @@ const emit = defineEmits(["created", "updated", "close"]);
 
 const message = ref("");
 const showMessage = ref(false);
+const form = ref(null);
 const dadosEtapa = ref({});
 watch(
   () => props.etapa,
@@ -84,27 +90,28 @@ const dialogTitle = computed(() =>
   dadosEtapa.value.id ? "Editar Etapa" : "Adicionar Etapa"
 );
 
-const onClickSalvar = () => {
-  if (!dadosEtapa.value.nome || !dadosEtapa.value.ordem) {
-    message.value = "Verifique os campos obrigatórios e tente novamente!";
-    return (showMessage.value = true);
-  }
+const onClickSalvar = async () => {
+  const { valid } = await form.value.validate();
+  if (!valid)
+    return (
+      (message.value = "Verifique os campos obrigatórios e tente novamente."),
+      (showMessage.value = true)
+    );
 
   dadosEtapa.value.id ? editarEtapa() : criarEtapa();
 };
 
 const editarEtapa = async () => {
-  const { data: etapaAtualizada, error } = await usePUT(
-    `etapas/${dadosEtapa.value.id}`,
-    {
-      nome: dadosEtapa.value.nome,
+  const { data: etapaAtualizada } = await useFetch("/api/etapas", {
+    method: "PUT",
+    body: {
+      ...dadosEtapa.value,
       ordem: parseInt(dadosEtapa.value.ordem),
-      idExterno: dadosEtapa.value.idExterno,
-    }
-  );
+    },
+  });
 
-  if (error.value) {
-    message.value = error.value;
+  if (etapaAtualizada.value.error) {
+    message.value = etapaAtualizada.value.message;
     return (showMessage.value = true);
   }
 
@@ -112,14 +119,16 @@ const editarEtapa = async () => {
 };
 
 const criarEtapa = async () => {
-  const { data: etapaCriada, error } = await usePOST("etapas", {
-    nome: dadosEtapa.value.nome,
-    ordem: parseInt(dadosEtapa.value.ordem),
-    idExterno: dadosEtapa.value.idExterno,
+  const { data: etapaCriada } = await useFetch("/api/etapas", {
+    method: "POST",
+    body: {
+      ...dadosEtapa.value,
+      ordem: parseInt(dadosEtapa.value.ordem),
+    },
   });
 
-  if (error.value) {
-    message.value = error.value;
+  if (etapaCriada.value.error) {
+    message.value = etapaCriada.value.message;
     return (showMessage.value = true);
   }
 
