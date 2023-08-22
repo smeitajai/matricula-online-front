@@ -43,6 +43,13 @@
     </v-container>
     <template #dialogActions>
       <CoreButton
+        v-if="turnoSelected"
+        text-color="blue-darken-1"
+        label="alterar turno"
+        variant="text"
+        @click="turnoSelected = null"
+      />
+      <CoreButton
         text-color="red-darken-1"
         label="cancelar"
         variant="text"
@@ -63,19 +70,16 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  turnos: {
+    type: Array,
+    default: () => [],
+  },
   unidade: {
     type: Object,
     default: () => ({}),
   },
 });
-watch(
-  () => props.dialog,
-  () => {
-    turnoSelected.value = null;
-  }
-);
 
-const { data: turnos } = await useGET("turnos");
 const turnoSelected = ref(null);
 
 const showDialog = computed({

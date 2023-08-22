@@ -7,8 +7,6 @@
 </template>
 
 <script setup>
-const router = useRouter();
-
 const dadosForm = ref({
   cpf: null,
   email: null,
@@ -18,14 +16,14 @@ const dadosForm = ref({
   etapa: null,
 });
 
-const onClickBuscarVaga = () => {
+const onClickBuscarVaga = async () => {
   //Se cadastro ainda não existir, deve criar a Pessoa antes
   console.log("dadosForm.value :>> ", dadosForm.value);
-  router.push({
+  await navigateTo({
     path: "/cadastro/vagas",
     query: {
       cpf: dadosForm.value.cpf,
-      etapa: dadosForm.value.etapa,
+      etapa: dadosForm.value.etapa.id,
     },
   });
 };

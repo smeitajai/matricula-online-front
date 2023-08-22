@@ -21,39 +21,59 @@
         </template>
       </CoreList>
     </v-col>
-    <v-col v-if="error">
-      {{ error }}
-    </v-col>
 
     <CadastroDialogVagas
+      v-if="dialog"
       :dialog="dialog"
       :etapa="etapa"
+      :turnos="turnos"
       :unidade="unidadeSelected"
       @close="dialog = false"
       @confirm="onConfirm($event)"
     />
   </v-row>
+
+  <CoreSnackbar
+    v-model="showMessage"
+    color="error"
+    :message="message"
+    @hide="showMessage = $event"
+  />
 </template>
 
 <script setup>
 const route = useRoute();
-//const { data: pessoa } = useGET("pessoas", { cpf: route.query.cpf });
-const { data: etapa } = useGET(`etapas/${route.query.etapa}`);
-const { data: unidades, error } = await useGET("unidades-ensino");
+//const { data: pessoa } = useFetch("/api/pessoas", { cpf: route.query.cpf });
+const { data: etapa } = await useFetch(`/api/etapas/${route.query.etapa}`);
+const { data: unidades } = await useFetch("/api/unidades");
+const { data: turnos } = await useFetch("/api/turnos");
+
+onMounted(() => {
+  if (unidades.value && unidades.value.error) {
+    message.value = unidades.value.message;
+    return (showMessage.value = true);
+  }
+
+  if (etapa.value && etapa.value.error) {
+    message.value = etapa.value.message;
+    return (showMessage.value = true);
+  }
+});
 
 const unidadeSelected = ref(null);
+const showMessage = ref(false);
+const message = ref("");
 const dialog = ref(false);
 
 const onClickItem = (unidade) => {
-  console.log("unidade :>> ", unidade);
   unidadeSelected.value = unidade;
   dialog.value = true;
 };
 
 const onConfirm = async (turno) => {
-  console.log("turno :>> ", turno.nome);
-  console.log("unidade :>> ", unidadeSelected.value.nome);
-  console.log("etapa :>> ", etapa.value.nome);
+  console.log("turno :>> ", turno);
+  console.log("unidade :>> ", unidadeSelected.value);
+  console.log("etapa :>> ", etapa.value);
   //Chamada para a API salvando a Inscrição
   if (true) {
     dialog.value = false; // Só fechar a Dialog se salvar a Inscrição
