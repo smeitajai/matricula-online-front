@@ -41,14 +41,19 @@ const items = ref([
     to: "/cadastro",
   },
   {
+    icon: "mdi-bulletin-board",
+    title: "Quadro de Vagas",
+    to: "/quadro",
+  },
+  {
     icon: "mdi-chart-timeline",
     title: "Processos",
     to: "/processo",
   },
   {
-    icon: "mdi-bulletin-board",
-    title: "Quadro de Vagas",
-    to: "/quadro",
+    icon: "mdi-map-marker-radius",
+    title: "Polos",
+    to: "/polo",
   },
   {
     icon: "mdi-home-variant-outline",
@@ -57,12 +62,12 @@ const items = ref([
   },
   {
     icon: "mdi-format-list-numbered",
-    title: "Etapa",
+    title: "Etapas",
     to: "/etapa",
   },
   {
     icon: "mdi-clock-outline",
-    title: "Turno",
+    title: "Turnos",
     to: "/turno",
   },
   {
