@@ -18,6 +18,12 @@
           @input="dadosUnidade.idExterno = $event"
         />
       </v-row>
+      <CoreFormSubtitle label="Endereço" />
+      <CoreAddress
+        ref="formEndereco"
+        v-model="dadosEndereco"
+        @validate="validateAddress = $event"
+      />
     </v-form>
     <template #dialogActions>
       <CoreButton
@@ -60,6 +66,17 @@ const emit = defineEmits(["created", "updated", "close"]);
 const message = ref("");
 const showMessage = ref(false);
 const form = ref(null);
+const validateAddress = ref(false);
+const dadosEndereco = ref({
+  cep: null,
+  estado: null,
+  cidade: null,
+  bairro: null,
+  logradouro: null,
+  numero: null,
+  complemento: null,
+  polo: null,
+});
 const dadosUnidade = ref({});
 watch(
   () => props.unidade,
@@ -83,7 +100,7 @@ const dialogTitle = computed(() =>
 
 const onClickSalvar = async () => {
   const { valid } = await form.value.validate();
-  if (!valid)
+  if (!valid || !validateAddress.value)
     return (
       (message.value = "Verifique os campos obrigatórios e tente novamente."),
       (showMessage.value = true)
@@ -103,6 +120,17 @@ const editarUnidade = async () => {
     return (showMessage.value = true);
   }
 
+  // Editar o Endereço da unidade
+  // const { data: enderecoAtualizado } = await useFetch("/api/endereco", {
+  //   method: "PUT",
+  //   body: dadosEndereco.value,
+  // });
+
+  // if (enderecoAtualizado.value.error) {
+  //   message.value = enderecoAtualizado.value.message;
+  //   return (showMessage.value = true);
+  // }
+
   emit("updated", unidadeAtualizada);
 };
 
@@ -116,6 +144,17 @@ const criarUnidade = async () => {
     message.value = unidadeCriada.value.message;
     return (showMessage.value = true);
   }
+
+  // Criar o Endereço da unidade
+  // const { data: enderecoCriado } = await useFetch("/api/endereco", {
+  //   method: "POST",
+  //   body: dadosEndereco.value,
+  // });
+
+  // if (enderecoCriado.value.error) {
+  //   message.value = enderecoCriado.value.message;
+  //   return (showMessage.value = true);
+  // }
 
   emit("created", unidadeCriada);
 };
