@@ -31,6 +31,7 @@
         clearable
         label="Nome do aluno(a)*"
         required
+        :full-width="aluno && aluno.id ? false : true"
         @input="dadosForm.nome = $event"
       />
 
@@ -43,6 +44,7 @@
       />
 
       <CoreSelect
+        v-if="aluno && aluno.id"
         v-model="dadosForm.unidade"
         :items="unidades"
         item-title="nome"
@@ -62,7 +64,8 @@
         @input="dadosForm.etapa = $event"
       />
     </v-row>
-    <v-row justify="end">
+
+    <v-row v-if="showAllInputs" justify="end">
       <CoreButton
         label="buscar vaga"
         prepend-icon="mdi-magnify"
@@ -108,6 +111,7 @@ const showAllInputs = ref(false);
 const showMessage = ref(false);
 const message = ref("");
 const form = ref(null);
+const aluno = ref(null);
 
 const dadosForm = computed({
   get() {
@@ -123,15 +127,22 @@ const onInputCPF = () => {
 
   if (dadosForm.value.cpf && dadosForm.value.cpf.length == 11) {
     return validateCPF(dadosForm.value.cpf)
-      ? carregarPessoa()
+      ? carregarAluno()
       : ((message.value = "Erro: CPF Inválido."), (showMessage.value = true));
   }
 };
 
-const carregarPessoa = () => {
+const carregarAluno = async () => {
   //Chamada para a API "do Erudio" carregando os dados da pessoa pelo CPF informado
   //Se já tiver uma inscrição para o CPF informado, deve verificar no BackEnd também
-  //dadosForm.value = { ...pessoa };
+  const { data } = await useFetch("/api/alunos", {
+    query: {
+      cpf: dadosForm.value.cpf,
+    },
+  });
+  console.log("Data aluno :>> ", data);
+  aluno.value = data.value;
+
   showAllInputs.value = true;
 };
 
@@ -148,6 +159,6 @@ const onSubmit = async () => {
       (message.value = "Erro: E-mail inválido."), (showMessage.value = true)
     );
 
-  emit("submit");
+  emit("submit", aluno.value);
 };
 </script>
