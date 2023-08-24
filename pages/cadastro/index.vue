@@ -2,7 +2,7 @@
   <CadastroForm
     ref="formCadastro"
     v-model="dadosForm"
-    @submit="onClickBuscarVaga"
+    @submit="onClickBuscarVaga($event)"
   />
 </template>
 
@@ -16,8 +16,9 @@ const dadosForm = ref({
   etapa: null,
 });
 
-const onClickBuscarVaga = async () => {
-  //Se cadastro ainda não existir, deve criar a Pessoa antes
+const onClickBuscarVaga = async (aluno) => {
+  //Se aluno ainda não existir, deve criar antes de trocar de rota
+  console.log("aluno :>> ", aluno);
   console.log("dadosForm.value :>> ", dadosForm.value);
   await navigateTo({
     path: "/cadastro/vagas",
