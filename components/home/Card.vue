@@ -1,7 +1,7 @@
 <template>
   <CoreCard rounded="lg" title="Matrícula On-line" toolbar>
     <v-row>
-      <span class="text-h6 ma-5">
+      <span class="text-h6 ma-5 text-center">
         Seja bem-vindo(a) ao novo sistema de Matrículas On-line para o ensino
         fundamental do município de Itajaí/SC!
       </span>
@@ -16,16 +16,18 @@
 
     <v-row class="my-8 pl-5">
       <v-col cols="12" class="pa-0"> Datas Importantes: </v-col>
-      <v-col cols="12" class="pa-0">
-        <span class="font-weight-bold">
-          Matrícula Interna - 07/11/2023 até 10/11/2023
+      <v-col
+        v-for="processo in processos"
+        :key="processo.id"
+        cols="12"
+        class="pa-0"
+      >
+        <span :class="[{ 'font-weight-bold': processoEmAndamento(processo) }]">
+          {{ processo.nome }}:
+          {{ formatarData(processo.faseInicialDataInicio) }}
+          até
+          {{ formatarData(processo.faseFinalDataFim) }}
         </span>
-      </v-col>
-      <v-col cols="12" class="pa-0">
-        <span>Transferência Interna - 21/11/2023 até 24/11/2023</span>
-      </v-col>
-      <v-col cols="12" class="pa-0">
-        <span>Matrículas Novas - 05/12/2023 até 08/12/2023</span>
       </v-col>
     </v-row>
 
@@ -38,8 +40,31 @@
       >
     </v-row>
   </CoreCard>
+
+  <CoreSnackbar
+    v-if="processos.error"
+    v-model="processos.error"
+    color="error"
+    :message="processos.message"
+  />
 </template>
 
 <script setup>
+import { format, parseISO, isAfter, isBefore } from "date-fns";
+
 const anoEdital = new Date().getFullYear() + 1;
+const { data: processos } = await useFetch("/api/processos");
+
+const processoEmAndamento = (processo) => {
+  const dataAtual = new Date();
+  const dataInicio = new Date(processo.faseInicialDataInicio);
+  const dataFim = new Date(processo.faseFinalDataFim);
+  return isAfter(dataAtual, dataInicio) && isBefore(dataAtual, dataFim)
+    ? true
+    : false;
+};
+
+const formatarData = (data) => {
+  return format(parseISO(data), "dd/MM/yyyy");
+};
 </script>
