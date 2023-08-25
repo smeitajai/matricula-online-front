@@ -77,7 +77,13 @@ const onConfirm = async (turno) => {
   //Chamada para a API salvando a Inscrição
   if (true) {
     dialog.value = false; // Só fechar a Dialog se salvar a Inscrição
-    alert("Salvar!");
+    await navigateTo({
+      path: "/protocolo",
+      // query: {
+      //   cpf: dadosForm.value.cpf,
+      //   etapa: dadosForm.value.etapa.id,
+      // },
+    });
   }
 };
 
