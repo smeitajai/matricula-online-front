@@ -2,6 +2,7 @@
   <v-tooltip :text="tooltip" location="top" :disabled="hideTooltip()">
     <template #activator="{ props }">
       <v-btn
+        :id="id"
         v-bind="props"
         :color="color"
         :rounded="rounded"
@@ -53,6 +54,10 @@ const props = defineProps({
   iconColor: {
     type: String,
     default: "white",
+  },
+  id: {
+    type: String,
+    default: "",
   },
   label: {
     type: String,
