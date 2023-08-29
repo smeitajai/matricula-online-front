@@ -1,34 +1,22 @@
 <template>
   <v-row class="ma-5">
     <PageTitle v-if="unidade" :title="`Quadro de vagas | ${unidade.nome}`" />
-    <v-col cols="12">
-      <v-table v-if="quadros.length" fixed-header>
-        <thead>
-          <tr>
-            <th v-for="item in headers" :key="item" class="text-center">
-              {{ item }}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in quadros" :key="item.id" class="text-center">
-            <td>{{ item.etapa.nome }}</td>
-            <td>{{ item.turno.nome }}</td>
-            <td>{{ item.quantidadeVaga }}</td>
-            <td>
-              <CoreButton
-                icon="mdi-pencil"
-                icon-color="primary"
-                tooltip="Editar Vagas"
-                variant="text"
-                @click="onClickEdit(item)"
-              />
-            </td>
-          </tr>
-        </tbody>
-      </v-table>
-      <span v-else>Nenhum quadro de vagas cadastrado para esta unidade.</span>
-    </v-col>
+    <CoreTable :headers="headers" :items="quadros">
+      <template #body="{ item }">
+        <td>{{ item.etapa.nome }}</td>
+        <td>{{ item.turno.nome }}</td>
+        <td>{{ item.quantidadeVaga }}</td>
+        <td>
+          <CoreButton
+            icon="mdi-pencil"
+            icon-color="primary"
+            tooltip="Editar Vagas"
+            variant="text"
+            @click="onClickEdit(item)"
+          />
+        </td>
+      </template>
+    </CoreTable>
   </v-row>
 
   <QuadroDialog
