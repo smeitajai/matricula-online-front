@@ -79,7 +79,11 @@ const value = computed({
     return props.modelValue;
   },
   set(val) {
-    emit("input", val);
+    if (props.type == "number") {
+      emit("input", parseInt(val));
+    } else {
+      emit("input", val);
+    }
   },
 });
 

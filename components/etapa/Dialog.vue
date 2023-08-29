@@ -22,7 +22,6 @@
           v-model="dadosEtapa.idExterno"
           clearable
           label="ID Externo*"
-          type="number"
           required
           @input="dadosEtapa.idExterno = $event"
         />
@@ -104,10 +103,7 @@ const onClickSalvar = async () => {
 const editarEtapa = async () => {
   const { data: etapaAtualizada } = await useFetch("/api/etapas", {
     method: "PUT",
-    body: {
-      ...dadosEtapa.value,
-      ordem: parseInt(dadosEtapa.value.ordem),
-    },
+    body: dadosEtapa.value,
   });
 
   if (etapaAtualizada.value.error) {
@@ -121,10 +117,7 @@ const editarEtapa = async () => {
 const criarEtapa = async () => {
   const { data: etapaCriada } = await useFetch("/api/etapas", {
     method: "POST",
-    body: {
-      ...dadosEtapa.value,
-      ordem: parseInt(dadosEtapa.value.ordem),
-    },
+    body: dadosEtapa.value,
   });
 
   if (etapaCriada.value.error) {
