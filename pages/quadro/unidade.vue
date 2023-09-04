@@ -9,7 +9,11 @@
         <td>
           <CoreButton
             icon="mdi-pencil"
-            icon-color="primary"
+            :icon-color="
+              theme.global.name.value === 'customLightTheme'
+                ? 'primary'
+                : 'white'
+            "
             tooltip="Editar Vagas"
             variant="text"
             @click="onClickEdit(item)"
@@ -46,6 +50,8 @@
 </template>
 
 <script setup>
+import { useTheme } from "vuetify";
+const theme = useTheme();
 const route = useRoute();
 const { data: unidade } = await useFetch(`/api/unidades/${route.query.id}`);
 const { data: etapas } = await useFetch("/api/etapas");
