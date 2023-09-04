@@ -11,7 +11,6 @@
         persistent-hint
         placeholder="123456789000"
         required
-        type="number"
         @input="(dadosForm.cpf = $event), onInputCPF()"
       />
     </v-row>
