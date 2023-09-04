@@ -1,11 +1,11 @@
 <template>
-  <v-app-bar id="app-bar" color="grey-lighten-2" density="comfortable">
+  <v-app-bar id="app-bar" color="primary-darken-1" density="comfortable">
     <v-app-bar-nav-icon
       variant="text"
       @click.stop="drawer = !drawer"
     ></v-app-bar-nav-icon>
     <v-app-bar-title>Matrícula On-line</v-app-bar-title>
-    <v-spacer />
+    <button-theme />
   </v-app-bar>
 
   <v-navigation-drawer v-model="drawer" location="left" temporary>
