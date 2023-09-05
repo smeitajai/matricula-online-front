@@ -30,7 +30,7 @@
         clearable
         label="Nome do aluno(a)*"
         required
-        :full-width="aluno && aluno.id ? false : true"
+        full-width
         @input="dadosForm.nome = $event"
       />
 
@@ -43,21 +43,9 @@
       />
 
       <CoreSelect
-        v-if="aluno && aluno.id"
-        v-model="dadosForm.unidade"
-        :items="unidades"
-        item-title="nome"
-        item-value="id"
-        label="Unidade de Ensino*"
-        required
-        @input="dadosForm.unidade = $event"
-      />
-
-      <CoreSelect
         v-model="dadosForm.etapa"
         :items="etapas"
         item-title="nome"
-        item-value="id"
         label="Etapa*"
         required
         @input="dadosForm.etapa = $event"
@@ -97,29 +85,13 @@ onMounted(() => {
   }
 });
 
-const props = defineProps({
-  modelValue: {
-    type: Object,
-    default: () => ({}),
-  },
-});
-
-const emit = defineEmits(["input", "submit"]);
+const emit = defineEmits(["submit"]);
 
 const showAllInputs = ref(false);
 const showMessage = ref(false);
 const message = ref("");
 const form = ref(null);
-const aluno = ref(null);
-
-const dadosForm = computed({
-  get() {
-    return props.modelValue;
-  },
-  set(dadosForm) {
-    emit("input", dadosForm);
-  },
-});
+const dadosForm = ref({});
 
 const onInputCPF = () => {
   showAllInputs.value = false;
@@ -134,13 +106,13 @@ const onInputCPF = () => {
 const carregarAluno = async () => {
   //Chamada para a API "do Erudio" carregando os dados da pessoa pelo CPF informado
   //Se já tiver uma inscrição para o CPF informado, deve verificar no BackEnd também
-  const { data } = await useFetch("/api/alunos", {
+  const { data: aluno } = await useFetch("/api/alunosaaa", {
     query: {
       cpf: dadosForm.value.cpf,
     },
   });
-  console.log("Data aluno :>> ", data);
-  aluno.value = data.value;
+
+  if (aluno.value) dadosForm.value = { ...aluno.value[0] };
 
   showAllInputs.value = true;
 };
@@ -158,6 +130,21 @@ const onSubmit = async () => {
       (message.value = "Erro: E-mail inválido."), (showMessage.value = true)
     );
 
-  emit("submit", aluno.value);
+  if (!dadosForm.value.id) {
+    //Se não tem ID, deve criar o Aluno
+    const dadosAluno = { ...dadosForm.value };
+    delete dadosAluno["etapa"];
+    const { data: alunoCriado, error } = await useFetch("/api/alunos", {
+      method: "POST",
+      body: dadosAluno,
+    });
+
+    if (error.value || alunoCriado.value.statusCode) {
+      message.value = error.value || alunoCriado.value.message;
+      return (showMessage.value = true);
+    }
+  }
+
+  emit("submit", dadosForm.value);
 };
 </script>
