@@ -62,6 +62,9 @@
 </template>
 
 <script setup>
+import { useDisplay } from "vuetify";
+const { mobile } = useDisplay();
+
 const props = defineProps({
   dialog: {
     type: Boolean,
@@ -85,7 +88,6 @@ const props = defineProps({
   },
 });
 
-const mobile = useMobile();
 const emit = defineEmits(["created", "updated", "close"]);
 
 const message = ref("");

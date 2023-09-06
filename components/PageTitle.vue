@@ -20,6 +20,8 @@
 </template>
 
 <script setup>
+import { useDisplay } from "vuetify";
+const { mobile } = useDisplay();
 const slots = useSlots();
 
 defineProps({
@@ -29,6 +31,5 @@ defineProps({
   },
 });
 
-const mobile = useMobile();
 const router = useRouter();
 </script>
