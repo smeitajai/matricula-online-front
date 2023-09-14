@@ -5,6 +5,7 @@
     <v-col cols="12">
       <CoreList
         :item-text="(i) => i.nome"
+        :item-text-sub="(i) => `Ordem: ${i.ordem}`"
         :items="polos"
         header="Polos Cadastrados"
         toolbar
@@ -39,21 +40,7 @@
 const dadosPolo = ref({});
 const dialog = ref(false);
 
-// const { data: polos } = await useFetch("/api/polos");
-const polos = [
-  {
-    id: 1,
-    nome: "Fazenda",
-  },
-  {
-    id: 2,
-    nome: "Cordeiros",
-  },
-  {
-    id: 1,
-    nome: "São Vicente",
-  },
-];
+const { data: polos } = await useFetch("/api/polos");
 
 const onClickItem = (polo) => {
   dadosPolo.value = { ...polo };
