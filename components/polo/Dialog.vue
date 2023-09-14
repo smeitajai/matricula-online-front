@@ -5,10 +5,17 @@
         <CoreInput
           v-model="dadosPolo.nome"
           clearable
-          full-width
           label="Nome*"
           required
           @input="dadosPolo.nome = $event"
+        />
+        <CoreInput
+          v-model="dadosPolo.ordem"
+          clearable
+          label="Ordem*"
+          required
+          type="number"
+          @input="dadosPolo.ordem = $event"
         />
       </v-row>
     </v-form>

@@ -85,7 +85,7 @@ const value = computed({
     return props.modelValue;
   },
   set(val) {
-    if (props.type == "number") {
+    if (props.type == "number" && val.length > 0) {
       emit("input", parseInt(val));
     } else {
       emit("input", val);
