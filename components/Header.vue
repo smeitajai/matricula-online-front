@@ -5,7 +5,8 @@
       @click.stop="drawer = !drawer"
     ></v-app-bar-nav-icon>
     <v-app-bar-title>Matrícula On-line</v-app-bar-title>
-    <button-theme />
+    <ButtonTheme />
+    <ButtonLogin />
   </v-app-bar>
 
   <v-navigation-drawer v-model="drawer" location="left" temporary>
@@ -28,8 +29,9 @@
 
 <script setup>
 const drawer = ref(false);
+const items = ref();
 
-const items = ref([
+const menuDefault = [
   {
     icon: "mdi-apps",
     title: "Início",
@@ -40,6 +42,15 @@ const items = ref([
     title: "Inscrição",
     to: "/cadastro",
   },
+  {
+    icon: "mdi-progress-question",
+    title: "Ajuda",
+    to: "/ajuda",
+  },
+];
+
+const menuAuth = [
+  ...menuDefault,
   {
     icon: "mdi-bulletin-board",
     title: "Quadro de Vagas",
@@ -69,11 +80,16 @@ const items = ref([
     icon: "mdi-clock-outline",
     title: "Turnos",
     to: "/turno",
-  },
-  {
-    icon: "mdi-progress-question",
-    title: "Sobre",
-    to: "/sobre",
-  },
-]);
+  }
+];
+
+const user = useSupabaseUser();
+
+watchEffect(() => {
+  if (user.value) {
+    items.value = menuAuth;
+  } else {
+    items.value = menuDefault;
+  }
+});
 </script>
