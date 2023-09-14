@@ -20,7 +20,8 @@
             @append-inner-click="showPassword = !showPassword"
             @input="password = $event"
           />
-          <v-row justify="end" class="pa-4">
+          <v-row justify="space-between" class="pa-4">
+            <CoreButton label="Cancelar" @click="router.back()" />
             <CoreButton label="Entrar" @click="userLogin" />
           </v-row>
         </CoreCard>
@@ -38,6 +39,7 @@
 <script setup>
 const user = useSupabaseUser();
 const supabase = useSupabaseClient();
+const router = useRouter();
 
 const email = ref("");
 const password = ref("");
