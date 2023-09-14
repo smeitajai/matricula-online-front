@@ -2,6 +2,7 @@
   <v-col cols="12" class="py-1 px-1" :md="fullWidth ? 12 : 6">
     <v-text-field
       v-model="value"
+      :append-inner-icon="appendInnerIcon"
       :autofocus="autofocus"
       :clearable="clearable"
       :counter="counter"
@@ -12,12 +13,17 @@
       :rules="validationRules"
       :type="type"
       :variant="variant"
+      @click:append-inner="appendInnerClick"
     />
   </v-col>
 </template>
 
 <script setup>
 const props = defineProps({
+  appendInnerIcon: {
+    type: String,
+    default: null,
+  },
   autofocus: {
     type: Boolean,
     default: false,
@@ -72,7 +78,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["input"]);
+const emit = defineEmits(["input", "append-inner-click"]);
 
 const value = computed({
   get() {
@@ -88,6 +94,10 @@ const value = computed({
 });
 
 const validationRules = ref([]);
+
+const appendInnerClick = () => {
+  emit("append-inner-click");
+};
 
 onMounted(() => {
   validationRules.value = props.required
