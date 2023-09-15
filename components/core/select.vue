@@ -3,12 +3,13 @@
     <v-select
       v-model="value"
       :clearable="clearable"
-      :items="items"
+      :disabled="disabled"
       :item-title="itemTitle"
+      :items="items"
       :label="label"
-      return-object
       :rules="validationRules"
       :variant="variant"
+      return-object
     />
   </v-col>
 </template>
@@ -16,6 +17,10 @@
 <script setup>
 const props = defineProps({
   clearable: {
+    type: Boolean,
+    default: false,
+  },
+  disabled: {
     type: Boolean,
     default: false,
   },
