@@ -5,6 +5,7 @@
         <v-col :cols="mobile ? 12 : 4" class="py-0">
           <CoreSelect
             v-model="dadosQuadro.etapa"
+            :disabled="editing"
             :items="etapas"
             full-width
             item-title="nome"
@@ -16,6 +17,7 @@
         <v-col :cols="mobile ? 12 : 4" class="py-0">
           <CoreSelect
             v-model="dadosQuadro.turno"
+            :disabled="editing"
             :items="turnos"
             full-width
             item-title="nome"
@@ -94,12 +96,16 @@ const message = ref("");
 const showMessage = ref(false);
 const form = ref(null);
 const dadosQuadro = ref({});
+const editing = computed(() => !!props.quadro.id);
 
 onMounted(() => {
-  dadosQuadro.value = {
-    ...props.quadro,
-    unidadeEnsino: { ...props.unidade },
-  };
+  dadosQuadro.value = props.quadro.id
+    ? {
+        ...props.quadro,
+        etapa: props.etapas.find((e) => e.id == props.quadro.etapaId),
+        turno: props.turnos.find((e) => e.id == props.quadro.turnoId),
+      }
+    : {};
 });
 
 const showDialog = computed({
@@ -112,7 +118,7 @@ const showDialog = computed({
 });
 
 const dialogTitle = computed(() =>
-  dadosQuadro.value.id ? "Editar Quadro" : "Adicionar Quadro"
+  dadosQuadro.value.id ? "Editar Quadro" : "Adicionar Quadro",
 );
 
 const onClickSalvar = async () => {
@@ -129,7 +135,12 @@ const onClickSalvar = async () => {
 const criarQuadro = async () => {
   const { data: quadroCadastrado } = await useFetch("/api/quadros-vaga", {
     method: "POST",
-    body: dadosQuadro.value,
+    body: {
+      etapaId: dadosQuadro.value.etapa.id,
+      quantidadeVaga: dadosQuadro.value.quantidadeVaga,
+      turnoId: dadosQuadro.value.turno.id,
+      unidadeEnsinoId: props.unidade.id,
+    },
   });
 
   if (quadroCadastrado.value.error) {
@@ -143,7 +154,13 @@ const criarQuadro = async () => {
 const editarQuadro = async () => {
   const { data: quadroAtualizado } = await useFetch("/api/quadros-vaga", {
     method: "PUT",
-    body: dadosQuadro.value,
+    body: {
+      id: dadosQuadro.value.id,
+      etapaId: dadosQuadro.value.etapa.id,
+      quantidadeVaga: dadosQuadro.value.quantidadeVaga,
+      turnoId: dadosQuadro.value.turno.id,
+      unidadeEnsinoId: props.unidade.id,
+    },
   });
 
   if (quadroAtualizado.value.error) {

@@ -3,8 +3,9 @@
     <PageTitle v-if="unidade" :title="`Quadro de vagas | ${unidade.nome}`" />
     <CoreTable :headers="headers" :items="quadros">
       <template #body="{ item }">
-        <td>{{ item.etapa.nome }}</td>
-        <td>{{ item.turno.nome }}</td>
+        <!-- <td>{{ item.etapa.nome }}</td>
+        <td>{{ item.turno.nome }}</td> -->
+        <td>{{ item.nome }}</td>
         <td>{{ item.quantidadeVaga }}</td>
         <td>
           <CoreButton
@@ -62,7 +63,7 @@ const { data: quadros } = await useFetch("/api/quadros-vaga", {
   },
 });
 
-const headers = ["Etapa", "Turno", "Vagas", "Ações"];
+const headers = ["Nome", "Vagas", "Ações"];
 const dialog = ref(false);
 const quadroSelected = ref({});
 
