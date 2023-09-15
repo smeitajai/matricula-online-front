@@ -3,24 +3,11 @@
     <v-row class="mt-1">
       <CoreInput
         v-model="endereco.cep"
+        :counter="8"
         clearable
         label="CEP"
         type="number"
         @input="(endereco.cep = $event), onChange()"
-      />
-      <CoreInput
-        v-model="endereco.estado"
-        clearable
-        label="Estado*"
-        required
-        @input="(endereco.estado = $event), onChange()"
-      />
-      <CoreInput
-        v-model="endereco.cidade"
-        clearable
-        label="Cidade*"
-        required
-        @input="(endereco.cidade = $event), onChange()"
       />
       <CoreInput
         v-model="endereco.bairro"
@@ -87,21 +74,7 @@ const endereco = computed({
   },
 });
 
-//const {data: polos} = await useFetch("/api/polos");
-const polos = [
-  {
-    id: 1,
-    nome: "Cordeiros",
-  },
-  {
-    id: 2,
-    nome: "Dom Bosco",
-  },
-  {
-    id: 3,
-    nome: "Fazenda",
-  },
-];
+const { data: polos } = await useFetch("/api/polos");
 const form = ref(null);
 
 const onChange = async () => {

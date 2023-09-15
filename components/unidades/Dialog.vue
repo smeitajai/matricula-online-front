@@ -13,7 +13,6 @@
           v-model="dadosUnidade.idExterno"
           clearable
           label="ID Externo*"
-          type="number"
           required
           @input="dadosUnidade.idExterno = $event"
         />
@@ -69,8 +68,6 @@ const form = ref(null);
 const validateAddress = ref(false);
 const dadosEndereco = ref({
   cep: null,
-  estado: null,
-  cidade: null,
   bairro: null,
   logradouro: null,
   numero: null,
@@ -82,7 +79,7 @@ watch(
   () => props.unidade,
   (newValue) => {
     dadosUnidade.value = newValue;
-  }
+  },
 );
 
 const showDialog = computed({
@@ -95,7 +92,7 @@ const showDialog = computed({
 });
 
 const dialogTitle = computed(() =>
-  dadosUnidade.value.id ? "Editar Unidade" : "Adicionar Unidade"
+  dadosUnidade.value.id ? "Editar Unidade" : "Adicionar Unidade",
 );
 
 const onClickSalvar = async () => {
@@ -120,16 +117,24 @@ const editarUnidade = async () => {
     return (showMessage.value = true);
   }
 
-  // Editar o Endereço da unidade
-  // const { data: enderecoAtualizado } = await useFetch("/api/endereco", {
-  //   method: "PUT",
-  //   body: dadosEndereco.value,
-  // });
+  const { data: enderecoAtualizado } = await useFetch("/api/enderecos", {
+    method: "PUT",
+    body: {
+      id: dadosEndereco.value.id,
+      cep: dadosEndereco.value.cep.toString(),
+      bairro: dadosEndereco.value.bairro,
+      logradouro: dadosEndereco.value.logradouro,
+      numero: dadosEndereco.value.numero.toString(),
+      complemento: dadosEndereco.value.complemento,
+      poloId: dadosEndereco.value.polo.id,
+      //unidadeId: unidadeCriada.value.id,
+    },
+  });
 
-  // if (enderecoAtualizado.value.error) {
-  //   message.value = enderecoAtualizado.value.message;
-  //   return (showMessage.value = true);
-  // }
+  if (enderecoAtualizado.value.error) {
+    message.value = enderecoAtualizado.value.message;
+    return (showMessage.value = true);
+  }
 
   emit("updated", unidadeAtualizada);
 };
@@ -145,16 +150,23 @@ const criarUnidade = async () => {
     return (showMessage.value = true);
   }
 
-  // Criar o Endereço da unidade
-  // const { data: enderecoCriado } = await useFetch("/api/endereco", {
-  //   method: "POST",
-  //   body: dadosEndereco.value,
-  // });
+  const { data: enderecoCriado } = await useFetch("/api/enderecos", {
+    method: "POST",
+    body: {
+      cep: dadosEndereco.value.cep.toString(),
+      bairro: dadosEndereco.value.bairro,
+      logradouro: dadosEndereco.value.logradouro,
+      numero: dadosEndereco.value.numero.toString(),
+      complemento: dadosEndereco.value.complemento,
+      poloId: dadosEndereco.value.polo.id,
+      //unidadeId: unidadeCriada.value.id,
+    },
+  });
 
-  // if (enderecoCriado.value.error) {
-  //   message.value = enderecoCriado.value.message;
-  //   return (showMessage.value = true);
-  // }
+  if (enderecoCriado.value.error) {
+    message.value = enderecoCriado.value.message;
+    return (showMessage.value = true);
+  }
 
   emit("created", unidadeCriada);
 };
