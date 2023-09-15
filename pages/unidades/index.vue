@@ -54,7 +54,7 @@ const onCreate = (unidade) => {
 
 const onUpdate = (unidade) => {
   const indexUnidade = unidades.value.findIndex(
-    (u) => u.id == unidade.value.id
+    (u) => u.id == unidade.value.id,
   );
   Object.assign(unidades.value[indexUnidade], unidade.value);
   dialog.value = false;
