@@ -1,5 +1,5 @@
 <template>
-  <CoreDialog v-model="showDialog" persistent :title="dialogTitle" toolbar>
+  <CoreDialog v-model="showDialog" persistent title="Confirmar Vaga" toolbar>
     <v-row class="ma-0 text-h6" justify="center">
       <span> Vaga escolhida na</span>
     </v-row>
@@ -7,27 +7,12 @@
       <span>{{ unidade.nome }}</span>
     </v-row>
 
-    <v-container v-if="!turnoSelected" class="pa-0">
-      <v-row class="ma-0 py-6 text-body-1" justify="center">
-        Escolha o turno desejado:
-      </v-row>
-      <v-row class="ma-0" justify="space-evenly">
-        <CoreButton
-          v-for="turno in turnos"
-          :key="turno.id"
-          :label="turno.nome"
-          rounded
-          @click="turnoSelected = turno"
-        />
-      </v-row>
-    </v-container>
-
-    <v-container v-else class="pa-0">
+    <v-container class="pa-0">
       <v-row class="ma-0 pt-6 text-h6 font-weight-bold" justify="center">
         Etapa: {{ etapa.nome }}
       </v-row>
       <v-row class="mx-0 my-n2 pb-6 text-h6 font-weight-bold" justify="center">
-        Turno: {{ turnoSelected.nome }}
+        Turno: {{ turno.nome }}
       </v-row>
       <v-row class="ma-0 text-body-1" justify="center">
         Confirme a vaga escolhida
@@ -37,23 +22,16 @@
           label="Confirmar"
           rounded
           prepend-icon="mdi-check"
-          @click="emit('confirm', turnoSelected)"
+          @click="emit('confirm')"
         />
       </v-row>
     </v-container>
     <template #dialogActions>
       <CoreButton
-        v-if="turnoSelected"
-        text-color="blue-darken-1"
-        label="alterar turno"
-        variant="text"
-        @click="turnoSelected = null"
-      />
-      <CoreButton
         text-color="red-darken-1"
         label="cancelar"
         variant="text"
-        @click="(turnoSelected = null), emit('close')"
+        @click="emit('close')"
       />
     </template>
   </CoreDialog>
@@ -70,17 +48,15 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
-  turnos: {
-    type: Array,
-    default: () => [],
+  turno: {
+    type: Object,
+    default: () => ({}),
   },
   unidade: {
     type: Object,
     default: () => ({}),
   },
 });
-
-const turnoSelected = ref(null);
 
 const showDialog = computed({
   get() {
@@ -90,8 +66,4 @@ const showDialog = computed({
     emit("close");
   },
 });
-
-const dialogTitle = computed(() =>
-  turnoSelected.value ? "Confirmar Vaga" : "Escolher Turno"
-);
 </script>

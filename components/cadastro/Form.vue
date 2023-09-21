@@ -130,10 +130,10 @@ const onSubmit = async () => {
       (message.value = "Erro: E-mail inválido."), (showMessage.value = true)
     );
 
+  // Nesse ponto, já deve saber se Aluno existe ou não. Seguindo como se aluno não existisse
   if (!dadosForm.value.id) {
-    //Se não tem ID, deve criar o Aluno
     const dadosAluno = { ...dadosForm.value };
-    delete dadosAluno["etapa"];
+    delete dadosAluno.etapa;
     const { data: alunoCriado, error } = await useFetch("/api/alunos", {
       method: "POST",
       body: dadosAluno,
@@ -143,8 +143,11 @@ const onSubmit = async () => {
       message.value = error.value || alunoCriado.value.message;
       return (showMessage.value = true);
     }
-  }
 
-  emit("submit", dadosForm.value);
+    emit("submit", {
+      alunoId: alunoCriado.value.id,
+      etapaId: dadosForm.value.etapa.id,
+    });
+  }
 };
 </script>

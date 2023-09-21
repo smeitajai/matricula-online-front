@@ -9,8 +9,8 @@ const onClickBuscarVaga = async (aluno) => {
   await navigateTo({
     path: "/cadastro/vagas",
     query: {
-      cpf: aluno.cpf,
-      etapa: aluno.etapa.id,
+      aluno: aluno.alunoId,
+      etapa: aluno.etapaId,
     },
   });
 };

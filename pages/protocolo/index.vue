@@ -1,5 +1,5 @@
 <template>
-  <ProtocoloInfo />
+  <ProtocoloInfo v-if="showProtocolo" :dados-inscricao="dadosInscricao" />
   <v-row id="protocol" justify="end" class="ma-5">
     <div class="mx-2">
       <CoreButton
@@ -16,9 +16,47 @@
       />
     </div>
   </v-row>
+  <CoreSnackbar
+    v-model="showMessage"
+    color="error"
+    :message="message"
+    @hide="showMessage = $event"
+  />
 </template>
 
 <script setup>
+const route = useRoute();
+const showMessage = ref(false);
+const message = ref("");
+const dadosInscricao = ref(null);
+const showProtocolo = ref(false);
+
+onMounted(() => {
+  getDadosInscricao(route.query.inscricao);
+});
+
+const getDadosInscricao = async (inscricaoId) => {
+  const { data: inscricao } = await useFetch(`/api/inscricoes/${inscricaoId}`);
+  const { data: aluno } = await useFetch(
+    `/api/alunos/${inscricao.value.alunoId}`,
+  );
+  const { data: processo } = await useFetch(
+    `/api/processos/${inscricao.value.processoId}`,
+  );
+  const { data: quadro } = await useFetch(
+    `/api/quadros-vaga/${inscricao.value.quadroVagaId}`,
+  );
+  dadosInscricao.value = {
+    ...inscricao.value,
+    ...aluno.value,
+    ...processo.value,
+    ...quadro.value,
+  };
+  console.log("dadosInscricao.value :>> ", dadosInscricao.value);
+
+  showProtocolo.value = true;
+};
+
 const onClickImprimir = () => {
   const appbar = document.querySelector("#app-bar");
   const protocol = document.querySelector("#protocol");
