@@ -1,8 +1,6 @@
 <template>
   <v-row class="ma-5">
-    <PageTitle
-      :title="`Matrícula de ${pessoa.nome || ''} | ${etapa.nome || ''}`"
-    >
+    <PageTitle :title="`Matrícula de ${alunoState ? alunoState.nome : ''}`">
       <template #subtitle>
         <span>Clique na unidade de ensino pretendida para escolher a vaga</span>
       </template>
@@ -12,9 +10,7 @@
       <CoreList
         :elevation="4"
         :items="quadrosVaga"
-        :item-text="
-          (i) => getNomeUnidade(i.unidadeEnsinoId) + ` - ${getTurno(i.turnoId)}`
-        "
+        :item-text="(i) => getNomeUnidade(i.unidadeEnsinoId) + `: ${i.nome}`"
         :item-text-sub="(i) => getEnderecoUnidade(i.unidadeEnsinoId)"
         @click="onClickItem($event)"
       >
@@ -27,8 +23,7 @@
     <CadastroDialogVagas
       v-if="dialog"
       :dialog="dialog"
-      :etapa="etapa"
-      :turno="turnoSelected"
+      :quadro="quadroSelected"
       :unidade="unidadeSelected"
       @close="dialog = false"
       @confirm="onConfirm($event)"
@@ -46,9 +41,6 @@
 <script setup>
 const route = useRoute();
 const { data: unidades } = await useFetch("/api/unidades");
-const { data: turnos } = await useFetch("/api/turnos");
-const { data: pessoa } = useFetch(`/api/alunos/${route.query.aluno}`);
-const { data: etapa } = await useFetch(`/api/etapas/${route.query.etapa}`);
 const { data: quadrosVaga } = await useFetch("/api/quadros-vaga", {
   query: {
     etapa: route.query.etapa,
@@ -61,14 +53,20 @@ onMounted(() => {
     return (showMessage.value = true);
   }
 
-  if (etapa.value && etapa.value.error) {
-    message.value = etapa.value.message;
+  if (quadrosVaga.value && quadrosVaga.value.error) {
+    message.value = quadrosVaga.value.message;
     return (showMessage.value = true);
   }
 });
 
+const alunoState = useAluno();
+if (!alunoState || !alunoState.value.id) {
+  //Se não existir aluno no state, carrega o aluno
+  const { data } = await useFetch(`/api/alunos/${route.query.aluno}`);
+  alunoState.value = data.value;
+}
+
 const quadroSelected = ref(null);
-const turnoSelected = ref(null);
 const unidadeSelected = ref(null);
 const showMessage = ref(false);
 const message = ref("");
@@ -80,19 +78,14 @@ const getNomeUnidade = (unidadeEnsinoId) => {
 };
 
 const getEnderecoUnidade = (unidadeEnsinoId) => {
+  // Unidade de ensino ainda não tem relação com Endereço - REFATORAR!
   // const unidade = unidades.value.find((u) => u.id == unidadeEnsinoId);
   // return unidade.endereco;
   return endereco;
 };
 
-const getTurno = (turnoId) => {
-  const turno = turnos.value.find((t) => t.id == turnoId);
-  return turno.nome;
-};
-
 const onClickItem = (quadro) => {
   quadroSelected.value = quadro;
-  turnoSelected.value = turnos.value.find((t) => t.id == quadro.turnoId);
   unidadeSelected.value = unidades.value.find(
     (u) => u.id == quadro.unidadeEnsinoId,
   );
@@ -103,8 +96,8 @@ const onConfirm = async () => {
   const { data: inscricaoCriada, error } = await useFetch("/api/inscricoes", {
     method: "POST",
     body: {
-      alunoId: pessoa.value.id,
-      processoId: "6b0e883e-3833-40e7-85a9-e11d8a311548",
+      alunoId: alunoState.value.id,
+      processoId: "cb417e07-5389-4c72-9989-d4e2c9299ccb",
       quadroVagaId: quadroSelected.value.id,
     },
   });

@@ -70,15 +70,9 @@
 </template>
 
 <script setup>
-const { data: unidades } = await useFetch("/api/unidades");
 const { data: etapas } = await useFetch("/api/etapas");
 
 onMounted(() => {
-  if (unidades.value && unidades.value.error) {
-    message.value = unidades.value.message;
-    return (showMessage.value = true);
-  }
-
   if (etapas.value && etapas.value.error) {
     message.value = etapas.value.message;
     return (showMessage.value = true);
@@ -92,6 +86,7 @@ const showMessage = ref(false);
 const message = ref("");
 const form = ref(null);
 const dadosForm = ref({});
+const alunoState = useAluno();
 
 const onInputCPF = () => {
   showAllInputs.value = false;
@@ -130,24 +125,40 @@ const onSubmit = async () => {
       (message.value = "Erro: E-mail inválido."), (showMessage.value = true)
     );
 
+  if (
+    (dadosForm.value.email && !dadosForm.value.email.length) ||
+    !dadosForm.value.email
+  )
+    delete dadosForm.value.email;
+
   // Nesse ponto, já deve saber se Aluno existe ou não. Seguindo como se aluno não existisse
-  if (!dadosForm.value.id) {
-    const dadosAluno = { ...dadosForm.value };
-    delete dadosAluno.etapa;
-    const { data: alunoCriado, error } = await useFetch("/api/alunos", {
-      method: "POST",
-      body: dadosAluno,
-    });
+  //Se o Aluno já existir, deve utilizar os dados dele ao invés de criar
+  !dadosForm.value.id
+    ? criarAluno()
+    : emit("submit", {
+        alunoId: dadosForm.value.id,
+        etapaId: dadosForm.value.etapa.id,
+      });
+};
 
-    if (error.value || alunoCriado.value.statusCode) {
-      message.value = error.value || alunoCriado.value.message;
-      return (showMessage.value = true);
-    }
+const criarAluno = async () => {
+  const dadosAluno = { ...dadosForm.value };
+  delete dadosAluno.etapa;
+  const { data: alunoCriado, error } = await useFetch("/api/alunos", {
+    method: "POST",
+    body: dadosAluno,
+  });
 
-    emit("submit", {
-      alunoId: alunoCriado.value.id,
-      etapaId: dadosForm.value.etapa.id,
-    });
+  if (error.value || alunoCriado.value.statusCode) {
+    message.value = error.value || alunoCriado.value.message;
+    return (showMessage.value = true);
   }
+
+  alunoState.value = alunoCriado.value; // Grava o aluno criado no State
+
+  emit("submit", {
+    alunoId: alunoCriado.value.id,
+    etapaId: dadosForm.value.etapa.id,
+  });
 };
 </script>

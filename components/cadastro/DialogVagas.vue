@@ -8,11 +8,8 @@
     </v-row>
 
     <v-container class="pa-0">
-      <v-row class="ma-0 pt-6 text-h6 font-weight-bold" justify="center">
-        Etapa: {{ etapa.nome }}
-      </v-row>
-      <v-row class="mx-0 my-n2 pb-6 text-h6 font-weight-bold" justify="center">
-        Turno: {{ turno.nome }}
+      <v-row class="ma-0 py-6 text-h6 font-weight-bold" justify="center">
+        Etapa/Turno: {{ quadro.nome }}
       </v-row>
       <v-row class="ma-0 text-body-1" justify="center">
         Confirme a vaga escolhida
@@ -44,11 +41,7 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  etapa: {
-    type: Object,
-    default: () => ({}),
-  },
-  turno: {
+  quadro: {
     type: Object,
     default: () => ({}),
   },
