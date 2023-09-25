@@ -37,22 +37,10 @@ onMounted(() => {
 
 const getDadosInscricao = async (inscricaoId) => {
   const { data: inscricao } = await useFetch(`/api/inscricoes/${inscricaoId}`);
-  const { data: aluno } = await useFetch(
-    `/api/alunos/${inscricao.value.alunoId}`,
-  );
-  const { data: processo } = await useFetch(
-    `/api/processos/${inscricao.value.processoId}`,
-  );
-  const { data: quadro } = await useFetch(
-    `/api/quadros-vaga/${inscricao.value.quadroVagaId}`,
-  );
+
   dadosInscricao.value = {
     ...inscricao.value,
-    ...aluno.value,
-    ...processo.value,
-    ...quadro.value,
   };
-  console.log("dadosInscricao.value :>> ", dadosInscricao.value);
 
   showProtocolo.value = true;
 };
