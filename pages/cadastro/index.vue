@@ -3,14 +3,13 @@
 </template>
 
 <script setup>
-const onClickBuscarVaga = async (aluno) => {
-  //Se aluno ainda não existir, deve criar antes de trocar de rota
-  console.log("aluno :>> ", aluno);
+useClearState();
+const onClickBuscarVaga = async (item) => {
   await navigateTo({
     path: "/cadastro/vagas",
     query: {
-      aluno: aluno.alunoId,
-      etapa: aluno.etapaId,
+      aluno: item.alunoId,
+      etapa: item.etapaId,
     },
   });
 };

@@ -8,8 +8,9 @@
       Emitido em {{ dataAtual }}
     </v-col>
     <v-col cols="12">
-      O aluno João da Silva teve sua vaga escolhida no 1° ano na E.B. Antônio
-      Ramos no turno Matutino.
+      O(a) aluno(a)
+      {{ alunoState.nome || "" }} teve sua vaga escolhida no 1° ano na E.B.
+      Antônio Ramos no turno Matutino.
     </v-col>
     <v-col cols="12">
       Para efetivação da matrícula no ano letivo de 2024, você deve comparecer
@@ -56,4 +57,6 @@
 import { format } from "date-fns";
 
 const dataAtual = format(new Date(), "dd/MM/yyyy");
+
+const alunoState = useAluno();
 </script>
