@@ -45,6 +45,7 @@
       <CoreSelect
         v-model="dadosForm.etapa"
         :items="etapas"
+        :disabled="!!dadosForm.id"
         item-title="nome"
         label="Etapa*"
         required
@@ -91,6 +92,9 @@ const alunoState = useAluno();
 const onInputCPF = () => {
   showAllInputs.value = false;
 
+  if (dadosForm.value.cpf && dadosForm.value.cpf.length)
+    dadosForm.value.cpf = dadosForm.value.cpf.replace(/\D/g, "");
+
   if (dadosForm.value.cpf && dadosForm.value.cpf.length == 11) {
     return validateCPF(dadosForm.value.cpf)
       ? carregarAluno()
@@ -99,15 +103,20 @@ const onInputCPF = () => {
 };
 
 const carregarAluno = async () => {
-  //Chamada para a API "do Erudio" carregando os dados da pessoa pelo CPF informado
-  //Se já tiver uma inscrição para o CPF informado, deve verificar no BackEnd também
-  const { data: aluno } = await useFetch("/api/alunosaaa", {
+  const { data: aluno } = await useFetch("/api/alunos-matriculados", {
     query: {
       cpf: dadosForm.value.cpf,
     },
   });
 
-  if (aluno.value) dadosForm.value = { ...aluno.value[0] };
+  if (!aluno.value.statusCode && !aluno.value.error)
+    dadosForm.value = {
+      id: aluno.value.id,
+      cpf: aluno.value.cpf,
+      nome: aluno.value.nome,
+      dataNascimento: aluno.value.dataNascimento,
+      etapa: etapas.value.find((e) => e.id == aluno.value.etapaId),
+    };
 
   showAllInputs.value = true;
 };
@@ -125,24 +134,23 @@ const onSubmit = async () => {
       (message.value = "Erro: E-mail inválido."), (showMessage.value = true)
     );
 
-  if (
-    (dadosForm.value.email && !dadosForm.value.email.length) ||
-    !dadosForm.value.email
-  )
+  if (dadosForm.value.email && !dadosForm.value.email.length)
     delete dadosForm.value.email;
 
-  // Nesse ponto, já deve saber se Aluno existe ou não. Seguindo como se aluno não existisse
-  //Se o Aluno já existir, deve utilizar os dados dele ao invés de criar
-  !dadosForm.value.id
-    ? criarAluno()
-    : emit("submit", {
-        alunoId: dadosForm.value.id,
-        etapaId: dadosForm.value.etapa.id,
-      });
+  criarAluno();
+
+  // Precisa validar quando deve criar aluno e quando aluno já está criado
+  // !dadosForm.value.id
+  //   ? criarAluno()
+  //   : emit("submit", {
+  //       alunoId: dadosForm.value.id,
+  //       etapaId: dadosForm.value.etapa.id,
+  //     });
 };
 
 const criarAluno = async () => {
   const dadosAluno = { ...dadosForm.value };
+  delete dadosAluno.id;
   delete dadosAluno.etapa;
   const { data: alunoCriado, error } = await useFetch("/api/alunos", {
     method: "POST",
