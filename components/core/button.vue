@@ -5,6 +5,7 @@
         :id="id"
         v-bind="props"
         :color="color"
+        :disabled="disabled"
         :rounded="rounded"
         :size="size"
         :variant="variant"
@@ -46,6 +47,10 @@ const props = defineProps({
   color: {
     type: String,
     default: "#6200EE", // primary
+  },
+  disabled: {
+    type: Boolean,
+    default: false,
   },
   icon: {
     type: String,
