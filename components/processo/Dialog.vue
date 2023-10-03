@@ -30,8 +30,6 @@
 </template>
 
 <script setup>
-import { format, parseISO } from "date-fns";
-
 const props = defineProps({
   dialog: {
     type: Boolean,
@@ -52,51 +50,14 @@ const validate = ref(false);
 const dadosProcesso = ref({
   edital: null,
   nome: null,
-  faseInicialDataInicio: null,
-  faseInicialDataFim: null,
-  faseFinalDataInicio: null,
-  faseFinalDataFim: null,
 });
 
 watch(
   () => props.processo,
   (newValue) => {
     dadosProcesso.value = newValue;
-    if (newValue.id) formatData(dadosProcesso.value);
-  }
+  },
 );
-
-const formatData = (processo) => {
-  processo.faseInicialDataInicio = format(
-    parseISO(processo.faseInicialDataInicio),
-    "yyyy-MM-dd"
-  );
-  processo.faseInicialDataFim = format(
-    parseISO(processo.faseInicialDataFim),
-    "yyyy-MM-dd"
-  );
-  processo.faseFinalDataInicio = format(
-    parseISO(processo.faseFinalDataInicio),
-    "yyyy-MM-dd"
-  );
-  processo.faseFinalDataFim = format(
-    parseISO(processo.faseFinalDataFim),
-    "yyyy-MM-dd"
-  );
-};
-
-const formatISO = (processo) => {
-  processo.faseInicialDataInicio = new Date(
-    processo.faseInicialDataInicio
-  ).toISOString();
-  processo.faseInicialDataFim = new Date(
-    processo.faseInicialDataFim
-  ).toISOString();
-  processo.faseFinalDataInicio = new Date(
-    processo.faseFinalDataInicio
-  ).toISOString();
-  processo.faseFinalDataFim = new Date(processo.faseFinalDataFim).toISOString();
-};
 
 const showDialog = computed({
   get() {
@@ -108,7 +69,7 @@ const showDialog = computed({
 });
 
 const dialogTitle = computed(() =>
-  dadosProcesso.value.id ? "Editar Processo" : "Adicionar Processo"
+  dadosProcesso.value.id ? "Editar Processo" : "Adicionar Processo",
 );
 
 const onClickSalvar = (valid) => {
@@ -117,23 +78,18 @@ const onClickSalvar = (valid) => {
       (message.value = "Verifique os campos obrigatórios e tente novamente."),
       (showMessage.value = true)
     );
-  if (datasInvalidas())
-    return (
-      (message.value =
-        "Datas Inválidas! Verifique o período das datas e tente novamente."),
-      (showMessage.value = true)
-    );
 
-  let processo = { ...dadosProcesso.value };
-  formatISO(processo);
-
-  dadosProcesso.value.id ? editarProcesso(processo) : criarProcesso(processo);
+  dadosProcesso.value.id ? editarProcesso() : criarProcesso();
 };
 
-const editarProcesso = async (processo) => {
+const editarProcesso = async () => {
+  const processoAtualizar = {
+    ...dadosProcesso.value,
+  };
+  delete processoAtualizar.processoEtapas;
   const { data: processoAtualizado } = await useFetch("/api/processos", {
     method: "PUT",
-    body: processo,
+    body: processoAtualizar,
   });
 
   if (processoAtualizado.value.error) {
@@ -144,10 +100,10 @@ const editarProcesso = async (processo) => {
   emit("updated", processoAtualizado);
 };
 
-const criarProcesso = async (processo) => {
+const criarProcesso = async () => {
   const { data: processoCriado } = await useFetch("/api/processos", {
     method: "POST",
-    body: processo,
+    body: dadosProcesso.value,
   });
 
   if (processoCriado.value.error) {
@@ -156,27 +112,5 @@ const criarProcesso = async (processo) => {
   }
 
   emit("created", processoCriado);
-};
-
-const datasInvalidas = () => {
-  if (
-    dadosProcesso.value.faseInicialDataInicio >
-    dadosProcesso.value.faseInicialDataFim
-  )
-    return true;
-
-  if (
-    dadosProcesso.value.faseInicialDataFim >
-    dadosProcesso.value.faseFinalDataInicio
-  )
-    return true;
-
-  if (
-    dadosProcesso.value.faseFinalDataInicio >
-    dadosProcesso.value.faseFinalDataFim
-  )
-    return true;
-
-  return false;
 };
 </script>
