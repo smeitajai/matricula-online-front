@@ -28,6 +28,7 @@
         <v-divider
           v-if="index < items.length - 1"
           :key="`divider_${item.id}`"
+          class="my-2"
         />
       </template>
     </v-list>

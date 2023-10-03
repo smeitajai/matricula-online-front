@@ -17,16 +17,16 @@
     <v-row class="my-8 pl-5">
       <v-col cols="12" class="pa-0"> Datas Importantes: </v-col>
       <v-col
-        v-for="processo in processos"
-        :key="processo.id"
+        v-for="etapa in processo.processoEtapas"
+        :key="etapa.id"
         cols="12"
         class="pa-0"
       >
-        <span :class="[{ 'font-weight-bold': processoEmAndamento(processo) }]">
-          {{ processo.nome }}:
-          {{ formatarData(processo.faseInicialDataInicio) }}
+        <span :class="[{ 'font-weight-bold': etapa.emAndamento }]">
+          {{ etapa.nome }}:
+          {{ formatarData(etapa.faseInicialDataInicio) }}
           até
-          {{ formatarData(processo.faseFinalDataFim) }}
+          {{ formatarData(etapa.faseFinalDataFim) }}
         </span>
       </v-col>
     </v-row>
@@ -42,29 +42,35 @@
   </CoreCard>
 
   <CoreSnackbar
-    v-if="processos.error"
-    v-model="processos.error"
+    v-model="showMessage"
     color="error"
-    :message="processos.message"
+    :message="message"
+    @hide="showMessage = $event"
   />
 </template>
 
 <script setup>
-import { format, parseISO, isAfter, isBefore } from "date-fns";
+import { format, utcToZonedTime } from "date-fns-tz";
+
+const { data: processo, error: errorProcesso } = await useFetch(
+  "/api/processos/em-andamento",
+);
 
 const anoEdital = new Date().getFullYear() + 1;
-const { data: processos } = await useFetch("/api/processos");
+const showMessage = ref(false);
+const message = ref("");
 
-const processoEmAndamento = (processo) => {
-  const dataAtual = new Date();
-  const dataInicio = new Date(processo.faseInicialDataInicio);
-  const dataFim = new Date(processo.faseFinalDataFim);
-  return isAfter(dataAtual, dataInicio) && isBefore(dataAtual, dataFim)
-    ? true
-    : false;
-};
+onMounted(() => {
+  if (errorProcesso.value || (processo.value && processo.value.error)) {
+    errorProcesso.value
+      ? (message.value = errorProcesso.value.message)
+      : (message.value = processos.value.message);
+    return (showMessage.value = true);
+  }
+});
 
 const formatarData = (data) => {
-  return format(parseISO(data), "dd/MM/yyyy");
+  const dataTimeZoned = utcToZonedTime(data, "-00:00"); //Ignora o timezone, mantendo a data correta
+  return format(dataTimeZoned, "dd/MM/yyyy");
 };
 </script>
