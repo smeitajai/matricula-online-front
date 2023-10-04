@@ -3,10 +3,16 @@
     <PageTitle title="Unidades de Ensino" />
 
     <v-col cols="12">
+      <CoreInput
+        append-inner-icon="mdi-magnify"
+        full-width
+        label="Filtrar Unidade"
+        @input="onInputFilter($event)"
+      />
       <CoreList
         :item-text-sub="(i) => `ID: ${i.idExterno}`"
         :item-text="(i) => i.nome"
-        :items="unidades"
+        :items="unidadesFiltradas"
         header="Unidades Cadastradas"
         toolbar
         @click="onClickItem($event)"
@@ -41,6 +47,17 @@ const dadosUnidade = ref({});
 const dialog = ref(false);
 
 const { data: unidades } = await useFetch("/api/unidades");
+const unidadesFiltradas = ref([]);
+
+onMounted(() => {
+  unidadesFiltradas.value = unidades.value;
+});
+
+const onInputFilter = (textoFilter) => {
+  unidadesFiltradas.value = unidades.value.filter((unidade) => {
+    return new RegExp(textoFilter.toUpperCase()).test(unidade.nome);
+  });
+};
 
 const onClickItem = (unidade) => {
   dadosUnidade.value = { ...unidade };
