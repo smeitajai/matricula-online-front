@@ -1,12 +1,19 @@
 <template>
   <v-row class="ma-5">
     <PageTitle :title="`Matrícula de ${alunoState ? alunoState.nome : ''}`">
-      <template #subtitle>
-        <span>Clique na unidade de ensino pretendida para escolher a vaga</span>
+      <template v-if="etapaProcessoState" #subtitle>
+        <v-col cols="12" class="pa-0">
+          <span>Etapa atual do Processo: {{ etapaProcessoState.nome }}</span>
+        </v-col>
+        <v-col cols="12" class="px-0">
+          <span
+            >Clique na unidade de ensino pretendida para escolher a vaga
+          </span>
+        </v-col>
       </template>
     </PageTitle>
 
-    <v-col v-if="unidades && quadrosVaga" cols="12">
+    <v-col v-if="unidades && quadrosVaga && etapaProcessoState" cols="12">
       <CoreList
         :elevation="4"
         :items="quadrosVaga"
@@ -19,6 +26,12 @@
         </template>
       </CoreList>
     </v-col>
+
+    <v-alert
+      v-else
+      type="error"
+      title="Nenhuma etapa do processo está em andamento."
+    ></v-alert>
 
     <CadastroDialogVagas
       v-if="dialog"
@@ -46,6 +59,8 @@ const { data: quadrosVaga } = await useFetch("/api/quadros-vaga", {
     etapa: route.query.etapa,
   },
 });
+const { data: processo } = await useFetch("/api/processos/em-andamento");
+const etapaProcessoState = useEtapaProcesso();
 
 onMounted(() => {
   if (unidades.value && unidades.value.error) {
@@ -57,6 +72,16 @@ onMounted(() => {
     message.value = quadrosVaga.value.message;
     return (showMessage.value = true);
   }
+
+  if (processo.value && processo.value.error) {
+    message.value = processo.value.message;
+    return (showMessage.value = true);
+  }
+
+  etapaProcessoState.value =
+    processo.value && processo.value.processoEtapas
+      ? processo.value.processoEtapas.find((etapa) => etapa.emAndamento)
+      : null;
 });
 
 const alunoState = useAluno();
@@ -97,7 +122,7 @@ const onConfirm = async () => {
     method: "POST",
     body: {
       alunoId: alunoState.value.id,
-      processoId: "cb417e07-5389-4c72-9989-d4e2c9299ccb",
+      processoEtapaId: etapaProcessoState.value.id,
       quadroVagaId: quadroSelected.value.id,
     },
   });
