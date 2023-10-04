@@ -78,7 +78,8 @@ const dadosUnidade = ref({});
 watch(
   () => props.unidade,
   (newValue) => {
-    dadosUnidade.value = newValue;
+    dadosUnidade.value = { ...newValue };
+    dadosUnidade.value.id ? carregarEndereco() : (dadosEndereco.value = {});
   },
 );
 
@@ -95,6 +96,17 @@ const dialogTitle = computed(() =>
   dadosUnidade.value.id ? "Editar Unidade" : "Adicionar Unidade",
 );
 
+const carregarEndereco = async () => {
+  const { data: endereco } = await useFetch(
+    `/api/enderecos/${props.unidade.enderecoId}`,
+  );
+  if (endereco.value.error) {
+    message.value = endereco.value.message;
+    return (showMessage.value = true);
+  }
+  dadosEndereco.value = { ...endereco.value };
+};
+
 const onClickSalvar = async () => {
   const { valid } = await form.value.validate();
   if (!valid || !validateAddress.value)
@@ -107,6 +119,24 @@ const onClickSalvar = async () => {
 };
 
 const editarUnidade = async () => {
+  const mapEndereco = {
+    ...dadosEndereco.value,
+    cep: dadosEndereco.value.cep.toString(),
+    numero: dadosEndereco.value.numero.toString(),
+    poloId: dadosEndereco.value.polo.id,
+  };
+  delete mapEndereco.polo;
+
+  const { data: enderecoAtualizado } = await useFetch("/api/enderecos", {
+    method: "PUT",
+    body: mapEndereco,
+  });
+
+  if (enderecoAtualizado.value.error) {
+    message.value = enderecoAtualizado.value.message;
+    return (showMessage.value = true);
+  }
+
   const { data: unidadeAtualizada } = await useFetch("/api/unidades", {
     method: "PUT",
     body: dadosUnidade.value,
@@ -117,54 +147,38 @@ const editarUnidade = async () => {
     return (showMessage.value = true);
   }
 
-  const { data: enderecoAtualizado } = await useFetch("/api/enderecos", {
-    method: "PUT",
-    body: {
-      id: dadosEndereco.value.id,
-      cep: dadosEndereco.value.cep.toString(),
-      bairro: dadosEndereco.value.bairro,
-      logradouro: dadosEndereco.value.logradouro,
-      numero: dadosEndereco.value.numero.toString(),
-      complemento: dadosEndereco.value.complemento,
-      poloId: dadosEndereco.value.polo.id,
-      //unidadeId: unidadeCriada.value.id,
-    },
-  });
-
-  if (enderecoAtualizado.value.error) {
-    message.value = enderecoAtualizado.value.message;
-    return (showMessage.value = true);
-  }
-
   emit("updated", unidadeAtualizada);
 };
 
 const criarUnidade = async () => {
-  const { data: unidadeCriada } = await useFetch("/api/unidades", {
-    method: "POST",
-    body: dadosUnidade.value,
-  });
-
-  if (unidadeCriada.value.error) {
-    message.value = unidadeCriada.value.message;
-    return (showMessage.value = true);
-  }
+  const mapEndereco = {
+    ...dadosEndereco.value,
+    cep: dadosEndereco.value.cep.toString(),
+    numero: dadosEndereco.value.numero.toString(),
+    poloId: dadosEndereco.value.polo.id,
+  };
+  delete mapEndereco.polo;
 
   const { data: enderecoCriado } = await useFetch("/api/enderecos", {
     method: "POST",
-    body: {
-      cep: dadosEndereco.value.cep.toString(),
-      bairro: dadosEndereco.value.bairro,
-      logradouro: dadosEndereco.value.logradouro,
-      numero: dadosEndereco.value.numero.toString(),
-      complemento: dadosEndereco.value.complemento,
-      poloId: dadosEndereco.value.polo.id,
-      //unidadeId: unidadeCriada.value.id,
-    },
+    body: mapEndereco,
   });
 
   if (enderecoCriado.value.error) {
     message.value = enderecoCriado.value.message;
+    return (showMessage.value = true);
+  }
+
+  const { data: unidadeCriada } = await useFetch("/api/unidades", {
+    method: "POST",
+    body: {
+      ...dadosUnidade.value,
+      enderecoId: enderecoCriado.value.id,
+    },
+  });
+
+  if (unidadeCriada.value.error) {
+    message.value = unidadeCriada.value.message;
     return (showMessage.value = true);
   }
 
