@@ -13,6 +13,11 @@ export const useTurno = () =>
     return {};
   });
 
+export const useEtapaProcesso = () =>
+  useState("etapaProcesso", () => {
+    return {};
+  });
+
 export const useClearState = () => {
-  return clearNuxtState(["aluno", "etapa", "turno"]);
+  return clearNuxtState(["aluno", "etapa", "turno", "etapaProcesso"]);
 };

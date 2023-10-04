@@ -13,9 +13,13 @@
       Antônio Ramos no turno Matutino.
     </v-col>
     <v-col cols="12">
-      Para efetivação da matrícula no ano letivo de 2024, você deve comparecer
-      pessoalmente na unidade de ensino até o dia XX/XX/XXXX portando os
-      seguintes documentos:
+      Para efetivação da matrícula no ano letivo de 2024, o responsável legal
+      deve comparecer pessoalmente na unidade de ensino até
+      <span v-if="etapaProcessoState.faseFinalDataFim">
+        o dia {{ formatarData(etapaProcessoState.faseFinalDataFim) }},</span
+      >
+      <span v-else>a data definida no edital, </span>
+      portando os seguintes documentos:
     </v-col>
     <v-col cols="12">
       - Certidão de Nascimento ou Documento de identificação do aluno, com foto,
@@ -54,9 +58,15 @@
 </template>
 
 <script setup>
-import { format } from "date-fns";
+import { format, utcToZonedTime } from "date-fns-tz";
 
 const dataAtual = format(new Date(), "dd/MM/yyyy");
 
 const alunoState = useAluno();
+const etapaProcessoState = useEtapaProcesso();
+
+const formatarData = (data) => {
+  const dataTimeZoned = utcToZonedTime(data, "-00:00"); //Ignora o timezone, mantendo a data correta
+  return format(dataTimeZoned, "dd/MM/yyyy");
+};
 </script>
