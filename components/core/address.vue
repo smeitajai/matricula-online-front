@@ -65,6 +65,8 @@ const props = defineProps({
   },
 });
 
+const { data: polos } = await useFetch("/api/polos");
+
 const endereco = computed({
   get() {
     return props.modelValue;
@@ -74,8 +76,13 @@ const endereco = computed({
   },
 });
 
-const { data: polos } = await useFetch("/api/polos");
 const form = ref(null);
+
+onMounted(() => {
+  endereco.value.polo = props.modelValue.poloId
+    ? polos.value.find((p) => p.id == props.modelValue.poloId)
+    : null;
+});
 
 const onChange = async () => {
   const { valid } = await form.value.validate();
