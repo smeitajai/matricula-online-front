@@ -13,10 +13,18 @@
       </template>
     </PageTitle>
 
-    <v-col v-if="unidades && quadrosVaga && etapaProcessoState" cols="12">
+    <v-col v-if="unidades && quadrosFiltrados && etapaProcessoState" cols="12">
+      <CoreInput
+        v-model="textFilter"
+        clearable
+        full-width
+        label="Buscar por unidade de ensino"
+        placeholder="Ex: Aníbal César"
+        @input="(textFilter = $event), onInputFilter()"
+      />
       <CoreList
         :elevation="4"
-        :items="quadrosVaga"
+        :items="quadrosFiltrados"
         :item-text="(i) => getNomeUnidade(i.unidadeEnsinoId) + `: ${i.nome}`"
         :item-text-sub="(i) => getEnderecoUnidade(i.unidadeEnsinoId)"
         @click="onClickItem($event)"
@@ -60,7 +68,10 @@ const { data: quadrosVaga } = await useFetch("/api/quadros-vaga", {
   },
 });
 const { data: processo } = await useFetch("/api/processos/em-andamento");
+
 const etapaProcessoState = useEtapaProcesso();
+const quadrosFiltrados = ref([]);
+const textFilter = ref(null);
 
 onMounted(() => {
   if (unidades.value && unidades.value.error) {
@@ -77,6 +88,8 @@ onMounted(() => {
     message.value = processo.value.message;
     return (showMessage.value = true);
   }
+
+  quadrosFiltrados.value = quadrosVaga.value;
 
   etapaProcessoState.value =
     processo.value && processo.value.processoEtapas
@@ -96,6 +109,14 @@ const unidadeSelected = ref(null);
 const showMessage = ref(false);
 const message = ref("");
 const dialog = ref(false);
+
+const onInputFilter = () => {
+  quadrosFiltrados.value = quadrosVaga.value.filter((quadro) => {
+    return new RegExp(textFilter.value.toUpperCase()).test(
+      quadro.nome.toUpperCase(),
+    );
+  });
+};
 
 const getNomeUnidade = (unidadeEnsinoId) => {
   const unidade = unidades.value.find((u) => u.id == unidadeEnsinoId);
