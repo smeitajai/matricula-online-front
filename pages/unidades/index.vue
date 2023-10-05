@@ -4,10 +4,12 @@
 
     <v-col cols="12">
       <CoreInput
-        append-inner-icon="mdi-magnify"
+        v-model="textFilter"
+        clearable
         full-width
         label="Filtrar Unidade"
-        @input="onInputFilter($event)"
+        placeholder="Ex: Aníbal César"
+        @input="(textFilter = $event), onInputFilter()"
       />
       <CoreList
         :item-text-sub="(i) => `ID: ${i.idExterno}`"
@@ -48,14 +50,17 @@ const dialog = ref(false);
 
 const { data: unidades } = await useFetch("/api/unidades");
 const unidadesFiltradas = ref([]);
+const textFilter = ref(null);
 
 onMounted(() => {
   unidadesFiltradas.value = unidades.value;
 });
 
-const onInputFilter = (textoFilter) => {
+const onInputFilter = () => {
   unidadesFiltradas.value = unidades.value.filter((unidade) => {
-    return new RegExp(textoFilter.toUpperCase()).test(unidade.nome);
+    return new RegExp(textFilter.value.toUpperCase()).test(
+      unidade.nome.toUpperCase(),
+    );
   });
 };
 
