@@ -143,7 +143,7 @@ const criarQuadro = async () => {
     },
   });
 
-  if (quadroCadastrado.value.error) {
+  if (quadroCadastrado.value.error || quadroCadastrado.value.statusCode) {
     message.value = quadroCadastrado.value.message;
     return (showMessage.value = true);
   }
