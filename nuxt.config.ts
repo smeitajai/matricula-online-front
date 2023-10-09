@@ -3,16 +3,16 @@
 export default defineNuxtConfig({
   devtools: { enabled: true },
 
-  devServer: {     
-    port: 3001,     
-    host: '0.0.0.0',
+  devServer: {
+    port: 3001,
+    host: "0.0.0.0",
   },
 
   supabase: {
-     redirect: false,
+    redirect: false,
   },
 
-  modules: ['@nuxtjs/supabase'],
+  modules: ["@nuxtjs/supabase"],
 
   css: [
     "vuetify/lib/styles/main.sass",
