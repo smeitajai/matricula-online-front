@@ -14,7 +14,7 @@
       </span>
     </v-row>
 
-    <v-row class="my-8 pl-5">
+    <v-row v-if="processo" class="my-8 pl-5">
       <v-col cols="12" class="pa-0"> Datas Importantes: </v-col>
       <v-col
         v-for="etapa in processo.processoEtapas"
