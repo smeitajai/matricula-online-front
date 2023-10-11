@@ -3,23 +3,23 @@
     <v-col cols="12" class="text-center text-h4">
       Vaga escolhida com sucesso!
     </v-col>
-    <v-col cols="12" class="text-center text-h4"> Protocolo: 1202300001 </v-col>
+    <v-col cols="12" class="text-center text-h4">
+      Protocolo: {{ inscricao.protocolo }}
+    </v-col>
     <v-col cols="12" class="text-center font-weight-bold">
       Emitido em {{ dataAtual }}
     </v-col>
     <v-col cols="12">
       O(a) aluno(a)
-      {{ alunoState.nome || "" }} teve sua vaga escolhida no 1° ano na E.B.
-      Antônio Ramos no turno Matutino.
+      {{ inscricao.aluno.nome }} - CPF [{{ inscricao.aluno.cpf }}], teve sua
+      vaga escolhida no {{ inscricao.etapa.nome }} na
+      {{ inscricao.unidadeEnsino.nome }} no turno {{ inscricao.turno.nome }}.
     </v-col>
     <v-col cols="12">
       Para efetivação da matrícula no ano letivo de 2024, o responsável legal
-      deve comparecer pessoalmente na unidade de ensino até
-      <span v-if="etapaProcessoState.faseFinalDataFim">
-        o dia {{ formatarData(etapaProcessoState.faseFinalDataFim) }},</span
-      >
-      <span v-else>a data definida no edital, </span>
-      portando os seguintes documentos:
+      deve comparecer pessoalmente na unidade de ensino até o dia
+      {{ formatarData(inscricao.processoEtapa.faseFinalDataFim) }}, portando os
+      seguintes documentos:
     </v-col>
     <v-col cols="12">
       - Certidão de Nascimento ou Documento de identificação do aluno, com foto,
@@ -37,6 +37,7 @@
       esteja no nome de um dos integrantes da família, anexar declaração do
       proprietário da residência.
       <a
+        id="modelo"
         href="https://drive.google.com/file/d/1VWcxK8tRSxOK-Y8yfmsQ0UoaogIjrrDo/view?usp=sharing"
         target="_blank"
         >(Modelo - clique aqui);
@@ -60,10 +61,14 @@
 <script setup>
 import { format, utcToZonedTime } from "date-fns-tz";
 
-const dataAtual = format(new Date(), "dd/MM/yyyy");
+const props = defineProps({
+  inscricao: {
+    type: Object,
+    default: () => ({}),
+  },
+});
 
-const alunoState = useAluno();
-const etapaProcessoState = useEtapaProcesso();
+const dataAtual = format(new Date(), "dd/MM/yyyy");
 
 const formatarData = (data) => {
   const dataTimeZoned = utcToZonedTime(data, "-00:00"); //Ignora o timezone, mantendo a data correta
