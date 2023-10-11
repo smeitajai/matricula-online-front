@@ -14,7 +14,7 @@
       </span>
     </v-row>
 
-    <v-row v-if="processo" class="my-8 pl-5">
+    <v-row v-if="showDates" class="my-8 pl-5">
       <v-col cols="12" class="pa-0"> Datas Importantes: </v-col>
       <v-col
         v-for="etapa in processo.processoEtapas"
@@ -40,6 +40,17 @@
       >
     </v-row>
   </CoreCard>
+  <v-col cols="12" class="mt-5">
+    <v-row justify="center">
+      <CoreButton
+        v-if="showBtn"
+        label="clique aqui para começar"
+        link="/cadastro"
+        rounded="xl"
+        size="x-large"
+      />
+    </v-row>
+  </v-col>
 
   <CoreSnackbar
     v-model="showMessage"
@@ -59,6 +70,14 @@ const { data: processo, error: errorProcesso } = await useFetch(
 const anoEdital = new Date().getFullYear() + 1;
 const showMessage = ref(false);
 const message = ref("");
+const showBtn = ref(false);
+const showDates = computed(() => {
+  return (
+    processo.value &&
+    processo.value.processoEtapas &&
+    processo.value.processoEtapas.length
+  );
+});
 
 onMounted(() => {
   if (errorProcesso.value || (processo.value && processo.value.error)) {
@@ -67,6 +86,18 @@ onMounted(() => {
       : (message.value = processos.value.message);
     return (showMessage.value = true);
   }
+
+  if (!processo.value.id) {
+    message.value = "Nenhum processo ativo no momento";
+    return (showMessage.value = true);
+  }
+
+  if (!processo.value.processoEtapas.length) {
+    message.value = "Nenhuma etapa de inscrição cadastrada";
+    return (showMessage.value = true);
+  }
+
+  showBtn.value = true;
 });
 
 const formatarData = (data) => {
