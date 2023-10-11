@@ -1,5 +1,5 @@
 <template>
-  <ProtocoloInfo v-if="showProtocolo" :dados-inscricao="dadosInscricao" />
+  <ProtocoloInfo v-if="inscricao" :inscricao="inscricao" />
   <v-row id="protocol" justify="end" class="ma-5">
     <div class="mx-2">
       <CoreButton
@@ -26,38 +26,29 @@
 
 <script setup>
 const route = useRoute();
+const { data: inscricao } = await useFetch(
+  `/api/protocolos/${route.query.inscricao}`,
+);
+
 const showMessage = ref(false);
 const message = ref("");
-const dadosInscricao = ref(null);
-const showProtocolo = ref(false);
-
-onMounted(() => {
-  getDadosInscricao(route.query.inscricao);
-});
-
-const getDadosInscricao = async (inscricaoId) => {
-  const { data: inscricao } = await useFetch(`/api/inscricoes/${inscricaoId}`);
-
-  dadosInscricao.value = {
-    ...inscricao.value,
-  };
-
-  showProtocolo.value = true;
-};
 
 const onClickImprimir = () => {
   const appbar = document.querySelector("#app-bar");
+  const modelo = document.querySelector("#modelo");
   const protocol = document.querySelector("#protocol");
   const footer = document.querySelector("#footer");
 
   window.addEventListener("beforeprint", () => {
     appbar.style.display = "none";
+    modelo.style.display = "none";
     protocol.style.display = "none";
     footer.style.display = "none";
   });
 
   window.addEventListener("afterprint", () => {
     appbar.style.display = "inline";
+    modelo.style.display = "inline";
     protocol.style.display = "flex";
     footer.style.display = "inline";
   });
@@ -71,3 +62,11 @@ const onClickInicio = async () => {
   });
 };
 </script>
+
+<style scoped>
+/* Remover o cabeçalho e o rodapé padrão para impressão */
+@page {
+  size: auto;
+  margin: 0;
+}
+</style>
