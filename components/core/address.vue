@@ -19,9 +19,9 @@
       <CoreInput
         v-model="endereco.logradouro"
         clearable
+        full-width
         label="Logradouro*"
         required
-        :full-width="hidePolo"
         @input="(endereco.logradouro = $event), onChange()"
       />
       <CoreInput
@@ -38,15 +38,6 @@
         label="Complemento"
         @input="(endereco.complemento = $event), onChange()"
       />
-      <CoreSelect
-        v-if="!hidePolo"
-        v-model="endereco.polo"
-        :items="polos"
-        item-title="nome"
-        label="Polo*"
-        required
-        @input="(endereco.polo = $event), onChange()"
-      />
     </v-row>
   </v-form>
 </template>
@@ -59,13 +50,7 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
-  hidePolo: {
-    type: Boolean,
-    default: false,
-  },
 });
-
-const { data: polos } = await useFetch("/api/polos");
 
 const endereco = computed({
   get() {
@@ -77,12 +62,6 @@ const endereco = computed({
 });
 
 const form = ref(null);
-
-onMounted(() => {
-  endereco.value.polo = props.modelValue.poloId
-    ? polos.value.find((p) => p.id == props.modelValue.poloId)
-    : null;
-});
 
 const onChange = async () => {
   const { valid } = await form.value.validate();

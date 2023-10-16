@@ -5,6 +5,7 @@
         <CoreInput
           v-model="dadosUnidade.nome"
           clearable
+          full-width
           label="Nome da unidade*"
           required
           @input="dadosUnidade.nome = $event"
@@ -15,6 +16,14 @@
           label="ID Externo*"
           required
           @input="dadosUnidade.idExterno = $event"
+        />
+        <CoreSelect
+          v-model="dadosUnidade.polo"
+          :items="polos"
+          item-title="nome"
+          label="Polo*"
+          required
+          @input="dadosUnidade.polo = $event"
         />
       </v-row>
       <CoreFormSubtitle label="Endereço" />
@@ -62,17 +71,18 @@ const props = defineProps({
 
 const emit = defineEmits(["created", "updated", "close"]);
 
+const { data: polos } = await useFetch("/api/polos");
+
 const message = ref("");
 const showMessage = ref(false);
 const form = ref(null);
-const validateAddress = ref(false);
+const validateAddress = ref(true);
 const dadosEndereco = ref({
   cep: null,
   bairro: null,
   logradouro: null,
   numero: null,
   complemento: null,
-  polo: null,
 });
 const dadosUnidade = ref({});
 watch(
@@ -80,6 +90,9 @@ watch(
   (newValue) => {
     dadosUnidade.value = { ...newValue };
     dadosUnidade.value.id ? carregarEndereco() : (dadosEndereco.value = {});
+    dadosUnidade.value.polo = dadosUnidade.value.poloId
+      ? polos.value.find((p) => p.id == dadosUnidade.value.poloId)
+      : null;
   },
 );
 
@@ -109,24 +122,31 @@ const carregarEndereco = async () => {
 
 const onClickSalvar = async () => {
   const { valid } = await form.value.validate();
+
   if (!valid || !validateAddress.value)
     return (
       (message.value = "Verifique os campos obrigatórios e tente novamente."),
       (showMessage.value = true)
     );
 
-  dadosUnidade.value.id ? editarUnidade() : criarUnidade();
-};
-
-const editarUnidade = async () => {
   const mapEndereco = {
     ...dadosEndereco.value,
     cep: dadosEndereco.value.cep.toString(),
     numero: dadosEndereco.value.numero.toString(),
-    poloId: dadosEndereco.value.polo.id,
   };
-  delete mapEndereco.polo;
 
+  const mapUnidade = {
+    ...dadosUnidade.value,
+    poloId: dadosUnidade.value.polo.id,
+  };
+  delete mapUnidade.polo;
+
+  dadosUnidade.value.id
+    ? editarUnidade(mapEndereco, mapUnidade)
+    : criarUnidade(mapEndereco, mapUnidade);
+};
+
+const editarUnidade = async (mapEndereco, mapUnidade) => {
   const { data: enderecoAtualizado } = await useFetch("/api/enderecos", {
     method: "PUT",
     body: mapEndereco,
@@ -139,7 +159,7 @@ const editarUnidade = async () => {
 
   const { data: unidadeAtualizada } = await useFetch("/api/unidades", {
     method: "PUT",
-    body: dadosUnidade.value,
+    body: mapUnidade,
   });
 
   if (unidadeAtualizada.value.error) {
@@ -150,15 +170,7 @@ const editarUnidade = async () => {
   emit("updated", unidadeAtualizada);
 };
 
-const criarUnidade = async () => {
-  const mapEndereco = {
-    ...dadosEndereco.value,
-    cep: dadosEndereco.value.cep.toString(),
-    numero: dadosEndereco.value.numero.toString(),
-    poloId: dadosEndereco.value.polo.id,
-  };
-  delete mapEndereco.polo;
-
+const criarUnidade = async (mapEndereco, mapUnidade) => {
   const { data: enderecoCriado } = await useFetch("/api/enderecos", {
     method: "POST",
     body: mapEndereco,
@@ -172,7 +184,7 @@ const criarUnidade = async () => {
   const { data: unidadeCriada } = await useFetch("/api/unidades", {
     method: "POST",
     body: {
-      ...dadosUnidade.value,
+      ...mapUnidade,
       enderecoId: enderecoCriado.value.id,
     },
   });
