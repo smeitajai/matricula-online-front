@@ -1,10 +1,6 @@
 <template>
   <v-col cols="auto">
-    <v-tooltip :text="text" location="top">
-      <template #activator="{ props }">
-        <v-btn v-bind="props" :icon="icon" @click="onClick"></v-btn>
-      </template>
-    </v-tooltip>
+    <CoreHeaderButton :icon="icon" :text="text" @click="onClick" />
   </v-col>
   <CoreSnackbar
     v-model="showMessage"
@@ -24,16 +20,18 @@ const showMessage = ref(false);
 const message = ref("");
 
 const onClick = async () => {
-  if (user.value) { // Se já estiver logado
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      message.value = error.message;
-      return showMessage.value = true;
-    }
-    navigateTo("/");
-  } else {
-    navigateTo("/login");
+  if (!user.value) {
+    await navigateTo("/login");
+    return;
   }
+
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    message.value = error.message;
+    return (showMessage.value = true);
+  }
+
+  await navigateTo("/");
 };
 
 watchEffect(() => {
@@ -45,5 +43,4 @@ watchEffect(() => {
     icon.value = "mdi-login";
   }
 });
-
 </script>
