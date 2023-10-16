@@ -1,18 +1,14 @@
 <template>
   <v-col cols="auto">
-    <v-tooltip text="Trocar Tema" location="top">
-      <template #activator="{ props }">
-        <v-btn
-          v-bind="props"
-          :icon="
-            theme.global.name.value === 'customLightTheme'
-              ? 'mdi-white-balance-sunny'
-              : 'mdi-weather-night'
-          "
-          @click="toggleTheme()"
-        ></v-btn>
-      </template>
-    </v-tooltip>
+    <CoreHeaderButton
+      :icon="
+        theme.global.name.value === 'customLightTheme'
+          ? 'mdi-white-balance-sunny'
+          : 'mdi-weather-night'
+      "
+      text="Trocar Tema"
+      @click="toggleTheme()"
+    />
   </v-col>
 </template>
 
