@@ -13,6 +13,12 @@
       </template>
     </PageTitle>
 
+    <v-alert
+      v-if="!quadrosFiltrados"
+      type="info"
+      title="Carregando..."
+    ></v-alert>
+
     <v-col v-if="unidades && quadrosFiltrados && etapaProcessoState" cols="12">
       <CoreInput
         v-model="textFilter"
@@ -23,20 +29,23 @@
         @input="(textFilter = $event), onInputFilter()"
       />
       <CoreList
+        v-if="quadrosFiltrados.length"
         :elevation="4"
         :items="quadrosFiltrados"
         :item-text="(i) => getNomeUnidade(i.unidadeEnsinoId) + `: ${i.nome}`"
         :item-text-sub="(i) => getEnderecoUnidade(i.unidadeEnsinoId)"
+        :lines="mobile ? 'two' : 'one'"
         @click="onClickItem($event)"
       >
         <template #itemTextSubtitle>
           {{ endereco }}
         </template>
       </CoreList>
+      <v-alert v-else type="warning" title="Nenhuma vaga encontrada."></v-alert>
     </v-col>
 
     <v-alert
-      v-else
+      v-if="!etapaProcessoState"
       type="error"
       title="Nenhuma etapa do processo está em andamento."
     ></v-alert>
@@ -60,18 +69,30 @@
 </template>
 
 <script setup>
+import { useDisplay } from "vuetify";
+const { mobile } = useDisplay();
 const route = useRoute();
 const { data: unidades } = await useFetch("/api/unidades");
-const { data: quadrosVaga } = await useFetch("/api/quadros-vaga", {
-  query: {
-    etapa: route.query.etapa,
-  },
-});
+const { data: enderecos } = await useFetch("/api/enderecos");
+const { data: polos } = await useFetch("/api/polos");
 const { data: processo } = await useFetch("/api/processos/em-andamento");
+const { data: quadrosVaga } = await useFetch(
+  "/api/quadros-vaga/vagas-disponiveis",
+  {
+    query: {
+      etapa: route.query.etapa,
+    },
+  },
+);
 
-const etapaProcessoState = useEtapaProcesso();
-const quadrosFiltrados = ref([]);
+const quadroSelected = ref(null);
+const unidadeSelected = ref(null);
+const showMessage = ref(false);
+const message = ref("");
+const dialog = ref(false);
 const textFilter = ref(null);
+const quadrosFiltrados = ref(null);
+const etapaProcessoState = useEtapaProcesso();
 
 onMounted(() => {
   if (unidades.value && unidades.value.error) {
@@ -104,29 +125,32 @@ if (!alunoState || !alunoState.value.id) {
   alunoState.value = data.value;
 }
 
-const quadroSelected = ref(null);
-const unidadeSelected = ref(null);
-const showMessage = ref(false);
-const message = ref("");
-const dialog = ref(false);
-
 const onInputFilter = () => {
+  if (!textFilter.value) {
+    quadrosFiltrados.value = quadrosVaga.value;
+    return;
+  }
+
   quadrosFiltrados.value = quadrosVaga.value.filter((quadro) => {
+    const unidade = unidades.value.find((u) => u.id == quadro.unidadeEnsinoId);
     return new RegExp(textFilter.value.toUpperCase()).test(
-      quadro.nome.toUpperCase(),
+      unidade.nome.toUpperCase(),
     );
   });
 };
 
 const getNomeUnidade = (unidadeEnsinoId) => {
-  const unidade = unidades.value.find((u) => u.id == unidadeEnsinoId);
-  return unidade.nome;
+  const { nome } = unidades.value.find((u) => u.id == unidadeEnsinoId);
+  return nome;
 };
 
 const getEnderecoUnidade = (unidadeEnsinoId) => {
-  // Unidade de ensino ainda não tem relação com Endereço - REFATORAR!
-  // const unidade = unidades.value.find((u) => u.id == unidadeEnsinoId);
-  // return unidade.endereco;
+  const unidade = unidades.value.find((u) => u.id == unidadeEnsinoId);
+  const { logradouro, numero, bairro } = enderecos.value.find(
+    (e) => e.id == unidade.enderecoId,
+  );
+  const polo = polos.value.find((p) => p.id == unidade.poloId);
+  const endereco = `${logradouro}, n° ${numero} - ${bairro} | Polo: ${polo.nome}`;
   return endereco;
 };
 
@@ -164,6 +188,4 @@ const onConfirm = async () => {
     },
   });
 };
-
-const endereco = "Rua teste, n° 123 - Dom Bosco | Polo 1 ";
 </script>
