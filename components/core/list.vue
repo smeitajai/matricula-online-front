@@ -5,7 +5,7 @@
     :toolbar="toolbar"
     padding-none
   >
-    <v-list v-if="items && items.length">
+    <v-list v-if="items && items.length" :lines="lines">
       <template v-for="(item, index) in items" :key="item.id">
         <v-list-item :value="item" @click="onClickItem(item)">
           <v-list-item-title v-if="itemText">{{
@@ -65,6 +65,10 @@ defineProps({
   itemTextSubtitle: {
     type: Boolean,
     default: false,
+  },
+  lines: {
+    type: String,
+    default: "one",
   },
   toolbar: {
     type: Boolean,
