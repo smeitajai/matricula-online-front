@@ -202,7 +202,7 @@ const contagemRegressiva = () => {
   if (tempoEspera.value > 0) {
     setTimeout(contagemRegressiva, 1000); // Aguarde 1 segundo antes de chamar a função novamente
   } else {
-    // Quando tempoEspera for igual a 0, fecha o dialog
+    // Quando tempoEspera for igual a 0, fecha o dialog e reseta o contador
     showCounter.value = false;
     tempoEspera.value = 11;
   }
@@ -220,7 +220,7 @@ const onConfirm = async () => {
 
   if (error.value || !inscricaoCriada.value.id) {
     // Quando da erro ou a vaga não esta mais disponível
-    message.value = "Erro: Vaga indisponível";
+    message.value = inscricaoCriada.value.message || "Erro: Vaga indisponível";
     showMessage.value = true;
     dialog.value = false;
     showCounter.value = true;
