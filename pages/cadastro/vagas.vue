@@ -58,6 +58,33 @@
       @close="dialog = false"
       @confirm="onConfirm($event)"
     />
+
+    <CoreDialog
+      v-if="showCounter"
+      v-model="showCounter"
+      persistent
+      title="Opsss...vaga ocupada!"
+      toolbar
+      :width="400"
+    >
+      <v-col cols="12" class="text-center">
+        <p>Desculpe, mas a vaga que você selecionou já foi preenchida.</p>
+        <br />
+        <p>Atualizando as vagas em...</p>
+      </v-col>
+      <v-col cols="12" class="text-center">
+        <v-progress-circular
+          :rotate="360"
+          :size="100"
+          :width="8"
+          :model-value="tempoEspera"
+          indeterminate
+          color="primary"
+        >
+          <template #default> {{ tempoEspera }} seg. </template>
+        </v-progress-circular>
+      </v-col>
+    </CoreDialog>
   </v-row>
 
   <CoreSnackbar
@@ -72,11 +99,12 @@
 import { useDisplay } from "vuetify";
 const { mobile } = useDisplay();
 const route = useRoute();
+
 const { data: unidades } = await useFetch("/api/unidades");
 const { data: enderecos } = await useFetch("/api/enderecos");
 const { data: polos } = await useFetch("/api/polos");
 const { data: processo } = await useFetch("/api/processos/em-andamento");
-const { data: quadrosVaga } = await useFetch(
+const { data: quadrosVaga, refresh: refreshVagas } = await useFetch(
   "/api/quadros-vaga/vagas-disponiveis",
   {
     query: {
@@ -88,11 +116,13 @@ const { data: quadrosVaga } = await useFetch(
 const quadroSelected = ref(null);
 const unidadeSelected = ref(null);
 const showMessage = ref(false);
+const showCounter = ref(false);
 const message = ref("");
 const dialog = ref(false);
 const textFilter = ref(null);
 const quadrosFiltrados = ref(null);
 const etapaProcessoState = useEtapaProcesso();
+const tempoEspera = ref(11);
 
 onMounted(() => {
   if (unidades.value && unidades.value.error) {
@@ -110,12 +140,16 @@ onMounted(() => {
     return (showMessage.value = true);
   }
 
-  quadrosFiltrados.value = quadrosVaga.value;
-
   etapaProcessoState.value =
     processo.value && processo.value.processoEtapas
       ? processo.value.processoEtapas.find((etapa) => etapa.emAndamento)
       : null;
+});
+
+watchEffect(() => {
+  if (quadrosVaga.value) {
+    quadrosFiltrados.value = quadrosVaga.value;
+  }
 });
 
 const alunoState = useAluno();
@@ -162,6 +196,18 @@ const onClickItem = (quadro) => {
   dialog.value = true;
 };
 
+// Função utilizada para aguardar um determinado tempo antes de atualizar a lista de vagas
+const contagemRegressiva = () => {
+  tempoEspera.value--;
+  if (tempoEspera.value > 0) {
+    setTimeout(contagemRegressiva, 1000); // Aguarde 1 segundo antes de chamar a função novamente
+  } else {
+    // Quando tempoEspera for igual a 0, fecha o dialog e reseta o contador
+    showCounter.value = false;
+    tempoEspera.value = 11;
+  }
+};
+
 const onConfirm = async () => {
   const { data: inscricaoCriada, error } = await useFetch("/api/inscricoes", {
     method: "POST",
@@ -173,11 +219,13 @@ const onConfirm = async () => {
   });
 
   if (error.value || !inscricaoCriada.value.id) {
-    message.value =
-      inscricaoCriada.value && !inscricaoCriada.value.id
-        ? inscricaoCriada.value.message
-        : error.value.message;
-    return (showMessage.value = true);
+    // Quando da erro ou a vaga não esta mais disponível
+    message.value = inscricaoCriada.value.message || "Erro: Vaga indisponível";
+    showMessage.value = true;
+    dialog.value = false;
+    showCounter.value = true;
+    refreshVagas(); // Atualiza a lista de vagas
+    return contagemRegressiva(); // Executa a contagem regressiva enquanto atualiza a lista de vagas
   }
 
   dialog.value = false;
