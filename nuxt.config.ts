@@ -30,8 +30,8 @@ export default defineNuxtConfig({
     public: {
       baseURL:
         process.env.NODE_ENV === "production"
-          ? process.env.NUXT_PUBLIC_API_PROD
-          : process.env.NUXT_PUBLIC_API_DEV,
+          ? process.env.API_PROD
+          : process.env.API_DEV,
     },
   },
 
