@@ -1,5 +1,8 @@
 <template>
   <CoreDialog v-model="showDialog" persistent title="Confirmar Vaga" toolbar>
+    <v-row class="ma-0 text-h6 pb-3" justify="center">
+      <span> Aluno(a): {{ aluno.nome }}</span>
+    </v-row>
     <v-row class="ma-0 text-h6" justify="center">
       <span> Vaga escolhida na</span>
     </v-row>
@@ -9,7 +12,8 @@
 
     <v-container class="pa-0">
       <v-row class="ma-0 py-6 text-h6 font-weight-bold" justify="center">
-        Etapa/Turno: {{ quadro.nome }}
+        <p>Etapa/Turno:</p>
+        <p>{{ quadro.nome }}</p>
       </v-row>
       <v-row class="ma-0 text-body-1" justify="center">
         Confirme a vaga escolhida
@@ -37,6 +41,10 @@
 <script setup>
 const emit = defineEmits(["confirm", "close"]);
 const props = defineProps({
+  aluno: {
+    type: Object,
+    default: () => ({}),
+  },
   dialog: {
     type: Boolean,
     default: false,

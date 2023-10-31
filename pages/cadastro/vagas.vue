@@ -53,6 +53,7 @@
     <CadastroDialogVagas
       v-if="dialog"
       :dialog="dialog"
+      :aluno="alunoState"
       :quadro="quadroSelected"
       :unidade="unidadeSelected"
       @close="dialog = false"
