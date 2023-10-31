@@ -1,0 +1,8 @@
+.nuxt
+.output
+node_modules
+.env
+.env.example
+dockerfile
+README.md
+
