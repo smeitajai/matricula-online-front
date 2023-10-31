@@ -2,8 +2,8 @@
   <CoreCard rounded="lg" title="Matrícula On-line" toolbar>
     <v-row>
       <span class="text-h6 ma-5 text-center">
-        Seja bem-vindo(a) ao novo sistema de Matrículas On-line para o ensino
-        fundamental do município de Itajaí/SC!
+        Seja bem-vindo(a) ao novo sistema de Matrículas On-line para o
+        <u>ensino fundamental</u> do município de Itajaí/SC!
       </span>
     </v-row>
 
