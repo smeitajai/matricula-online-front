@@ -4,15 +4,18 @@
       <v-btn
         :id="id"
         v-bind="props"
+        :append-icon="appendIcon"
+        :block="block"
         :color="color"
         :disabled="disabled"
-        :rounded="rounded"
-        :size="size"
-        :variant="variant"
-        :to="link || null"
+        :href="href"
         :loading="loading"
         :prepend-icon="prependIcon"
-        :append-icon="appendIcon"
+        :rounded="rounded"
+        :size="size"
+        :target="target"
+        :to="link || null"
+        :variant="variant"
         @click="!link ? onClick($event) : false"
       >
         <template v-if="prependIcon && !icon" #prepend>
@@ -44,6 +47,10 @@ const props = defineProps({
     type: String,
     default: undefined,
   },
+  block: {
+    type: Boolean,
+    default: false,
+  },
   color: {
     type: String,
     default: "#6200EE", // primary
@@ -51,6 +58,10 @@ const props = defineProps({
   disabled: {
     type: Boolean,
     default: false,
+  },
+  href: {
+    type: String,
+    default: null,
   },
   icon: {
     type: String,
@@ -99,6 +110,10 @@ const props = defineProps({
   prependIcon: {
     type: String,
     default: undefined,
+  },
+  target: {
+    type: String,
+    default: null,
   },
   variant: {
     type: String,

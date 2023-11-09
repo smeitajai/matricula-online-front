@@ -94,12 +94,6 @@ const onClickSalvar = (valid) => {
       (message.value = "Verifique os campos obrigatórios e tente novamente."),
       (showMessage.value = true)
     );
-  if (!validateDatesProcesso(dadosEtapa.value))
-    return (
-      (message.value =
-        "Datas Inválidas! Verifique o período das datas e tente novamente."),
-      (showMessage.value = true)
-    );
 
   let etapaProcesso = { ...dadosEtapa.value };
   delete etapaProcesso.emAndamento;

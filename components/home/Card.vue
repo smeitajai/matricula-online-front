@@ -2,19 +2,12 @@
   <CoreCard rounded="lg" title="Matrícula On-line" toolbar>
     <v-row>
       <span class="text-h6 ma-5 text-center">
-        Seja bem-vindo(a) ao novo sistema de Matrículas On-line para o
-        <u>ensino fundamental</u> do município de Itajaí/SC!
+        Seja bem-vindo(a) ao novo Sistema de Matrículas On-line para o
+        <u>Ensino Fundamental</u> do Município de Itajaí/SC!
       </span>
     </v-row>
 
-    <v-row>
-      <span class="mx-5">
-        Com apenas alguns cliques, você pode realizar o processo de forma
-        simples e segura.
-      </span>
-    </v-row>
-
-    <v-row v-if="showDates" class="my-8 pl-5">
+    <v-row v-if="showDates" class="my-5 pl-5">
       <v-col cols="12" class="pa-0"> Datas Importantes: </v-col>
       <v-col
         v-for="etapa in processo.processoEtapas"
@@ -32,16 +25,32 @@
     </v-row>
 
     <v-row>
-      <a
-        href="https://drive.google.com/file/d/1C6uFVd71HnQxWkg8czDpsYFu5Mk5poLM/view"
-        target="_blank"
-        class="text-h5 mx-5 pb-5"
-        >Clique aqui para acessar o edital de matrícula {{ anoEdital }}</a
-      >
+      <v-col cols="12" md="6">
+        <CoreButton
+          block
+          href="https://drive.google.com/file/d/1_f3Hueg2Ot0T45qDk3uPFoOBGKYgxsEY/view?usp=sharing"
+          label="Edital de Matrícula 2024"
+          prepend-color="primary"
+          prepend-icon="mdi-file-document"
+          target="_blank"
+          text-color="primary"
+          variant="outlined"
+        />
+      </v-col>
+      <v-col cols="12" md="6">
+        <CoreButton
+          block
+          href="https://drive.google.com/file/d/1iwDpUqgXzmE8CJfgluzu7QPmHHM2-M27/view?usp=sharing"
+          label="Manual de Uso"
+          prepend-color="primary"
+          prepend-icon="mdi-file-document"
+          target="_blank"
+          text-color="primary"
+          variant="outlined"
+        />
+      </v-col>
     </v-row>
-  </CoreCard>
-  <v-col cols="12" class="mt-5">
-    <v-row justify="center">
+    <v-row justify="center" class="py-4">
       <CoreButton
         v-if="showBtn"
         label="clique aqui para começar"
@@ -50,7 +59,7 @@
         size="x-large"
       />
     </v-row>
-  </v-col>
+  </CoreCard>
 
   <CoreSnackbar
     v-model="showMessage"
@@ -67,7 +76,6 @@ const { data: processo, error: errorProcesso } = await useFetch(
   "/api/processos/em-andamento",
 );
 
-const anoEdital = new Date().getFullYear() + 1;
 const showMessage = ref(false);
 const message = ref("");
 const showBtn = ref(false);
@@ -105,3 +113,10 @@ const formatarData = (data) => {
   return format(dataTimeZoned, "dd/MM/yyyy");
 };
 </script>
+
+<style>
+.backColor {
+  background-color: green;
+  opacity: 0.3;
+}
+</style>
