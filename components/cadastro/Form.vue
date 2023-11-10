@@ -26,6 +26,22 @@
       />
 
       <CoreInput
+        v-model="dadosForm.telefone1"
+        clearable
+        label="Telefone do responsável (1)"
+        placeholder="(99) 99999-9999"
+        @input="dadosForm.telefone1 = $event"
+      />
+
+      <CoreInput
+        v-model="dadosForm.telefone2"
+        clearable
+        label="Telefone do responsável (2)"
+        placeholder="(99) 99999-9999"
+        @input="dadosForm.telefone2 = $event"
+      />
+
+      <CoreInput
         v-model="dadosForm.nome"
         clearable
         label="Nome do aluno(a)*"
@@ -45,7 +61,6 @@
       <CoreSelect
         v-model="dadosForm.etapa"
         :items="etapas"
-        :disabled="!!dadosForm.id"
         item-title="nome"
         label="Etapa*"
         required
@@ -103,19 +118,36 @@ const onInputCPF = () => {
 };
 
 const carregarAluno = async () => {
-  const { data: aluno } = await useFetch("/api/alunos-matriculados", {
+  // Verifica se o aluno existe no Matricula On-line
+  const { data: alunoMatriculaOnline } = await useFetch("/api/alunos", {
+    query: {
+      cpf: dadosForm.value.cpf,
+    },
+  });
+  const aluno = alunoMatriculaOnline.value[0] || null;
+
+  if (
+    !alunoMatriculaOnline.value.statusCode &&
+    !alunoMatriculaOnline.value.error &&
+    alunoMatriculaOnline.value.length
+  ) {
+    dadosForm.value = { ...aluno };
+    alunoState.value = aluno; // Grava o aluno carregado no State
+  }
+
+  // Verifica se o aluno existe no Erudio e retorna os dados
+  const { data: alunoErudio } = await useFetch("/api/alunos-matriculados", {
     query: {
       cpf: dadosForm.value.cpf,
     },
   });
 
-  if (!aluno.value.statusCode && !aluno.value.error)
+  if (!alunoErudio.value.statusCode && !alunoErudio.value.error)
     dadosForm.value = {
-      id: aluno.value.id,
-      cpf: aluno.value.cpf,
-      nome: aluno.value.nome,
-      dataNascimento: aluno.value.dataNascimento,
-      etapa: etapas.value.find((e) => e.id == aluno.value.etapaId),
+      ...dadosForm.value,
+      nome: alunoErudio.value.nome,
+      dataNascimento: alunoErudio.value.dataNascimento,
+      etapa: etapas.value.find((e) => e.id == alunoErudio.value.etapaId), // Talvez seja ID Externo
     };
 
   showAllInputs.value = true;
@@ -137,15 +169,12 @@ const onSubmit = async () => {
   if (dadosForm.value.email && !dadosForm.value.email.length)
     delete dadosForm.value.email;
 
-  criarAluno();
-
-  // Precisa validar quando deve criar aluno e quando aluno já está criado
-  // !dadosForm.value.id
-  //   ? criarAluno()
-  //   : emit("submit", {
-  //       alunoId: dadosForm.value.id,
-  //       etapaId: dadosForm.value.etapa.id,
-  //     });
+  !dadosForm.value.id
+    ? criarAluno()
+    : emit("submit", {
+        alunoId: dadosForm.value.id,
+        etapaId: dadosForm.value.etapa.id,
+      });
 };
 
 const criarAluno = async () => {
