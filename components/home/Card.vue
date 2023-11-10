@@ -1,5 +1,5 @@
 <template>
-  <CoreCard rounded="lg" title="Matrícula On-line" toolbar>
+  <CoreCard rounded="lg" title="Matrícula On-line" toolbar class="ma-5">
     <v-row>
       <span class="text-h6 ma-5 text-center">
         Seja bem-vindo(a) ao novo Sistema de Matrículas On-line para o
