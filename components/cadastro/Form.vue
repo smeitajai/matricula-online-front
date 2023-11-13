@@ -87,13 +87,7 @@
 
 <script setup>
 const { data: etapas } = await useFetch("/api/etapas");
-
-onMounted(() => {
-  if (etapas.value && etapas.value.error) {
-    message.value = etapas.value.message;
-    return (showMessage.value = true);
-  }
-});
+const { data: processo } = await useFetch("/api/processos/em-andamento");
 
 const emit = defineEmits(["submit"]);
 
@@ -101,8 +95,16 @@ const showAllInputs = ref(false);
 const showMessage = ref(false);
 const message = ref("");
 const form = ref(null);
+const etapaAtiva = ref(null);
 const dadosForm = ref({});
 const alunoState = useAluno();
+
+onMounted(() => {
+  etapaAtiva.value =
+    processo.value && processo.value.processoEtapas
+      ? processo.value.processoEtapas.find((etapa) => etapa.emAndamento)
+      : null;
+});
 
 const onInputCPF = () => {
   showAllInputs.value = false;
@@ -118,6 +120,7 @@ const onInputCPF = () => {
 };
 
 const carregarAluno = async () => {
+  dadosForm.value = { cpf: dadosForm.value.cpf };
   // Verifica se o aluno existe no Matricula On-line
   const { data: alunoMatriculaOnline } = await useFetch("/api/alunos", {
     query: {
@@ -132,7 +135,26 @@ const carregarAluno = async () => {
     alunoMatriculaOnline.value.length
   ) {
     dadosForm.value = { ...aluno };
-    alunoState.value = aluno; // Grava o aluno carregado no State
+  }
+
+  if (etapaAtiva.value && aluno) {
+    //Verifica se o Aluno já possui inscrição na Etapa Ativa do Processo
+    const { data: inscricao } = await useFetch(
+      `/api/processo-etapas/${etapaAtiva.value.id}/inscricoes`,
+      {
+        query: {
+          alunoId: aluno.id,
+        },
+      },
+    );
+
+    if (inscricao.value && !inscricao.value.statusCode)
+      return (
+        (message.value =
+          inscricao.value.message ||
+          "Erro: Aluno(a) ja possui inscrição nesta etapa."),
+        (showMessage.value = true)
+      );
   }
 
   // Verifica se o aluno existe no Erudio e retorna os dados
