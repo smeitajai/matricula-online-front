@@ -6,6 +6,7 @@
       :autofocus="autofocus"
       :clearable="clearable"
       :counter="counter"
+      :disabled="disabled"
       :hint="hint"
       :label="label"
       :persistent-hint="persistentHint"
@@ -35,6 +36,10 @@ const props = defineProps({
   counter: {
     type: Number,
     default: 0,
+  },
+  disabled: {
+    type: Boolean,
+    default: false,
   },
   fullWidth: {
     type: Boolean,
@@ -85,7 +90,7 @@ const value = computed({
     return props.modelValue;
   },
   set(val) {
-    if (props.type == "number" && (val && val.length > 0)) {
+    if (props.type == "number" && val && val.length > 0) {
       emit("input", parseInt(val));
     } else {
       emit("input", val);
