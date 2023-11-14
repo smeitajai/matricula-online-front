@@ -43,7 +43,7 @@
 
       <CoreInput
         v-model="dadosForm.nome"
-        clearable
+        disabled
         label="Nome do aluno(a)*"
         required
         full-width
@@ -52,6 +52,7 @@
 
       <CoreInput
         v-model="dadosForm.dataNascimento"
+        disabled
         label="Data de nascimento*"
         type="date"
         required
@@ -60,6 +61,7 @@
 
       <CoreSelect
         v-model="dadosForm.etapa"
+        disabled
         :items="etapas"
         item-title="nome"
         label="Etapa*"
