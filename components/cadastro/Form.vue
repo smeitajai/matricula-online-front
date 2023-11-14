@@ -82,6 +82,40 @@
       :message="message"
       @hide="showMessage = $event"
     />
+
+    <CoreDialog
+      v-if="showDialog"
+      v-model="showDialog"
+      persistent
+      title="Atenção!"
+      toolbar
+      :width="600"
+    >
+      <v-row class="text-center">
+        <v-col cols="12">
+          O CPF informado não retornou nenhum dado do(a) aluno(a).
+        </v-col>
+        <v-col cols="12"> Possíveis impedimentos: </v-col>
+        <v-col cols="12">
+          - Neste momento, a matrícula on-line está disponível apenas para
+          <span class="font-weight-bold">{{ etapaAtiva.nome || "" }}.</span>
+        </v-col>
+        <v-col cols="12">
+          - Caso necessite fazer a matrícula na
+          <span class="font-weight-bold">{{ etapaAtiva.nome || "" }}</span
+          >, entre em contato com a Unidade de Ensino para atualizar o CPF do(a)
+          aluno(a).
+        </v-col>
+      </v-row>
+      <template #dialogActions>
+        <CoreButton
+          text-color="red-darken-1"
+          label="FECHAR"
+          variant="text"
+          @click="showDialog = false"
+        />
+      </template>
+    </CoreDialog>
   </v-form>
 </template>
 
@@ -92,6 +126,7 @@ const { data: processo } = await useFetch("/api/processos/em-andamento");
 const emit = defineEmits(["submit"]);
 
 const showAllInputs = ref(false);
+const showDialog = ref(false);
 const showMessage = ref(false);
 const message = ref("");
 const form = ref(null);
@@ -164,15 +199,23 @@ const carregarAluno = async () => {
     },
   });
 
-  if (!alunoErudio.value.statusCode && !alunoErudio.value.error)
+  if (
+    !alunoErudio.value.statusCode &&
+    !alunoErudio.value.error &&
+    alunoErudio.value.id
+  ) {
     dadosForm.value = {
       ...dadosForm.value,
       nome: alunoErudio.value.nome,
       dataNascimento: alunoErudio.value.dataNascimento,
-      etapa: etapas.value.find((e) => e.id == alunoErudio.value.etapaId), // Talvez seja ID Externo
+      etapa: etapas.value.find((e) => e.id == alunoErudio.value.etapaId),
     };
 
-  showAllInputs.value = true;
+    return (showAllInputs.value = true); // Exibe o Form SOMENTE se carregar um aluno do Erudio
+  }
+
+  //Se não carregar o Aluno do Errudio
+  showDialog.value = true;
 };
 
 const onSubmit = async () => {
