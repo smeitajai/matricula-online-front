@@ -105,6 +105,14 @@ onMounted(() => {
     return (showMessage.value = true);
   }
 
+  const etapaEmAndamento = processo.value.processoEtapas.some(
+    (etapa) => etapa.emAndamento,
+  );
+  if (!etapaEmAndamento) {
+    message.value = "Nenhuma etapa em andamento";
+    return (showMessage.value = true);
+  }
+
   showBtn.value = true;
 });
 
