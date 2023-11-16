@@ -51,10 +51,10 @@
         >https://comprovante-vacinal.itajai.sc.gov.br/
       </a>
     </v-col>
-    <v-col cols="12" class="text-center text-h5">
+    <!-- <v-col cols="12" class="text-center text-h5">
       Este documento não precisa ser impresso, uma cópia foi enviada para o
       e-mail informado no ato da inscrição.
-    </v-col>
+    </v-col> -->
   </v-row>
 </template>
 
