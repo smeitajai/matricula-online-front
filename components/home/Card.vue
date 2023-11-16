@@ -8,18 +8,20 @@
     </v-row>
 
     <v-row v-if="showDates" class="my-5 pl-5">
-      <v-col cols="12" class="pa-0"> Datas Importantes: </v-col>
+      <v-col cols="12" class="pa-0 font-weight-bold">
+        Datas Importantes:
+      </v-col>
       <v-col
         v-for="etapa in processo.processoEtapas"
         :key="etapa.id"
         cols="12"
-        class="pa-0"
+        class="py-2"
       >
         <span :class="[{ 'font-weight-bold': etapa.emAndamento }]">
-          {{ etapa.nome }}:
-          {{ formatarData(etapa.faseInicialDataInicio) }}
-          até
-          {{ formatarData(etapa.faseFinalDataFim) }}
+          {{ etapa.nome }}: {{ formatarData(etapa.faseInicialDataInicio) }} -
+          {{ utcToSaoPauloTime(etapa.faseInicialDataInicio) }}h até
+          {{ formatarData(etapa.faseInicialDataFim) }} -
+          {{ utcToSaoPauloTime(etapa.faseInicialDataFim) }}h
         </span>
       </v-col>
     </v-row>
@@ -70,6 +72,7 @@
 </template>
 
 <script setup>
+import { getHours } from "date-fns";
 import { format, utcToZonedTime } from "date-fns-tz";
 
 const { data: processo, error: errorProcesso } = await useFetch(
@@ -120,11 +123,9 @@ const formatarData = (data) => {
   const dataTimeZoned = utcToZonedTime(data, "-00:00"); //Ignora o timezone, mantendo a data correta
   return format(dataTimeZoned, "dd/MM/yyyy");
 };
-</script>
 
-<style>
-.backColor {
-  background-color: green;
-  opacity: 0.3;
-}
-</style>
+const utcToSaoPauloTime = (data) => {
+  const dataSaoPaulo = utcToZonedTime(data, "America/Sao_Paulo");
+  return getHours(dataSaoPaulo);
+};
+</script>
