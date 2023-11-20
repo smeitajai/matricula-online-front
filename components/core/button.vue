@@ -9,6 +9,7 @@
         :color="color"
         :disabled="disabled"
         :href="href"
+        :icon="iconRounded"
         :loading="loading"
         :prepend-icon="prependIcon"
         :rounded="rounded"
@@ -70,6 +71,10 @@ const props = defineProps({
   iconColor: {
     type: String,
     default: "white",
+  },
+  iconRounded: {
+    type: Boolean,
+    default: false,
   },
   id: {
     type: String,
