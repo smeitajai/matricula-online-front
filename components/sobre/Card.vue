@@ -64,7 +64,8 @@ const itens = [
     id: 6,
     pergunta: "Preciso imprimir o protocolo de reserva da vaga?",
     resposta:
-      "Não é necessário imprimir o protocolo. No entanto, se você forneceu um endereço de e-mail ao fazer o cadastro, uma cópia do protocolo será enviada para esse e-mail.",
+      // "Não é necessário imprimir o protocolo. No entanto, se você forneceu um endereço de e-mail ao fazer o cadastro, uma cópia do protocolo será enviada para esse e-mail.",
+      "Não é necessário imprimir o protocolo. No entanto, você pode fazer isso utilizando o botão Imprimir, disponível ao finalizar uma inscrição.",
   },
   {
     id: 7,

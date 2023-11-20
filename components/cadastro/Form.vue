@@ -211,6 +211,7 @@ const carregarAluno = async () => {
       nome: alunoErudio.value.nome,
       dataNascimento: alunoErudio.value.dataNascimento,
       etapa: etapas.value.find((e) => e.id == alunoErudio.value.etapaId),
+      unidadeEnsinoId: alunoErudio.value.unidadeEnsinoId,
     };
 
     return (showAllInputs.value = true); // Exibe o Form SOMENTE se carregar um aluno do Erudio
@@ -241,6 +242,7 @@ const onSubmit = async () => {
     : emit("submit", {
         alunoId: dadosForm.value.id,
         etapaId: dadosForm.value.etapa.id,
+        unidadeEnsinoId: dadosForm.value.unidadeEnsinoId,
       });
 };
 
@@ -248,6 +250,7 @@ const criarAluno = async () => {
   const dadosAluno = { ...dadosForm.value };
   delete dadosAluno.id;
   delete dadosAluno.etapa;
+  delete dadosAluno.unidadeEnsinoId;
   const { data: alunoCriado, error } = await useFetch("/api/alunos", {
     method: "POST",
     body: dadosAluno,
@@ -263,6 +266,7 @@ const criarAluno = async () => {
   emit("submit", {
     alunoId: alunoCriado.value.id,
     etapaId: dadosForm.value.etapa.id,
+    unidadeEnsinoId: dadosForm.value.unidadeEnsinoId,
   });
 };
 </script>

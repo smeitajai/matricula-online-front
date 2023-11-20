@@ -43,6 +43,11 @@ const menuDefault = [
     to: "/cadastro",
   },
   {
+    icon: "mdi-file-find-outline",
+    title: "Consulta Protocolo",
+    to: "/consulta",
+  },
+  {
     icon: "mdi-progress-question",
     title: "Ajuda",
     to: "/ajuda",
@@ -80,7 +85,7 @@ const menuAuth = [
     icon: "mdi-clock-outline",
     title: "Turnos",
     to: "/turno",
-  }
+  },
 ];
 
 const user = useSupabaseUser();
