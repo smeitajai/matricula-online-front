@@ -42,11 +42,11 @@ const menuDefault = [
     title: "Inscrição",
     to: "/cadastro",
   },
-  // {
-  //   icon: "mdi-file-find-outline",
-  //   title: "Consulta Protocolo",
-  //   to: "/consulta",
-  // },
+  {
+    icon: "mdi-file-find-outline",
+    title: "Consulta Protocolo",
+    to: "/consulta",
+  },
   {
     icon: "mdi-progress-question",
     title: "Ajuda",
