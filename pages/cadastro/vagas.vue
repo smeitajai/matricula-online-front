@@ -145,13 +145,37 @@ onMounted(() => {
     processo.value && processo.value.processoEtapas
       ? processo.value.processoEtapas.find((etapa) => etapa.emAndamento)
       : null;
+
+  ordenarQuadrosVaga();
 });
 
-watchEffect(() => {
-  if (quadrosVaga.value) {
-    quadrosFiltrados.value = quadrosVaga.value;
+const ordenarQuadrosVaga = () => {
+  // Ordena os quadros de vaga pelo Polo da unidade de Origem
+  const unidade = unidades.value.find((u) => u.id == route.query.unidade);
+
+  if (unidade) {
+    quadrosVaga.value = quadrosVaga.value.sort((a, b) => {
+      let unidadeA = unidades.value.find((u) => u.id == a.unidadeEnsinoId);
+      let unidadeB = unidades.value.find((u) => u.id == b.unidadeEnsinoId);
+
+      if (
+        unidadeA.poloId === unidade.poloId &&
+        unidadeB.poloId !== unidade.poloId
+      ) {
+        return -1; // 'a' vem antes de 'b'
+      } else if (
+        unidadeA.poloId !== unidade.poloId &&
+        unidadeB.poloId === unidade.poloId
+      ) {
+        return 1; // 'b' vem antes de 'a'
+      } else {
+        return 0; // não muda a ordem
+      }
+    });
   }
-});
+
+  quadrosFiltrados.value = quadrosVaga.value;
+};
 
 const alunoState = useAluno();
 if (!alunoState || !alunoState.value.id) {

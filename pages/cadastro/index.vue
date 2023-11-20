@@ -10,6 +10,7 @@ const onClickBuscarVaga = async (item) => {
     query: {
       aluno: item.alunoId,
       etapa: item.etapaId,
+      unidade: item.unidadeEnsinoId,
     },
   });
 };
