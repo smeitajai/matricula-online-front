@@ -160,6 +160,7 @@ const editarQuadro = async () => {
       quantidadeVaga: dadosQuadro.value.quantidadeVaga,
       turnoId: dadosQuadro.value.turno.id,
       unidadeEnsinoId: props.unidade.id,
+      nome: dadosQuadro.value.nome,
     },
   });
 

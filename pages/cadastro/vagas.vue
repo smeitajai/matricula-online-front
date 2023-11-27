@@ -234,7 +234,11 @@ const contagemRegressiva = () => {
 };
 
 const onConfirm = async () => {
-  const { data: inscricaoCriada, error } = await useFetch("/api/inscricoes", {
+  const rota =
+    etapaProcessoState.value.tipo == "MATRICULA"
+      ? "inscricoes"
+      : "inscricoes/transferencias";
+  const { data: inscricaoCriada, error } = await useFetch(`/api/${rota}`, {
     method: "POST",
     body: {
       alunoId: alunoState.value.id,

@@ -56,15 +56,17 @@ const { data: etapasProcesso, error: errorEtapas } = await useFetch(
   {
     query: {
       // Esse filtro ainda não funciona
-      processo: route.query.processo,
+      processoId: route.query.processo,
     },
   },
 );
 
-// Filtro Paliativo para exibir apenas as etapas do processo selecionado
-etapasProcesso.value = etapasProcesso.value.filter(
-  (e) => e.processoId == processo.value.id,
-);
+//Filtro Paliativo para exibir apenas as etapas do processo selecionado
+if (etapasProcesso.value) {
+  etapasProcesso.value = etapasProcesso.value.filter(
+    (e) => e.processoId == processo.value.id,
+  );
+}
 
 const showMessage = ref(false);
 const message = ref("");

@@ -3,10 +3,16 @@
     <v-row class="ma-0">
       <CoreInput
         v-model="dadosEtapa.nome"
-        full-width
         label="Nome*"
         required
         @input="dadosEtapa.nome = $event"
+      />
+      <CoreSelect
+        v-model="dadosEtapa.tipo"
+        label="Tipo*"
+        :items="tipos"
+        required
+        @input="dadosEtapa.tipo = $event"
       />
       <CoreFormSubtitle label="Fase Inicial" class="pt-0" />
       <CoreInput
@@ -47,6 +53,7 @@
 import { format, utcToZonedTime } from "date-fns-tz";
 
 const form = ref(null);
+const tipos = ref(["MATRICULA", "TRANSFERENCIA"]);
 
 const emit = defineEmits(["input", "valid"]);
 
