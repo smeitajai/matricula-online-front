@@ -1,7 +1,6 @@
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const config = useRuntimeConfig();
-  console.log("BATEU AQUI!");
 
   const response = await fetch(`${config.public.baseURL}/inscricoes/transferencias`, {
     method: "POST",
