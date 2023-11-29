@@ -69,8 +69,15 @@ const showInscricoes = ref(false);
 const aluno = ref(null);
 const inscricoes = ref(null);
 
+const { data: processo } = await useFetch("/api/processos/em-andamento");
+
 const { data: etapasProcesso, error: errorEtapas } = await useFetch(
   "/api/processo-etapas",
+  {
+    query: {
+      processoId: processo.value.id,
+    },
+  },
 );
 
 onMounted(() => {
