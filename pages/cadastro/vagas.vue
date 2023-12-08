@@ -150,6 +150,9 @@ onMounted(() => {
 });
 
 const ordenarQuadrosVaga = () => {
+  // Se não vier uma unidade como queryParams, mostra todas as unidades sem ordenação
+  if (!route.query.unidade) return (quadrosFiltrados.value = quadrosVaga.value);
+
   // Ordena os quadros de vaga pelo Polo da unidade de Origem
   const unidade = unidades.value.find((u) => u.id == route.query.unidade);
 
