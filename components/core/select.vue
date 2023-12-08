@@ -4,6 +4,8 @@
       v-model="value"
       :clearable="clearable"
       :disabled="disabled"
+      :hint="hint"
+      :persistent-hint="persistentHint"
       :item-title="itemTitle"
       :items="items"
       :label="label"
@@ -25,6 +27,14 @@ const props = defineProps({
     default: false,
   },
   fullWidth: {
+    type: Boolean,
+    default: false,
+  },
+  hint: {
+    type: String,
+    default: "",
+  },
+  persistentHint: {
     type: Boolean,
     default: false,
   },
