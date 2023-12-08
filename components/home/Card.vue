@@ -125,7 +125,7 @@ const formatarData = (data) => {
 };
 
 const utcToSaoPauloTime = (data) => {
-  const dataSaoPaulo = utcToZonedTime(data, "America/Sao_Paulo");
+  const dataSaoPaulo = utcToZonedTime(data, "-00:00"); //Ignora o timezone, mantendo a hora correta
   return getHours(dataSaoPaulo);
 };
 </script>
