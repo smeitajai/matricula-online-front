@@ -43,7 +43,6 @@
 
       <CoreInput
         v-model="dadosForm.nome"
-        disabled
         label="Nome do aluno(a)*"
         required
         full-width
@@ -52,7 +51,6 @@
 
       <CoreInput
         v-model="dadosForm.dataNascimento"
-        disabled
         label="Data de nascimento*"
         type="date"
         required
@@ -61,10 +59,11 @@
 
       <CoreSelect
         v-model="dadosForm.etapa"
-        disabled
         :items="etapas"
+        hint="para o ano letivo de 2024"
         item-title="nome"
         label="Etapa*"
+        persistent-hint
         required
         @input="dadosForm.etapa = $event"
       />
@@ -95,18 +94,17 @@
     >
       <v-row class="text-center">
         <v-col cols="12">
-          O CPF informado não retornou nenhum dado do(a) aluno(a).
-        </v-col>
-        <v-col cols="12"> Possíveis impedimentos: </v-col>
-        <v-col cols="12">
-          - Neste momento, a matrícula on-line está disponível apenas para
-          <span class="font-weight-bold">{{ etapaAtiva.nome || "" }}.</span>
+          O CPF informado está vinculado a um aluno(a) que já está frequentando
+          uma unidade de ensino municipal.
         </v-col>
         <v-col cols="12">
-          - Caso necessite fazer a matrícula na
+          Nesta etapa são permitidas apenas as inscrições de novos alunos.
+        </v-col>
+        <v-col cols="12">
+          Caso necessite fazer a inscrição na etapa
           <span class="font-weight-bold">{{ etapaAtiva.nome || "" }}</span
-          >, entre em contato com a Unidade de Ensino para atualizar o CPF do(a)
-          aluno(a).
+          >, entre em contato com a Unidade de Ensino para regularizar a
+          situação do(a) aluno(a).
         </v-col>
       </v-row>
       <template #dialogActions>
@@ -201,23 +199,29 @@ const carregarAluno = async () => {
     },
   });
 
-  if (
-    !alunoErudio.value.statusCode &&
-    !alunoErudio.value.error &&
-    alunoErudio.value.id
-  ) {
-    dadosForm.value = {
-      ...dadosForm.value,
-      nome: alunoErudio.value.nome,
-      dataNascimento: alunoErudio.value.dataNascimento,
-      etapa: etapas.value.find((e) => e.id == alunoErudio.value.etapaId),
-      unidadeEnsinoId: alunoErudio.value.unidadeEnsinoId,
-    };
+  // Quando é Processo Exclusivamente Interno - Utilizar esse bloco
+  // if (
+  //   !alunoErudio.value.statusCode &&
+  //   !alunoErudio.value.error &&
+  //   alunoErudio.value.id
+  // ) {
+  //   dadosForm.value = {
+  //     ...dadosForm.value,
+  //     nome: alunoErudio.value.nome,
+  //     dataNascimento: alunoErudio.value.dataNascimento,
+  //     etapa: etapas.value.find((e) => e.id == alunoErudio.value.etapaId),
+  //     unidadeEnsinoId: alunoErudio.value.unidadeEnsinoId,
+  //   };
 
-    return (showAllInputs.value = true); // Exibe o Form SOMENTE se carregar um aluno do Erudio
+  //   return (showAllInputs.value = true); // Exibe o Form SOMENTE se carregar um aluno do Erudio
+  // }
+
+  // Quando​ é Processo Exclusivamente Externo - Utilizar esse bloco
+  if (alunoErudio.value && alunoErudio.value.id) {
+    return (showAllInputs.value = true); // Exibe o Form SOMENTE se o Aluno Carregado retornar ID
   }
 
-  //Se não carregar o Aluno do Errudio
+  //Se alunoErudio não retorna id, deve exibir o Dialog de Erro
   showDialog.value = true;
 };
 
