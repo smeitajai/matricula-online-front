@@ -29,25 +29,27 @@
     <v-row>
       <v-col cols="12" md="6">
         <CoreButton
+          :color="themeColor"
+          :prepend-color="themeColor"
+          :text-color="themeColor"
           block
           href="https://drive.google.com/file/d/1_f3Hueg2Ot0T45qDk3uPFoOBGKYgxsEY/view?usp=sharing"
           label="Edital de Matrícula 2024"
-          prepend-color="primary"
           prepend-icon="mdi-file-document"
           target="_blank"
-          text-color="primary"
           variant="outlined"
         />
       </v-col>
       <v-col cols="12" md="6">
         <CoreButton
+          :color="themeColor"
+          :prepend-color="themeColor"
+          :text-color="themeColor"
           block
           href="https://drive.google.com/file/d/1iwDpUqgXzmE8CJfgluzu7QPmHHM2-M27/view?usp=sharing"
           label="Manual de Uso"
-          prepend-color="primary"
           prepend-icon="mdi-file-document"
           target="_blank"
-          text-color="primary"
           variant="outlined"
         />
       </v-col>
@@ -74,6 +76,8 @@
 <script setup>
 import { getHours } from "date-fns";
 import { format, utcToZonedTime } from "date-fns-tz";
+import { useTheme } from "vuetify";
+const theme = useTheme();
 
 const { data: processo, error: errorProcesso } = await useFetch(
   "/api/processos/em-andamento",
@@ -88,6 +92,9 @@ const showDates = computed(() => {
     processo.value.processoEtapas &&
     processo.value.processoEtapas.length
   );
+});
+const themeColor = computed(() => {
+  return theme.global.name.value === "customLightTheme" ? "primary" : "white";
 });
 
 onMounted(() => {
