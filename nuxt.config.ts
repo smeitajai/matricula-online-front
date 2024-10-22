@@ -40,4 +40,6 @@ export default defineNuxtConfig({
       "process.env.DEBUG": false,
     },
   },
+
+  compatibilityDate: "2024-10-09",
 });
