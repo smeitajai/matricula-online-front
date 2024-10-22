@@ -16,10 +16,10 @@
       {{ inscricao.unidadeEnsino.nome }} no turno {{ inscricao.turno.nome }}.
     </v-col>
     <v-col cols="12">
-      Para efetivação da matrícula no ano letivo de 2024, o responsável legal
-      deve comparecer pessoalmente na unidade de ensino até o dia
-      {{ formatarData(inscricao.processoEtapa.faseFinalDataFim) }}, portando os
-      seguintes documentos:
+      Para efetivação da matrícula no ano letivo de {{ ANO_INSCRICAO }}, o
+      responsável legal deve comparecer pessoalmente na unidade de ensino até o
+      dia {{ formatarData(inscricao.processoEtapa.faseFinalDataFim) }}, portando
+      os seguintes documentos:
     </v-col>
     <v-col cols="12">
       - Certidão de Nascimento ou Documento de identificação do aluno, com foto,
@@ -68,6 +68,7 @@ const props = defineProps({
   },
 });
 
+const ANO_INSCRICAO = new Date().getFullYear() + 1;
 const dataAtual = format(new Date(), "dd/MM/yyyy");
 
 const formatarData = (data) => {
