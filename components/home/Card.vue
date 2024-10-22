@@ -2,8 +2,8 @@
   <CoreCard rounded="lg" title="Matrícula On-line" toolbar class="ma-5">
     <v-row>
       <span class="text-h6 ma-5 text-center">
-        Seja bem-vindo(a) ao novo Sistema de Matrículas On-line para o
-        <u>Ensino Fundamental</u> do Município de Itajaí/SC!
+        Seja bem-vindo(a) ao sistema de matrículas On-line para o
+        <u>Ensino Fundamental</u> do município de Itajaí/SC!
       </span>
     </v-row>
 
@@ -18,10 +18,11 @@
         class="py-2"
       >
         <span :class="[{ 'font-weight-bold': etapa.emAndamento }]">
-          {{ etapa.nome }}: {{ formatarData(etapa.faseInicialDataInicio) }} -
-          {{ utcToSaoPauloTime(etapa.faseInicialDataInicio) }}h até
-          {{ formatarData(etapa.faseInicialDataFim) }} -
-          {{ utcToSaoPauloTime(etapa.faseInicialDataFim) }}h
+          {{ etapa.nome }}: {{ formatarData(etapa.faseInicialDataInicio) }} ({{
+            utcToSaoPauloTime(etapa.faseInicialDataInicio)
+          }}h) até {{ formatarData(etapa.faseInicialDataFim) }} ({{
+            utcToSaoPauloTime(etapa.faseInicialDataFim)
+          }}h)
         </span>
       </v-col>
     </v-row>
@@ -34,7 +35,7 @@
           :text-color="themeColor"
           block
           href="https://drive.google.com/file/d/1_f3Hueg2Ot0T45qDk3uPFoOBGKYgxsEY/view?usp=sharing"
-          label="Edital de Matrícula 2024"
+          :label="`Edital de Matrícula ${ANO_INSCRICAO}`"
           prepend-icon="mdi-file-document"
           target="_blank"
           variant="outlined"
@@ -82,6 +83,8 @@ const theme = useTheme();
 const { data: processo, error: errorProcesso } = await useFetch(
   "/api/processos/em-andamento",
 );
+
+const ANO_INSCRICAO = new Date().getFullYear() + 1;
 
 const showMessage = ref(false);
 const message = ref("");
