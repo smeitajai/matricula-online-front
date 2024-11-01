@@ -76,6 +76,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  processo: {
+    type: Object,
+    default: () => ({}),
+  },
   quadro: {
     type: Object,
     default: () => ({}),
@@ -140,6 +144,7 @@ const criarQuadro = async () => {
       quantidadeVaga: dadosQuadro.value.quantidadeVaga,
       turnoId: dadosQuadro.value.turno.id,
       unidadeEnsinoId: props.unidade.id,
+      processoId: props.processo.id,
     },
   });
 
@@ -160,6 +165,7 @@ const editarQuadro = async () => {
       quantidadeVaga: dadosQuadro.value.quantidadeVaga,
       turnoId: dadosQuadro.value.turno.id,
       unidadeEnsinoId: props.unidade.id,
+      processoId: props.processo.id,
       nome: dadosQuadro.value.nome,
     },
   });
