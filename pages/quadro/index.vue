@@ -50,7 +50,7 @@ const onClickItem = async (unidade) => {
   await navigateTo({
     path: "/quadro/unidade",
     query: {
-      id: unidade.id,
+      unidade: unidade.id,
     },
   });
 };
