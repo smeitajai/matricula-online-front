@@ -34,8 +34,8 @@
           :prepend-color="themeColor"
           :text-color="themeColor"
           block
-          href="https://drive.google.com/file/d/1_f3Hueg2Ot0T45qDk3uPFoOBGKYgxsEY/view?usp=sharing"
-          :label="`Edital de Matrícula ${ANO_INSCRICAO}`"
+          href="https://drive.google.com/file/d/1vnIzopK8JtWcvpxYGiO4iZOtuFp9bJag"
+          label="Edital de Matrícula 2025"
           prepend-icon="mdi-file-document"
           target="_blank"
           variant="outlined"
@@ -47,7 +47,7 @@
           :prepend-color="themeColor"
           :text-color="themeColor"
           block
-          href="https://drive.google.com/file/d/1iwDpUqgXzmE8CJfgluzu7QPmHHM2-M27/view?usp=sharing"
+          href="https://drive.google.com/file/d/1iwDpUqgXzmE8CJfgluzu7QPmHHM2-M27"
           label="Manual de Uso"
           prepend-icon="mdi-file-document"
           target="_blank"
@@ -83,8 +83,6 @@ const theme = useTheme();
 const { data: processo, error: errorProcesso } = await useFetch(
   "/api/processos/em-andamento",
 );
-
-const ANO_INSCRICAO = new Date().getFullYear() + 1;
 
 const showMessage = ref(false);
 const message = ref("");
