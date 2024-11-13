@@ -125,7 +125,14 @@ const carregarAluno = async () => {
     },
   });
 
-  inscricoes.value = inscricoesAluno.value || [];
+  // Filtra apenas as inscrições em etapas do Processo em andamento
+  const inscricoesFiltradas = inscricoesAluno.value.filter((inscricao) =>
+    etapasProcesso.value.some(
+      (etapa) => etapa.id === inscricao.processoEtapaId,
+    ),
+  );
+
+  inscricoes.value = inscricoesFiltradas || [];
   showInscricoes.value = true;
 };
 
