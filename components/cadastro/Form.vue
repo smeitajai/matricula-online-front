@@ -190,6 +190,7 @@ const carregarAlunoErudio = async () => {
   const { data: alunoErudio } = await useFetch("/api/alunos-matriculados", {
     query: {
       cpf: dadosForm.value.cpf,
+      ordem: etapaAtiva.value.ordem,
     },
   });
 
@@ -197,32 +198,32 @@ const carregarAlunoErudio = async () => {
 };
 
 const validarInscricao = async () => {
-  dadosForm.value = { cpf: dadosForm.value.cpf }; // ?????????
+  dadosForm.value = { cpf: dadosForm.value.cpf };
 
   if (!etapaAtiva.value)
-    // Não permite seguir se não houver etapa em andamento
     return (
       (message.value = "Erro: Nenhuma etapa em andamento."),
       (showMessage.value = true)
     );
 
-  const aluno = await carregarAlunoMatriculaOnline(); // Verifica se o aluno existe no Matricula On-line
+  const aluno = await carregarAlunoMatriculaOnline();
 
   if (aluno) {
+    // Se o aluno estiver cadastrado no Matricula On-line, verifica se já possui inscricao na etapa ativa
     dadosForm.value = { ...aluno };
-    const possuiInscricao = await possuiInscricaoEtapaAtiva(aluno); //Verifica se o aluno já possui inscrição na Etapa Ativa do Processo
+    const inscricaoAtiva = await possuiInscricaoEtapaAtiva(aluno);
 
-    if (possuiInscricao) {
+    if (inscricaoAtiva.hasOwnProperty("message")) {
       return (
         (message.value =
-          possuiInscricao.message ||
+          inscricaoAtiva.message ||
           "Erro: Aluno(a) já está inscrito nesta etapa do processo."),
         (showMessage.value = true)
       );
     }
   }
 
-  const alunoErudio = await carregarAlunoErudio(); // Verifica se o aluno existe no Erudio
+  const alunoErudio = await carregarAlunoErudio();
 
   //Quando é Processo Exclusivamente Interno - Utilizar esse bloco
   if (!alunoErudio.statusCode && !alunoErudio.error && alunoErudio.cpf) {
@@ -232,9 +233,8 @@ const validarInscricao = async () => {
       nome: alunoErudio.nome,
       responsavelNome: alunoErudio.responsavelNome,
       dataNascimento: alunoErudio.dataNascimento,
-      //etapa: etapas.value.find((e) => e.id == alunoErudio.etapaId),
-      //unidadeEnsinoId: alunoErudio.unidadeEnsinoId,
-      unidadeEnsinoId: "061e152e-600a-467e-b90b-3c51beb6a3a8",
+      etapa: etapas.value.find((e) => e.id == alunoErudio.etapaId),
+      unidadeEnsinoId: alunoErudio.unidadeEnsinoId,
     };
 
     console.log("dadosForm.value FINAL :>> ", dadosForm.value);
