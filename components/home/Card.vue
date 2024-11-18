@@ -128,12 +128,12 @@ onMounted(() => {
 });
 
 const formatarData = (data) => {
-  const dataTimeZoned = utcToZonedTime(data, "-00:00"); //Ignora o timezone, mantendo a data correta
+  const dataTimeZoned = utcToZonedTime(data, "America/Sao_Paulo");
   return format(dataTimeZoned, "dd/MM/yyyy");
 };
 
 const utcToSaoPauloTime = (data) => {
-  const dataSaoPaulo = utcToZonedTime(data, "-00:00"); //Ignora o timezone, mantendo a hora correta
+  const dataSaoPaulo = utcToZonedTime(data, "America/Sao_Paulo");
   return getHours(dataSaoPaulo);
 };
 </script>
