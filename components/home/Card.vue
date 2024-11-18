@@ -2,8 +2,8 @@
   <CoreCard rounded="lg" title="Matrícula On-line" toolbar class="ma-5">
     <v-row>
       <span class="text-h6 ma-5 text-center">
-        Seja bem-vindo(a) ao novo Sistema de Matrículas On-line para o
-        <u>Ensino Fundamental</u> do Município de Itajaí/SC!
+        Seja bem-vindo(a) ao sistema de matrículas On-line para o
+        <u>Ensino Fundamental</u> do município de Itajaí/SC!
       </span>
     </v-row>
 
@@ -18,10 +18,11 @@
         class="py-2"
       >
         <span :class="[{ 'font-weight-bold': etapa.emAndamento }]">
-          {{ etapa.nome }}: {{ formatarData(etapa.faseInicialDataInicio) }} -
-          {{ utcToSaoPauloTime(etapa.faseInicialDataInicio) }}h até
-          {{ formatarData(etapa.faseInicialDataFim) }} -
-          {{ utcToSaoPauloTime(etapa.faseInicialDataFim) }}h
+          {{ etapa.nome }}: {{ formatarData(etapa.faseInicialDataInicio) }} ({{
+            utcToSaoPauloTime(etapa.faseInicialDataInicio)
+          }}h) até {{ formatarData(etapa.faseInicialDataFim) }} ({{
+            utcToSaoPauloTime(etapa.faseInicialDataFim)
+          }}h)
         </span>
       </v-col>
     </v-row>
@@ -33,8 +34,8 @@
           :prepend-color="themeColor"
           :text-color="themeColor"
           block
-          href="https://drive.google.com/file/d/1_f3Hueg2Ot0T45qDk3uPFoOBGKYgxsEY/view?usp=sharing"
-          label="Edital de Matrícula 2024"
+          href="https://drive.google.com/file/d/1vnIzopK8JtWcvpxYGiO4iZOtuFp9bJag"
+          label="Edital de Matrícula 2025"
           prepend-icon="mdi-file-document"
           target="_blank"
           variant="outlined"
@@ -46,7 +47,7 @@
           :prepend-color="themeColor"
           :text-color="themeColor"
           block
-          href="https://drive.google.com/file/d/1iwDpUqgXzmE8CJfgluzu7QPmHHM2-M27/view?usp=sharing"
+          href="https://drive.google.com/file/d/1iwDpUqgXzmE8CJfgluzu7QPmHHM2-M27"
           label="Manual de Uso"
           prepend-icon="mdi-file-document"
           target="_blank"
@@ -127,12 +128,12 @@ onMounted(() => {
 });
 
 const formatarData = (data) => {
-  const dataTimeZoned = utcToZonedTime(data, "-00:00"); //Ignora o timezone, mantendo a data correta
+  const dataTimeZoned = utcToZonedTime(data, "America/Sao_Paulo");
   return format(dataTimeZoned, "dd/MM/yyyy");
 };
 
 const utcToSaoPauloTime = (data) => {
-  const dataSaoPaulo = utcToZonedTime(data, "-00:00"); //Ignora o timezone, mantendo a hora correta
+  const dataSaoPaulo = utcToZonedTime(data, "America/Sao_Paulo");
   return getHours(dataSaoPaulo);
 };
 </script>

@@ -1,10 +1,8 @@
 <template>
   <v-row class="ma-5">
     <PageTitle v-if="unidade" :title="`Quadro de vagas | ${unidade.nome}`" />
-    <CoreTable :headers="headers" :items="quadros">
+    <CoreTable :headers="headers" :items="quadrosCarregados">
       <template #body="{ item }">
-        <!-- <td>{{ item.etapa.nome }}</td>
-        <td>{{ item.turno.nome }}</td> -->
         <td>{{ item.nome }}</td>
         <td>{{ item.quantidadeVaga }}</td>
         <td>
@@ -28,6 +26,7 @@
     v-if="dialog"
     :dialog="dialog"
     :etapas="etapas"
+    :processo="processo"
     :quadro="quadroSelected"
     :turnos="turnos"
     :unidade="unidade"
@@ -54,18 +53,29 @@
 import { useTheme } from "vuetify";
 const theme = useTheme();
 const route = useRoute();
-const { data: unidade } = await useFetch(`/api/unidades/${route.query.id}`);
+const { data: processo } = await useFetch("/api/processos/em-andamento");
+const { data: unidade } = await useFetch(
+  `/api/unidades/${route.query.unidade}`,
+);
 const { data: etapas } = await useFetch("/api/etapas");
 const { data: turnos } = await useFetch("/api/turnos");
 const { data: quadros } = await useFetch("/api/quadros-vaga", {
   query: {
-    unidadeEnsino: route.query.id,
+    unidadeEnsino: route.query.unidade,
+    //processo: processo.value.id,
   },
 });
 
 const headers = ["Nome", "Vagas", "Ações"];
 const dialog = ref(false);
+const quadrosCarregados = ref([]);
 const quadroSelected = ref({});
+
+onMounted(() => {
+  quadrosCarregados.value = quadros.value.filter(
+    (q) => q.processoId == processo.value.id,
+  );
+});
 
 const onClickEdit = (item) => {
   quadroSelected.value = item;
@@ -74,12 +84,14 @@ const onClickEdit = (item) => {
 
 const onCreate = (quadro) => {
   dialog.value = false;
-  quadros.value.push(quadro.value);
+  quadrosCarregados.value.push(quadro.value);
 };
 
 const onUpdate = (quadro) => {
   dialog.value = false;
-  const index = quadros.value.findIndex((item) => item.id === quadro.value.id);
-  quadros.value[index] = quadro.value;
+  const index = quadrosCarregados.value.findIndex(
+    (item) => item.id === quadro.value.id,
+  );
+  quadrosCarregados.value[index] = quadro.value;
 };
 </script>

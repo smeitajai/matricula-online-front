@@ -4,6 +4,7 @@
       <CoreInput
         v-model="dadosForm.cpf"
         :counter="11"
+        :disabled="!etapaAtiva"
         clearable
         full-width
         hint="Digite apenas números"
@@ -16,11 +17,17 @@
     </v-row>
     <v-row v-if="showAllInputs">
       <CoreInput
-        v-model="dadosForm.email"
+        v-model="dadosForm.responsavelNome"
         autofocus
         clearable
-        full-width
-        label="E-mail do responsável"
+        label="Nome do(a) responsável*"
+        required
+        @input="dadosForm.responsavelNome = $event"
+      />
+      <CoreInput
+        v-model="dadosForm.email"
+        clearable
+        label="E-mail do(a) responsável"
         placeholder="email@email.com"
         @input="dadosForm.email = $event"
       />
@@ -28,7 +35,7 @@
       <CoreInput
         v-model="dadosForm.telefone1"
         clearable
-        label="Telefone do responsável (1)"
+        label="Telefone do(a) responsável (1)"
         placeholder="(99) 99999-9999"
         @input="dadosForm.telefone1 = $event"
       />
@@ -36,7 +43,7 @@
       <CoreInput
         v-model="dadosForm.telefone2"
         clearable
-        label="Telefone do responsável (2)"
+        label="Telefone do(a) responsável (2)"
         placeholder="(99) 99999-9999"
         @input="dadosForm.telefone2 = $event"
       />
@@ -60,7 +67,7 @@
       <CoreSelect
         v-model="dadosForm.etapa"
         :items="etapas"
-        hint="para o ano letivo de 2024"
+        :hint="`para o ano letivo de ${ANO_INSCRICAO}`"
         item-title="nome"
         label="Etapa*"
         persistent-hint
@@ -84,38 +91,17 @@
       @hide="showMessage = $event"
     />
 
-    <CoreDialog
-      v-if="showDialog"
-      v-model="showDialog"
-      persistent
-      title="Atenção!"
-      toolbar
-      :width="600"
-    >
-      <v-row class="text-center">
-        <v-col cols="12">
-          O CPF informado está vinculado a um aluno(a) que já está frequentando
-          uma unidade de ensino municipal.
-        </v-col>
-        <v-col cols="12">
-          Nesta etapa são permitidas apenas as inscrições de novos alunos.
-        </v-col>
-        <v-col cols="12">
-          Caso necessite fazer a inscrição na etapa
-          <span class="font-weight-bold">{{ etapaAtiva.nome || "" }}</span
-          >, entre em contato com a Unidade de Ensino para regularizar a
-          situação do(a) aluno(a).
-        </v-col>
-      </v-row>
-      <template #dialogActions>
-        <CoreButton
-          text-color="red-darken-1"
-          label="FECHAR"
-          variant="text"
-          @click="showDialog = false"
-        />
-      </template>
-    </CoreDialog>
+    <CadastroDialogProcessoExterno
+      :dialog="showDialogProcessoExterno"
+      :etapa-ativa="etapaAtiva"
+      @close="showDialogProcessoExterno = $event"
+    />
+
+    <CadastroDialogProcessoInterno
+      :dialog="showDialogProcessoInterno"
+      :etapa-ativa="etapaAtiva"
+      @close="showDialogProcessoInterno = $event"
+    />
   </v-form>
 </template>
 
@@ -125,8 +111,11 @@ const { data: processo } = await useFetch("/api/processos/em-andamento");
 
 const emit = defineEmits(["submit"]);
 
+const ANO_INSCRICAO = new Date().getFullYear() + 1;
+
 const showAllInputs = ref(false);
-const showDialog = ref(false);
+const showDialogProcessoExterno = ref(false);
+const showDialogProcessoInterno = ref(false);
 const showMessage = ref(false);
 const message = ref("");
 const form = ref(null);
@@ -139,6 +128,11 @@ onMounted(() => {
     processo.value && processo.value.processoEtapas
       ? processo.value.processoEtapas.find((etapa) => etapa.emAndamento)
       : null;
+
+  if (!etapaAtiva.value) {
+    message.value = "Erro: Nenhuma etapa em andamento.";
+    return (showMessage.value = true);
+  }
 });
 
 const onInputCPF = () => {
@@ -149,80 +143,113 @@ const onInputCPF = () => {
 
   if (dadosForm.value.cpf && dadosForm.value.cpf.length == 11) {
     return validateCPF(dadosForm.value.cpf)
-      ? carregarAluno()
+      ? validarInscricao()
       : ((message.value = "Erro: CPF Inválido."), (showMessage.value = true));
   }
 };
 
-const carregarAluno = async () => {
-  dadosForm.value = { cpf: dadosForm.value.cpf };
+const carregarAlunoMatriculaOnline = async () => {
   // Verifica se o aluno existe no Matricula On-line
-  const { data: alunoMatriculaOnline } = await useFetch("/api/alunos", {
+  const { data, error } = await useFetch("/api/alunos", {
     query: {
       cpf: dadosForm.value.cpf,
     },
   });
-  const aluno = alunoMatriculaOnline.value[0] || null;
 
-  if (
-    !alunoMatriculaOnline.value.statusCode &&
-    !alunoMatriculaOnline.value.error &&
-    alunoMatriculaOnline.value.length
-  ) {
-    dadosForm.value = { ...aluno };
+  if (error.value || data.value.statusCode || data.value.error) {
+    message.value = error.value || data.value.error || data.value.message;
+    return (showMessage.value = true);
   }
 
-  if (etapaAtiva.value && aluno) {
-    //Verifica se o Aluno já possui inscrição na Etapa Ativa do Processo
-    const { data: inscricao } = await useFetch(
-      `/api/processo-etapas/${etapaAtiva.value.id}/inscricoes`,
-      {
-        query: {
-          alunoId: aluno.id,
-        },
+  const aluno = data.value && data.value.length ? data.value[0] : null;
+  return aluno;
+};
+
+const possuiInscricaoEtapaAtiva = async (aluno) => {
+  // Verificar se o aluno já está inscrito na etapa ativa
+  const { data: inscricao, error } = await useFetch(
+    `/api/processo-etapas/${etapaAtiva.value.id}/inscricoes`,
+    {
+      query: {
+        alunoId: aluno.id,
       },
-    );
+    },
+  );
 
-    if (inscricao.value && !inscricao.value.statusCode)
-      return (
-        (message.value =
-          inscricao.value.message ||
-          "Erro: Aluno(a) ja possui inscrição nesta etapa."),
-        (showMessage.value = true)
-      );
+  if (error.value || inscricao.value.statusCode || inscricao.value.error) {
+    message.value =
+      error.value || inscricao.value.error || inscricao.value.message;
+    return (showMessage.value = true);
   }
 
-  // Verifica se o aluno existe no Erudio e retorna os dados
+  return inscricao.value;
+};
+
+const carregarAlunoErudio = async () => {
+  // Verifica se o aluno existe no Erudio
   const { data: alunoErudio } = await useFetch("/api/alunos-matriculados", {
     query: {
       cpf: dadosForm.value.cpf,
+      ordem: etapaAtiva.value.ordem,
     },
   });
 
-  // Quando é Processo Exclusivamente Interno - Utilizar esse bloco
-  // if (
-  //   !alunoErudio.value.statusCode &&
-  //   !alunoErudio.value.error &&
-  //   alunoErudio.value.id
-  // ) {
-  //   dadosForm.value = {
-  //     ...dadosForm.value,
-  //     nome: alunoErudio.value.nome,
-  //     dataNascimento: alunoErudio.value.dataNascimento,
-  //     etapa: etapas.value.find((e) => e.id == alunoErudio.value.etapaId),
-  //     unidadeEnsinoId: alunoErudio.value.unidadeEnsinoId,
-  //   };
+  return alunoErudio.value;
+};
 
-  //   return (showAllInputs.value = true); // Exibe o Form SOMENTE se carregar um aluno do Erudio
-  // }
+const validarInscricao = async () => {
+  dadosForm.value = { cpf: dadosForm.value.cpf };
 
-  // Quando​ é Processo Exclusivamente Externo - Utilizar esse bloco
-  if (alunoErudio.value && alunoErudio.value.id) {
-    return (showAllInputs.value = true); // Exibe o Form SOMENTE se o Aluno Carregado retornar ID
+  if (!etapaAtiva.value)
+    return (
+      (message.value = "Erro: Nenhuma etapa em andamento."),
+      (showMessage.value = true)
+    );
+
+  const aluno = await carregarAlunoMatriculaOnline();
+
+  if (aluno) {
+    // Se o aluno estiver cadastrado no Matricula On-line, verifica se já possui inscricao na etapa ativa
+    dadosForm.value = { ...aluno };
+    const inscricaoAtiva = await possuiInscricaoEtapaAtiva(aluno);
+
+    if (inscricaoAtiva.hasOwnProperty("message")) {
+      return (
+        (message.value =
+          inscricaoAtiva.message ||
+          "Erro: Aluno(a) já está inscrito nesta etapa do processo."),
+        (showMessage.value = true)
+      );
+    }
   }
 
-  //Se alunoErudio não retorna id, deve exibir o Dialog de Erro
-  showDialog.value = true;
+  const alunoErudio = await carregarAlunoErudio();
+
+  //Quando é Processo Exclusivamente Interno - Utilizar esse bloco
+  if (!alunoErudio.statusCode && !alunoErudio.error && alunoErudio.cpf) {
+    dadosForm.value = {
+      ...dadosForm.value,
+      cpf: alunoErudio.cpf,
+      nome: alunoErudio.nome,
+      responsavelNome: alunoErudio.responsavelNome,
+      dataNascimento: alunoErudio.dataNascimento,
+      etapa: etapas.value.find((e) => e.id == alunoErudio.etapaId),
+      unidadeEnsinoId: alunoErudio.unidadeEnsinoId,
+    };
+
+    return (showAllInputs.value = true); // Exibe o Form SOMENTE se carregar um aluno do Erudio
+  }
+
+  // Se alunoErudio não retorna cpf, deve exibir o Dialog de Erro de Processo Interno
+  showDialogProcessoInterno.value = true;
+  // Fim do Bloco de Processo Interno
+
+  // Quando​ é Processo Exclusivamente Externo --- Utilizar esse bloco ---
+  // if (!alunoErudio.statusCode && !alunoErudio.error && !alunoErudio.cpf) {
+  //   return (showAllInputs.value = true); // Exibe o Form somente se NÃO retornar um aluno (cpf) do Erudio
+  // }
+  // showDialogProcessoExterno = true;
+  // Fim do Bloco de Processo Externo
 };
 
 const onSubmit = async () => {
@@ -241,13 +268,29 @@ const onSubmit = async () => {
   if (dadosForm.value.email && !dadosForm.value.email.length)
     delete dadosForm.value.email;
 
-  !dadosForm.value.id
-    ? criarAluno()
-    : emit("submit", {
-        alunoId: dadosForm.value.id,
-        etapaId: dadosForm.value.etapa.id,
-        unidadeEnsinoId: dadosForm.value.unidadeEnsinoId,
-      });
+  dadosForm.value.id ? editarAluno() : criarAluno();
+};
+
+const editarAluno = async () => {
+  const dadosAluno = { ...dadosForm.value };
+  delete dadosAluno.etapa;
+  delete dadosAluno.unidadeEnsinoId;
+
+  const { data: alunoEditado, error } = await useFetch("/api/alunos", {
+    method: "PUT",
+    body: dadosAluno,
+  });
+
+  if (error.value || alunoEditado.value.statusCode) {
+    message.value = error.value || alunoEditado.value.message;
+    return (showMessage.value = true);
+  }
+
+  emit("submit", {
+    alunoId: alunoEditado.value.id,
+    etapaId: dadosForm.value.etapa.id,
+    unidadeEnsinoId: dadosForm.value.unidadeEnsinoId,
+  });
 };
 
 const criarAluno = async () => {

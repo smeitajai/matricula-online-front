@@ -78,7 +78,13 @@ const itens = [
     pergunta:
       "Qual é o prazo para o responsável comparecer à unidade de ensino?",
     resposta:
-      "Todas as datas e prazos estão descrito no Edital de Matrícula. Certifique-se de verificar o prazo e cumprir com as datas estabelecidas.",
+      "Todas as datas e prazos estão descritos no Edital de Matrícula. Certifique-se de verificar o prazo e cumprir com as datas estabelecidas.",
+  },
+  {
+    id: 9,
+    pergunta: "Estou buscando vagas de outros cursos. Como devo proceder?",
+    resposta:
+      "Este processo on-line contempla apenas as vagas de Ensino Fundamental (1° ao 9° ano). Para vagas de outros cursos, verifique as orientações disponíveis no Edital de Matrículas vigente.",
   },
 ];
 </script>
