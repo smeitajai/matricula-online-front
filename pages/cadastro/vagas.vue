@@ -19,6 +19,14 @@
       title="Carregando..."
     ></v-alert>
 
+    <v-alert
+      v-else
+      class="pa-1 mx-4"
+      type="info"
+      title="São exibidas apenas as unidades escolares que possuem vagas
+      disponíveis."
+    ></v-alert>
+
     <v-col v-if="unidades && quadrosFiltrados && etapaProcessoState" cols="12">
       <CoreInput
         v-model="textFilter"
