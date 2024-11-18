@@ -237,8 +237,6 @@ const validarInscricao = async () => {
       unidadeEnsinoId: alunoErudio.unidadeEnsinoId,
     };
 
-    console.log("dadosForm.value FINAL :>> ", dadosForm.value);
-
     return (showAllInputs.value = true); // Exibe o Form SOMENTE se carregar um aluno do Erudio
   }
 
