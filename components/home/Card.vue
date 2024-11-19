@@ -11,7 +11,25 @@
       <v-col cols="12" class="pa-0 font-weight-bold">
         Datas Importantes:
       </v-col>
-      <v-col
+      <v-col cols="12" class="py-2">
+        <span class="font-weight-bold"
+          >Matrícula Interna - 5° e 6° ano do Ensino Fundamental: 19/11/2024
+          (9h) até 21/11/2024 (18h)
+        </span>
+      </v-col>
+      <v-col cols="12" class="py-2">
+        Matrícula Interna - 1° ano do Ensino Fundamental: 26/11/2024 (9h) até
+        28/11/2024 (18h)
+      </v-col>
+      <v-col cols="12" class="py-2">
+        Transferência Interna na Rede Municipal - Ensino Fundamental: 03/12/2024
+        (9h) até 05/12/2024 (18h)
+      </v-col>
+      <v-col cols="12" class="py-2">
+        Novas Matrículas - Ensino Fundamental: 09/12/2024 (9h) até 12/12/2024
+        (18h)
+      </v-col>
+      <!-- <v-col
         v-for="etapa in processo.processoEtapas"
         :key="etapa.id"
         cols="12"
@@ -24,7 +42,7 @@
             utcToSaoPauloTime(etapa.faseInicialDataFim)
           }}h)
         </span>
-      </v-col>
+      </v-col> -->
     </v-row>
 
     <v-row>
