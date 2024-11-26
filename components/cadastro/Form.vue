@@ -12,9 +12,26 @@
         persistent-hint
         placeholder="123456789000"
         required
-        @input="(dadosForm.cpf = $event), onInputCPF()"
+        @input="((dadosForm.cpf = $event), onInputCPF())"
       />
     </v-row>
+    <template v-if="loading">
+      <v-row v-for="n in 4" :key="n" class="align-skeleton-loading">
+        <v-col cols="6" class="py-0">
+          <v-skeleton-loader type="text"></v-skeleton-loader>
+        </v-col>
+        <v-col cols="6" class="py-0">
+          <v-skeleton-loader type="text"></v-skeleton-loader>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="12"
+          ><v-skeleton-loader
+            class="justify-end"
+            type="button"
+          ></v-skeleton-loader></v-col
+      ></v-row>
+    </template>
     <v-row v-if="showAllInputs">
       <CoreInput
         v-model="dadosForm.responsavelNome"
@@ -121,6 +138,7 @@ const message = ref("");
 const form = ref(null);
 const etapaAtiva = ref(null);
 const dadosForm = ref({});
+const loading = ref(false);
 const alunoState = useAluno();
 
 onMounted(() => {
@@ -187,6 +205,7 @@ const possuiInscricaoEtapaAtiva = async (aluno) => {
 
 const carregarAlunoErudio = async () => {
   // Verifica se o aluno existe no Erudio
+
   const { data: alunoErudio } = await useFetch("/api/alunos-matriculados", {
     query: {
       cpf: dadosForm.value.cpf,
@@ -206,6 +225,7 @@ const validarInscricao = async () => {
       (showMessage.value = true)
     );
 
+  loading.value = true;
   const aluno = await carregarAlunoMatriculaOnline();
 
   if (aluno) {
@@ -214,6 +234,7 @@ const validarInscricao = async () => {
     const inscricaoAtiva = await possuiInscricaoEtapaAtiva(aluno);
 
     if (inscricaoAtiva.hasOwnProperty("message")) {
+      loading.value = false;
       return (
         (message.value =
           inscricaoAtiva.message ||
@@ -224,6 +245,8 @@ const validarInscricao = async () => {
   }
 
   const alunoErudio = await carregarAlunoErudio();
+
+  loading.value = false;
 
   //Quando é Processo Exclusivamente Interno - Utilizar esse bloco
   if (!alunoErudio.statusCode && !alunoErudio.error && alunoErudio.cpf) {
@@ -317,3 +340,10 @@ const criarAluno = async () => {
   });
 };
 </script>
+
+<style scoped>
+.align-skeleton-loading :nth-child(1),
+.align-skeleton-loading :nth-child(2) {
+  margin-top: 12px;
+}
+</style>
