@@ -167,7 +167,6 @@ const onInputCPF = () => {
 };
 
 const carregarAlunoMatriculaOnline = async () => {
-  // Verifica se o aluno existe no Matricula On-line
   const { data, error } = await useFetch("/api/alunos", {
     query: {
       cpf: dadosForm.value.cpf,
@@ -204,8 +203,6 @@ const possuiInscricaoEtapaAtiva = async (aluno) => {
 };
 
 const carregarAlunoErudio = async () => {
-  // Verifica se o aluno existe no Erudio
-
   const { data: alunoErudio } = await useFetch("/api/alunos-matriculados", {
     query: {
       cpf: dadosForm.value.cpf,
@@ -226,12 +223,11 @@ const validarInscricao = async () => {
     );
 
   loading.value = true;
-  const aluno = await carregarAlunoMatriculaOnline();
+  const aluno = await carregarAlunoMatriculaOnline(); // Verifica se o aluno existe no Matricula On-line
 
   if (aluno) {
-    // Se o aluno estiver cadastrado no Matricula On-line, verifica se já possui inscricao na etapa ativa
     dadosForm.value = { ...aluno };
-    const inscricaoAtiva = await possuiInscricaoEtapaAtiva(aluno);
+    const inscricaoAtiva = await possuiInscricaoEtapaAtiva(aluno); // Verifica se já possui inscricao na etapa ativa
 
     if (inscricaoAtiva.hasOwnProperty("message")) {
       loading.value = false;
@@ -244,35 +240,42 @@ const validarInscricao = async () => {
     }
   }
 
-  const alunoErudio = await carregarAlunoErudio();
+  const alunoErudio = await carregarAlunoErudio(); // Verifica se o aluno existe no Erudio
 
   loading.value = false;
 
-  //Quando é Processo Exclusivamente Interno - Utilizar esse bloco
-  if (!alunoErudio.statusCode && !alunoErudio.error && alunoErudio.cpf) {
-    dadosForm.value = {
-      ...dadosForm.value,
-      cpf: alunoErudio.cpf,
-      nome: alunoErudio.nome,
-      responsavelNome: alunoErudio.responsavelNome,
-      dataNascimento: alunoErudio.dataNascimento,
-      etapa: etapas.value.find((e) => e.id == alunoErudio.etapaId),
-      unidadeEnsinoId: alunoErudio.unidadeEnsinoId,
-    };
+  // Se etapa INTERNO
+  if (etapaAtiva.value.categoria === "INTERNO") {
+    if (!alunoErudio.statusCode && !alunoErudio.error && alunoErudio.cpf) {
+      dadosForm.value = {
+        ...dadosForm.value,
+        cpf: alunoErudio.cpf,
+        nome: alunoErudio.nome,
+        responsavelNome: alunoErudio.responsavelNome,
+        dataNascimento: alunoErudio.dataNascimento,
+        etapa: etapas.value.find((e) => e.id == alunoErudio.etapaId),
+        unidadeEnsinoId: alunoErudio.unidadeEnsinoId,
+      };
 
-    return (showAllInputs.value = true); // Exibe o Form SOMENTE se carregar um aluno do Erudio
+      return (showAllInputs.value = true); // Exibe o Form SOMENTE se carregar um aluno do Erudio
+    }
+    // Se não carregar um aluno do Erudio, deve exibir o Dialog de Erro de Processo Interno
+    return (showDialogProcessoInterno.value = true);
   }
 
-  // Se alunoErudio não retorna cpf, deve exibir o Dialog de Erro de Processo Interno
-  showDialogProcessoInterno.value = true;
-  // Fim do Bloco de Processo Interno
+  // Se etapa EXTERNO
+  if (etapaAtiva.value.categoria === "EXTERNO") {
+    if (!alunoErudio.statusCode && !alunoErudio.error && alunoErudio.id) {
+      return (showAllInputs.value = true); // Exibe o Form somente se NÃO retornar um aluno do Erudio
+    }
+    // Se carregar um aluno do Erudio, deve exibir o Dialog informando que a etapa é externa
+    return (showDialogProcessoExterno.value = true);
+  }
 
-  // Quando​ é Processo Exclusivamente Externo --- Utilizar esse bloco ---
-  // if (!alunoErudio.statusCode && !alunoErudio.error && !alunoErudio.cpf) {
-  //   return (showAllInputs.value = true); // Exibe o Form somente se NÃO retornar um aluno (cpf) do Erudio
+  // Se etapa GERAL
+  // if (etapaAtiva.value.categoria === "GERAL") {
+  //   // TODO: código de uma Etapa Geral (Inexistente no momento)
   // }
-  // showDialogProcessoExterno = true;
-  // Fim do Bloco de Processo Externo
 };
 
 const onSubmit = async () => {

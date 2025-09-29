@@ -18,7 +18,7 @@
         </span>
       </v-col>
       <v-col cols="12" class="py-2">
-        <span class="font-weight-bold"
+        <span
           >Matrícula Interna - 1° ano do Ensino Fundamental: 26/11/2024 (9h) até
           28/11/2024 (18h)</span
         >
@@ -30,7 +30,7 @@
         >
       </v-col>
       <v-col cols="12" class="py-2">
-        <span
+        <span class="font-weight-bold"
           >Novas Matrículas - Ensino Fundamental: 09/12/2024 (9h) até 12/12/2024
           (12h)</span
         >
