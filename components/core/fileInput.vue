@@ -62,14 +62,14 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["input"]);
+const emit = defineEmits(["update:modelValue"]);
 
 const model = computed({
   get() {
     return props.modelValue;
   },
   set(val) {
-    emit("input", val);
+    emit("update:modelValue", val);
   },
 });
 
@@ -77,7 +77,24 @@ const validationRules = ref([]);
 
 onMounted(() => {
   validationRules.value = props.required
-    ? [...props.validate, (v) => !!v || "Campo obrigatório"]
+    ? [
+        ...props.validate,
+        (v) => {
+          if (!v) return "Campo obrigatório";
+
+          // Quando 'multiple' for false
+          if (typeof v === "object" && "length" in v) {
+            return v.length > 0 || "Campo obrigatório";
+          }
+
+          // Quando 'multiple' for true
+          if (Array.isArray(v)) {
+            return v.length > 0 || "Campo obrigatório";
+          }
+
+          return "Campo obrigatório";
+        },
+      ]
     : [...props.validate];
 });
 </script>

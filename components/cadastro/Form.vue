@@ -64,6 +64,7 @@
         clearable
         label="Telefone do(a) responsável (2)"
         placeholder="(99) 99999-9999"
+        required
         @input="dadosForm.telefone2 = $event"
       />
 
@@ -104,7 +105,7 @@
           Informe os documentos, conforme item 2.2.4 do Edital de Matrícula
           2026.
         </p>
-        <p class="font-italic">
+        <p class="font-italic text-body-2">
           Os documentos marcados com (*) são obrigatórios
         </p>
       </v-col>
@@ -115,7 +116,6 @@
         clearable
         label="Certidão de nascimento ou documento de identidade do estudante*"
         required
-        @input="documentos.certidao_identidade = $event"
       />
 
       <CoreFileInput
@@ -126,7 +126,22 @@
         label="CPF e RG dos pais ou responsáveis*"
         multiple
         required
-        @input="documentos.cpf_rg_responsaveis = $event"
+      />
+
+      <CoreFileInput
+        v-model="documentos.comprovante_residencia"
+        chips
+        clearable
+        label="Comprovante de residência*"
+        required
+      />
+
+      <CoreFileInput
+        v-model="documentos.foto_estudante"
+        chips
+        clearable
+        label="Foto do(a) estudante (Rosto com fundo branco)*"
+        required
       />
 
       <CoreFileInput
@@ -141,27 +156,8 @@
         v-model="documentos.cartao_cns"
         chips
         clearable
-        label="Cartão Nacional de Saúde (CNS)*"
-        required
+        label="Cartão Nacional de Saúde (CNS)"
         @input="documentos.cartao_cns = $event"
-      />
-
-      <CoreFileInput
-        v-model="documentos.comprovante_residencia"
-        chips
-        clearable
-        label="Comprovante de residência*"
-        required
-        @input="documentos.comprovante_residencia = $event"
-      />
-
-      <CoreFileInput
-        v-model="documentos.foto_estudante"
-        chips
-        clearable
-        label="Foto do(a) estudante (Rosto com fundo branco)*"
-        required
-        @input="documentos.foto_estudante = $event"
       />
 
       <CoreFileInput
@@ -201,6 +197,7 @@
       <CoreButton
         label="salvar"
         prepend-icon="mdi-content-save"
+        :loading="loadingButton"
         @click="onSubmit()"
       />
     </v-row>
@@ -244,6 +241,7 @@ const etapaAtiva = ref(null);
 const dadosForm = ref({});
 const documentos = ref({});
 const loading = ref(false);
+const loadingButton = ref(false);
 const alunoState = useAluno();
 
 onMounted(() => {
@@ -393,9 +391,10 @@ const validarInscricao = async () => {
   }
 
   // Se etapa GERAL
-  // if (etapaAtiva.value.categoria === "GERAL") {
-  //   // TODO: código de uma Etapa Geral (Inexistente no momento)
-  // }
+  if (etapaAtiva.value.categoria === "GERAL") {
+    message.value = "Erro: Etapa ativa não pode ser da categoria: GERAL.";
+    return (showMessage.value = true);
+  }
 };
 
 const onSubmit = async () => {
@@ -414,6 +413,8 @@ const onSubmit = async () => {
   if (dadosForm.value.email && !dadosForm.value.email.length)
     delete dadosForm.value.email;
 
+  loadingButton.value = true;
+
   dadosForm.value.id ? editarAluno() : criarAluno();
 };
 
@@ -429,6 +430,7 @@ const editarAluno = async () => {
 
   if (error.value || alunoEditado.value.statusCode) {
     message.value = error.value || alunoEditado.value.message;
+    loadingButton.value = false;
     return (showMessage.value = true);
   }
 
@@ -453,6 +455,7 @@ const criarAluno = async () => {
 
   if (error.value || alunoCriado.value.statusCode) {
     message.value = error.value || alunoCriado.value.message;
+    loadingButton.value = false;
     return (showMessage.value = true);
   }
 
@@ -471,17 +474,18 @@ const salvarInscricao = async () => {
   const { data: inscricaoCriada, error } = await useFetch("/api/inscricoes", {
     method: "POST",
     body: {
-      alunoId: alunoState.value.id,
+      alunoId: alunoState.value.id.toString(),
       processoEtapaId: etapaAtiva.value.id,
       unidadeEnsinoProximoAnoId:
-        alunoState.value.unidadeEnsinoProximoAnoId || 1,
-      etapaProximoAnoId: alunoState.value.etapaProximoAnoId || 1,
-      turnoProximoAnoId: alunoState.value.turnoProximoAnoId || 1,
+        alunoState.value.unidadeEnsinoProximoAnoId?.toString() || "16142",
+      etapaProximoAnoId: alunoState.value.etapaProximoAnoId?.toString() || "1",
+      turnoProximoAnoId: alunoState.value.turnoProximoAnoId?.toString() || "1",
     },
   });
 
   if (error.value || inscricaoCriada.value.statusCode) {
     message.value = error.value || inscricaoCriada.value.message;
+    loadingButton.value = false;
     return (showMessage.value = true);
   }
 
@@ -511,6 +515,7 @@ const salvarDocumentos = async (inscricao) => {
 
   if (error.value || anexos.value.statusCode) {
     message.value = error.value || anexos.value.message;
+    loadingButton.value = false;
     return (showMessage.value = true);
   }
 

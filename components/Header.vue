@@ -47,11 +47,11 @@ const menuDefault = [
     title: "Consulta Protocolo",
     to: "/consulta",
   },
-  {
-    icon: "mdi-progress-question",
-    title: "Ajuda",
-    to: "/ajuda",
-  },
+  // {
+  //   icon: "mdi-progress-question",
+  //   title: "Ajuda",
+  //   to: "/ajuda",
+  // },
 ];
 
 const menuAuth = [

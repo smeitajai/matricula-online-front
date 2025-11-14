@@ -12,7 +12,7 @@
         persistent-hint
         placeholder="123456789000"
         required
-        @input="(cpf = $event), onInputCPF()"
+        @input="((cpf = $event), onInputCPF())"
       />
     </v-col>
     <v-col v-if="showInscricoes" cols="12">
@@ -24,7 +24,7 @@
         class="mt-4"
         :elevation="4"
         :items="inscricoes"
-        :item-text="(i) => `Etapa: ${getEtapaProcesso(i.processoEtapaId)}`"
+        :item-text="(i) => `Protocolo: ${i.protocolo}`"
         item-text-subtitle
       >
         <template #itemTextSubtitle="{ item }">
@@ -110,7 +110,11 @@ const carregarAluno = async () => {
     },
   });
 
-  if (alunoCarregado.value.statusCode || alunoCarregado.value.error) {
+  if (
+    alunoCarregado.value.statusCode ||
+    alunoCarregado.value.error ||
+    !alunoCarregado.value.length
+  ) {
     return (
       (message.value = "Erro: Aluno não encontrado."),
       (showMessage.value = true)
@@ -125,14 +129,27 @@ const carregarAluno = async () => {
     },
   });
 
-  // Filtra apenas as inscrições em etapas do Processo em andamento
-  const inscricoesFiltradas = inscricoesAluno.value.filter((inscricao) =>
-    etapasProcesso.value.some(
-      (etapa) => etapa.id === inscricao.processoEtapaId,
-    ),
-  );
+  if (
+    inscricoesAluno.value.statusCode ||
+    inscricoesAluno.value.error ||
+    !inscricoesAluno.value.length
+  ) {
+    return (
+      (message.value = "Erro: Nenhuma inscrição encontrada."),
+      (showMessage.value = true)
+    );
+  }
 
-  inscricoes.value = inscricoesFiltradas || [];
+  // Filtra apenas as inscrições em etapas do Processo em andamento
+  // const inscricoesFiltradas = inscricoesAluno.value.filter((inscricao) =>
+  //   etapasProcesso.value.some(
+  //     (etapa) => etapa.id === inscricao.processoEtapaId,
+  //   ),
+  // );
+
+  // inscricoes.value = inscricoesFiltradas || [];
+
+  inscricoes.value = inscricoesAluno.value;
   showInscricoes.value = true;
 };
 
