@@ -6,7 +6,7 @@
     ></v-app-bar-nav-icon>
     <v-app-bar-title>Matrícula On-line</v-app-bar-title>
     <ButtonTheme />
-    <ButtonLogin />
+    <!-- <ButtonLogin /> -->
   </v-app-bar>
 
   <v-navigation-drawer v-model="drawer" location="left" temporary>

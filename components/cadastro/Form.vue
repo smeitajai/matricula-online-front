@@ -37,6 +37,7 @@
         v-model="dadosForm.responsavelNome"
         autofocus
         clearable
+        disabled
         label="Nome do(a) responsável*"
         required
         @input="dadosForm.responsavelNome = $event"
@@ -54,6 +55,7 @@
         clearable
         label="Telefone do(a) responsável (1)"
         placeholder="(99) 99999-9999"
+        required
         @input="dadosForm.telefone1 = $event"
       />
 
@@ -67,21 +69,22 @@
 
       <CoreInput
         v-model="dadosForm.nome"
+        disabled
         label="Nome do aluno(a)*"
         required
-        full-width
         @input="dadosForm.nome = $event"
       />
 
       <CoreInput
         v-model="dadosForm.dataNascimento"
+        disabled
         label="Data de nascimento*"
         type="date"
         required
         @input="dadosForm.dataNascimento = $event"
       />
 
-      <CoreSelect
+      <!-- <CoreSelect
         v-model="dadosForm.etapa"
         :items="etapas"
         :hint="`para o ano letivo de ${ANO_INSCRICAO}`"
@@ -90,13 +93,114 @@
         persistent-hint
         required
         @input="dadosForm.etapa = $event"
+      /> -->
+
+      <v-col cols="12">
+        <v-divider></v-divider>
+      </v-col>
+
+      <v-col cols="12">
+        <p>
+          Informe os documentos, conforme item 2.2.4 do Edital de Matrícula
+          2026.
+        </p>
+        <p class="font-italic">
+          Os documentos marcados com (*) são obrigatórios
+        </p>
+      </v-col>
+
+      <CoreFileInput
+        v-model="documentos.certidao_identidade"
+        chips
+        clearable
+        label="Certidão de nascimento ou documento de identidade do estudante*"
+        required
+        @input="documentos.certidao_identidade = $event"
+      />
+
+      <CoreFileInput
+        v-model="documentos.cpf_rg_responsaveis"
+        chips
+        clearable
+        counter
+        label="CPF e RG dos pais ou responsáveis*"
+        multiple
+        required
+        @input="documentos.cpf_rg_responsaveis = $event"
+      />
+
+      <CoreFileInput
+        v-model="documentos.declaracao_vacinacao"
+        chips
+        clearable
+        label="Declaração de vacinação"
+        @input="documentos.declaracao_vacinacao = $event"
+      />
+
+      <CoreFileInput
+        v-model="documentos.cartao_cns"
+        chips
+        clearable
+        label="Cartão Nacional de Saúde (CNS)*"
+        required
+        @input="documentos.cartao_cns = $event"
+      />
+
+      <CoreFileInput
+        v-model="documentos.comprovante_residencia"
+        chips
+        clearable
+        label="Comprovante de residência*"
+        required
+        @input="documentos.comprovante_residencia = $event"
+      />
+
+      <CoreFileInput
+        v-model="documentos.foto_estudante"
+        chips
+        clearable
+        label="Foto do(a) estudante (Rosto com fundo branco)*"
+        required
+        @input="documentos.foto_estudante = $event"
+      />
+
+      <CoreFileInput
+        v-model="documentos.cartao_social"
+        chips
+        clearable
+        label="Cartão Social (NIS)"
+        @input="documentos.cartao_social = $event"
+      />
+
+      <CoreFileInput
+        v-model="documentos.cartao_bpc"
+        chips
+        clearable
+        label="Cartão Benefício de Prestação Continuada (BPC)"
+        @input="documentos.cartao_bpc = $event"
+      />
+
+      <CoreFileInput
+        v-model="documentos.tutela_provisoria"
+        chips
+        clearable
+        label="Tutela provisória"
+        @input="documentos.tutela_provisoria = $event"
+      />
+
+      <CoreFileInput
+        v-model="documentos.laudo_medico"
+        chips
+        clearable
+        label="Laudo Médico"
+        @input="documentos.laudo_medico = $event"
       />
     </v-row>
 
     <v-row v-if="showAllInputs" justify="end">
       <CoreButton
-        label="buscar vaga"
-        prepend-icon="mdi-magnify"
+        label="salvar"
+        prepend-icon="mdi-content-save"
         @click="onSubmit()"
       />
     </v-row>
@@ -128,7 +232,7 @@ const { data: processo } = await useFetch("/api/processos/em-andamento");
 
 const emit = defineEmits(["submit"]);
 
-const ANO_INSCRICAO = new Date().getFullYear() + 1;
+//const ANO_INSCRICAO = new Date().getFullYear() + 1;
 
 const showAllInputs = ref(false);
 const showDialogProcessoExterno = ref(false);
@@ -138,6 +242,7 @@ const message = ref("");
 const form = ref(null);
 const etapaAtiva = ref(null);
 const dadosForm = ref({});
+const documentos = ref({});
 const loading = ref(false);
 const alunoState = useAluno();
 
@@ -203,12 +308,22 @@ const possuiInscricaoEtapaAtiva = async (aluno) => {
 };
 
 const carregarAlunoErudio = async () => {
-  const { data: alunoErudio } = await useFetch("/api/alunos-matriculados", {
-    query: {
-      cpf: dadosForm.value.cpf,
-      ordem: etapaAtiva.value.ordem,
+  const { data: alunoErudio, error } = await useFetch(
+    "/api/alunos-matriculados",
+    {
+      query: {
+        cpf: dadosForm.value.cpf,
+        ordem: etapaAtiva.value.ordem,
+      },
     },
-  });
+  );
+
+  if (error.value || alunoErudio.value.statusCode || alunoErudio.value.error) {
+    message.value =
+      error.value || alunoErudio.value.error || alunoErudio.value.message;
+    showMessage.value = true;
+    return null;
+  }
 
   return alunoErudio.value;
 };
@@ -246,7 +361,12 @@ const validarInscricao = async () => {
 
   // Se etapa INTERNO
   if (etapaAtiva.value.categoria === "INTERNO") {
-    if (!alunoErudio.statusCode && !alunoErudio.error && alunoErudio.cpf) {
+    if (
+      alunoErudio &&
+      !alunoErudio.statusCode &&
+      !alunoErudio.error &&
+      alunoErudio.cpf
+    ) {
       dadosForm.value = {
         ...dadosForm.value,
         cpf: alunoErudio.cpf,
@@ -312,11 +432,13 @@ const editarAluno = async () => {
     return (showMessage.value = true);
   }
 
-  emit("submit", {
-    alunoId: alunoEditado.value.id,
-    etapaId: dadosForm.value.etapa.id,
-    unidadeEnsinoId: dadosForm.value.unidadeEnsinoId,
-  });
+  salvarInscricao();
+
+  // emit("submit", {
+  //   alunoId: alunoEditado.value.id,
+  //   etapaId: dadosForm.value.etapa.id,
+  //   unidadeEnsinoId: dadosForm.value.unidadeEnsinoId,
+  // });
 };
 
 const criarAluno = async () => {
@@ -336,10 +458,71 @@ const criarAluno = async () => {
 
   alunoState.value = alunoCriado.value; // Grava o aluno criado no State
 
-  emit("submit", {
-    alunoId: alunoCriado.value.id,
-    etapaId: dadosForm.value.etapa.id,
-    unidadeEnsinoId: dadosForm.value.unidadeEnsinoId,
+  salvarInscricao();
+
+  // emit("submit", {
+  //   alunoId: alunoCriado.value.id,
+  //   etapaId: dadosForm.value.etapa.id,
+  //   unidadeEnsinoId: dadosForm.value.unidadeEnsinoId,
+  // });
+};
+
+const salvarInscricao = async () => {
+  const { data: inscricaoCriada, error } = await useFetch("/api/inscricoes", {
+    method: "POST",
+    body: {
+      alunoId: alunoState.value.id,
+      processoEtapaId: etapaAtiva.value.id,
+      unidadeEnsinoProximoAnoId:
+        alunoState.value.unidadeEnsinoProximoAnoId || 1,
+      etapaProximoAnoId: alunoState.value.etapaProximoAnoId || 1,
+      turnoProximoAnoId: alunoState.value.turnoProximoAnoId || 1,
+    },
+  });
+
+  if (error.value || inscricaoCriada.value.statusCode) {
+    message.value = error.value || inscricaoCriada.value.message;
+    return (showMessage.value = true);
+  }
+
+  salvarDocumentos(inscricaoCriada.value);
+};
+
+const normalizeFiles = (value) => {
+  // Normaliza os arquivos para um array
+  if (!value) return [];
+  if (Array.isArray(value)) return value;
+  return [value];
+};
+
+const salvarDocumentos = async (inscricao) => {
+  const formData = new FormData();
+  formData.append("inscricaoId", inscricao.id);
+
+  Object.values(documentos.value).forEach((valor) => {
+    const arquivos = normalizeFiles(valor);
+    arquivos.forEach((arquivo) => formData.append("files", arquivo));
+  });
+
+  const { data: anexos, error } = await useFetch("/api/anexos", {
+    method: "POST",
+    body: formData,
+  });
+
+  if (error.value || anexos.value.statusCode) {
+    message.value = error.value || anexos.value.message;
+    return (showMessage.value = true);
+  }
+
+  gerarprotocolo(inscricao);
+};
+
+const gerarprotocolo = async (inscricao) => {
+  await navigateTo({
+    path: "/protocolo",
+    query: {
+      inscricao: inscricao.id,
+    },
   });
 };
 </script>

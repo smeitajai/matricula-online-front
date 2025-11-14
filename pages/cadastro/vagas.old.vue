@@ -34,7 +34,7 @@
         full-width
         label="Buscar por unidade de ensino"
         placeholder="Ex: Aníbal César"
-        @input="(textFilter = $event), onInputFilter()"
+        @input="((textFilter = $event), onInputFilter())"
       />
       <CoreList
         v-if="quadrosFiltrados.length"
