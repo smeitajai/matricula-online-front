@@ -206,6 +206,7 @@
       v-model="showMessage"
       color="error"
       :message="message"
+      :timeout="timeout"
       @hide="showMessage = $event"
     />
 
@@ -242,6 +243,7 @@ const dadosForm = ref({});
 const documentos = ref({});
 const loading = ref(false);
 const loadingButton = ref(false);
+const timeout = ref(5000);
 const alunoState = useAluno();
 
 onMounted(() => {
@@ -365,6 +367,19 @@ const validarInscricao = async () => {
       !alunoErudio.error &&
       alunoErudio.cpf
     ) {
+      if (
+        !alunoErudio.etapaProximoAnoId ||
+        !alunoErudio.turnoProximoAnoId ||
+        !alunoErudio.unidadeEnsinoProximoAnoId
+      ) {
+        // Se não tiver Etapa, Turno ou Unidade do Proximo Ano, mostra erro e não deixa seguir
+        message.value =
+          "Erro: Aluno(a) não possui etapa, turno ou unidade do próximo ano.";
+        timeout.value = 10000;
+        showMessage.value = true;
+        return;
+      }
+
       dadosForm.value = {
         ...dadosForm.value,
         cpf: alunoErudio.cpf,
