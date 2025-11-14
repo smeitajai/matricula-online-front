@@ -5,11 +5,10 @@
         Boas-vindas ao sistema de Matrículas On-line!
       </v-col>
       <v-col cols="12" class="text-overline">
-        Utilize o menu lateral 
+        Utilize o menu lateral
         <v-icon>mdi-menu</v-icon>
         para acessar as opções.
       </v-col>
     </v-row>
-    
   </v-container>
 </template>

@@ -13,7 +13,11 @@
       <v-col cols="12"> Possíveis impedimentos: </v-col>
       <v-col cols="12">
         - Neste momento, a matrícula on-line está disponível apenas para
-        <span class="font-weight-bold">{{ etapaAtiva.nome || "" }}.</span>
+        <!-- <span class="font-weight-bold">{{ etapaAtiva.nome || "" }}.</span> -->
+        estudantes que já frequentam uma unidade de ensino municipal.
+      </v-col>
+      <v-col cols="12">
+        - O CPF informado não está vinculado a um aluno(a).
       </v-col>
       <v-col cols="12">
         - Caso necessite fazer a matrícula na etapa de

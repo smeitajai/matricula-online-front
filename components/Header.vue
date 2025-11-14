@@ -6,7 +6,7 @@
     ></v-app-bar-nav-icon>
     <v-app-bar-title>Matrícula On-line</v-app-bar-title>
     <ButtonTheme />
-    <ButtonLogin />
+    <!-- <ButtonLogin /> -->
   </v-app-bar>
 
   <v-navigation-drawer v-model="drawer" location="left" temporary>
@@ -47,11 +47,11 @@ const menuDefault = [
     title: "Consulta Protocolo",
     to: "/consulta",
   },
-  {
-    icon: "mdi-progress-question",
-    title: "Ajuda",
-    to: "/ajuda",
-  },
+  // {
+  //   icon: "mdi-progress-question",
+  //   title: "Ajuda",
+  //   to: "/ajuda",
+  // },
 ];
 
 const menuAuth = [
