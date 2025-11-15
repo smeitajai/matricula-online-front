@@ -1,5 +1,12 @@
 <template>
   <v-row class="ma-5 pt-10">
+    <v-col cols="12" class="text-center">
+      <v-img
+        src="/logo_educacao.png"
+        max-width="300"
+        class="mx-auto mb-4"
+      ></v-img>
+    </v-col>
     <v-col cols="12" class="text-center text-h4">
       Solicitação efetuada com sucesso!
     </v-col>

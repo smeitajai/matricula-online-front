@@ -123,9 +123,16 @@
         chips
         clearable
         counter
-        label="CPF e RG dos pais ou responsáveis*"
-        multiple
+        label="CPF e RG do responsável 1*"
         required
+      />
+
+      <CoreFileInput
+        v-model="documentos.cpf_rg_responsaveis"
+        chips
+        clearable
+        counter
+        label="CPF e RG do responsável 2"
       />
 
       <CoreFileInput
@@ -244,6 +251,7 @@ const documentos = ref({});
 const loading = ref(false);
 const loadingButton = ref(false);
 const timeout = ref(5000);
+const inscricaoAtiva = ref(null);
 const alunoState = useAluno();
 
 onMounted(() => {
@@ -258,7 +266,7 @@ onMounted(() => {
   }
 });
 
-const onInputCPF = () => {
+const onInputCPF = async () => {
   showAllInputs.value = false;
 
   if (dadosForm.value.cpf && dadosForm.value.cpf.length)
@@ -266,7 +274,7 @@ const onInputCPF = () => {
 
   if (dadosForm.value.cpf && dadosForm.value.cpf.length == 11) {
     return validateCPF(dadosForm.value.cpf)
-      ? validarInscricao()
+      ? await validarInscricao()
       : ((message.value = "Erro: CPF Inválido."), (showMessage.value = true));
   }
 };
@@ -342,16 +350,16 @@ const validarInscricao = async () => {
 
   if (aluno) {
     dadosForm.value = { ...aluno };
-    const inscricaoAtiva = await possuiInscricaoEtapaAtiva(aluno); // Verifica se já possui inscricao na etapa ativa
+    inscricaoAtiva.value = await possuiInscricaoEtapaAtiva(aluno); // Verifica se já possui inscricao na etapa ativa
 
-    if (inscricaoAtiva.hasOwnProperty("message")) {
+    if (inscricaoAtiva.value.hasOwnProperty("message")) {
       loading.value = false;
-      return (
-        (message.value =
-          inscricaoAtiva.message ||
-          "Erro: Aluno(a) já está inscrito nesta etapa do processo."),
-        (showMessage.value = true)
-      );
+      message.value =
+        inscricaoAtiva.value.message ||
+        "Erro: Aluno(a) já está inscrito nesta etapa do processo.";
+
+      showMessage.value = true;
+      return;
     }
   }
 
@@ -413,6 +421,11 @@ const validarInscricao = async () => {
 };
 
 const onSubmit = async () => {
+  if (inscricaoAtiva.value) {
+    message.value = "Erro: Aluno(a) já está inscrito nesta etapa do processo.";
+    return (showMessage.value = true);
+  }
+
   const { valid } = await form.value.validate();
   if (!valid)
     return (

@@ -3,7 +3,7 @@
     <v-row>
       <span class="text-h6 ma-5 text-center">
         Seja bem-vindo(a) ao sistema de matrículas On-line para o
-        <u>Ensino Fundamental</u> do município de Itajaí/SC!
+        <u>Ensino Fundamental</u> do Município de Itajaí/SC!
       </span>
     </v-row>
 
