@@ -16,18 +16,18 @@
     <v-col cols="12" class="text-center font-weight-bold">
       Emitido em {{ dataAtual }}
     </v-col>
-    <v-col cols="12">
+    <!-- <v-col cols="12">
       O(a) aluno(a)
       {{ inscricao.aluno.nome }} - CPF [{{ inscricao.aluno.cpf }}], esta com a
       sua matrícula garantida. Favor consultar o sistema mais tarde para
       confirmar a unidade de ensino e o turno definido.
-    </v-col>
-    <!-- <v-col cols="12">
+    </v-col> -->
+    <v-col cols="12">
       O(a) aluno(a)
       {{ inscricao.aluno.nome }} - CPF [{{ inscricao.aluno.cpf }}], foi
       encaminhado(a) para o {{ inscricao.etapa.nome }} na unidade -
       {{ inscricao.unidadeEnsino.nome }} - turno {{ inscricao.turno.nome }}.
-    </v-col> -->
+    </v-col>
     <v-col cols="12" class="text-justify">
       Os documentos foram recebidos para o processo de rematrícula. Informamos
       que isso ainda não garante a rematrícula, pois todos os documentos serão
