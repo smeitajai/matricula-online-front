@@ -423,11 +423,6 @@ const validarInscricao = async () => {
 };
 
 const onSubmit = async () => {
-  if (inscricaoAtiva.value) {
-    message.value = "Erro: Aluno(a) já está inscrito nesta etapa do processo.";
-    return (showMessage.value = true);
-  }
-
   const { valid } = await form.value.validate();
   if (!valid)
     return (
@@ -463,6 +458,8 @@ const editarAluno = async () => {
     loadingButton.value = false;
     return (showMessage.value = true);
   }
+
+  alunoState.value = alunoEditado.value; // Grava o aluno editado no State
 
   salvarInscricao();
 
@@ -536,10 +533,35 @@ const salvarDocumentos = async (inscricao) => {
   const formData = new FormData();
   formData.append("inscricaoId", inscricao.id);
 
-  Object.values(documentos.value).forEach((valor) => {
-    const arquivos = normalizeFiles(valor);
-    arquivos.forEach((arquivo) => formData.append("files", arquivo));
+  const categoriasDocumentos = {
+    certidao_identidade: documentos.value.certidao_identidade,
+    cpf_rg_responsavel1: documentos.value.cpf_rg_responsavel1,
+    cpf_rg_responsavel2: documentos.value.cpf_rg_responsavel2,
+    comprovante_residencia: documentos.value.comprovante_residencia,
+    foto_estudante: documentos.value.foto_estudante,
+    declaracao_vacinacao: documentos.value.declaracao_vacinacao,
+    cartao_cns: documentos.value.cartao_cns,
+    cartao_social: documentos.value.cartao_social,
+    cartao_bpc: documentos.value.cartao_bpc,
+    tutela_provisoria: documentos.value.tutela_provisoria,
+    laudo_medico: documentos.value.laudo_medico,
+  };
+  //["certidao_identidade", "cpf_rg_responsavel1", "cpf_rg_responsavel2", "comprovante_residencia", "foto_estudante", "declaracao_vacinacao", "cartao_cns", "cartao_social", "cartao_bpc", "tutela_provisoria", "laudo_medico"];
+
+  console.log("categoriasDocumentos :>> ", categoriasDocumentos);
+
+  let listaNomes = [];
+  // Percorre todas as categorias dinamicamente
+  Object.entries(categoriasDocumentos).forEach(([nomeCampo, arquivos]) => {
+    const lista = normalizeFiles(arquivos);
+    lista.forEach((arquivo) => {
+      formData.append("files", arquivo);
+      //formData.append("nomeDocumento", nomeCampo);
+      listaNomes.push(nomeCampo);
+    });
   });
+
+  formData.append("nomeDocumento", listaNomes);
 
   const { data: anexos, error } = await useFetch("/api/anexos", {
     method: "POST",
