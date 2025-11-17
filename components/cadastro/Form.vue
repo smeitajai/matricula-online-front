@@ -251,7 +251,7 @@ const documentos = ref({});
 const loading = ref(false);
 const loadingButton = ref(false);
 const timeout = ref(5000);
-const inscricaoAtiva = ref(null);
+const hasInscricaoAtiva = ref(false);
 const alunoCarregadoErudio = ref(null);
 const alunoState = useAluno();
 
@@ -310,10 +310,11 @@ const possuiInscricaoEtapaAtiva = async (aluno) => {
   if (error.value || inscricao.value.statusCode || inscricao.value.error) {
     message.value =
       error.value || inscricao.value.error || inscricao.value.message;
-    return (showMessage.value = true);
+    showMessage.value = true;
+    return true;
   }
 
-  return inscricao.value;
+  return false;
 };
 
 const carregarAlunoErudio = async () => {
@@ -347,21 +348,26 @@ const validarInscricao = async () => {
     );
 
   loading.value = true;
+  hasInscricaoAtiva.value = false;
   const aluno = await carregarAlunoMatriculaOnline(); // Verifica se o aluno existe no Matricula On-line
 
   if (aluno) {
     dadosForm.value = { ...aluno };
-    inscricaoAtiva.value = await possuiInscricaoEtapaAtiva(aluno); // Verifica se já possui inscricao na etapa ativa
+    hasInscricaoAtiva.value = await possuiInscricaoEtapaAtiva(aluno); // Verifica se já possui inscricao na etapa ativa
 
-    if (inscricaoAtiva.value.hasOwnProperty("message")) {
+    if (hasInscricaoAtiva.value) {
       loading.value = false;
       message.value =
-        inscricaoAtiva.value.message ||
+        hasInscricaoAtiva.value.message ||
         "Erro: Aluno(a) já está inscrito nesta etapa do processo.";
 
       showMessage.value = true;
-      return;
     }
+  }
+
+  if (hasInscricaoAtiva.value) {
+    loading.value = false;
+    return;
   }
 
   const alunoErudio = await carregarAlunoErudio(); // Verifica se o aluno existe no Erudio
@@ -462,12 +468,6 @@ const editarAluno = async () => {
   alunoState.value = alunoEditado.value; // Grava o aluno editado no State
 
   salvarInscricao();
-
-  // emit("submit", {
-  //   alunoId: alunoEditado.value.id,
-  //   etapaId: dadosForm.value.etapa.id,
-  //   unidadeEnsinoId: dadosForm.value.unidadeEnsinoId,
-  // });
 };
 
 const criarAluno = async () => {
@@ -489,12 +489,6 @@ const criarAluno = async () => {
   alunoState.value = alunoCriado.value; // Grava o aluno criado no State
 
   salvarInscricao();
-
-  // emit("submit", {
-  //   alunoId: alunoCriado.value.id,
-  //   etapaId: dadosForm.value.etapa.id,
-  //   unidadeEnsinoId: dadosForm.value.unidadeEnsinoId,
-  // });
 };
 
 const salvarInscricao = async () => {
@@ -546,9 +540,6 @@ const salvarDocumentos = async (inscricao) => {
     tutela_provisoria: documentos.value.tutela_provisoria,
     laudo_medico: documentos.value.laudo_medico,
   };
-  //["certidao_identidade", "cpf_rg_responsavel1", "cpf_rg_responsavel2", "comprovante_residencia", "foto_estudante", "declaracao_vacinacao", "cartao_cns", "cartao_social", "cartao_bpc", "tutela_provisoria", "laudo_medico"];
-
-  console.log("categoriasDocumentos :>> ", categoriasDocumentos);
 
   let listaNomes = [];
   // Percorre todas as categorias dinamicamente
@@ -556,7 +547,6 @@ const salvarDocumentos = async (inscricao) => {
     const lista = normalizeFiles(arquivos);
     lista.forEach((arquivo) => {
       formData.append("files", arquivo);
-      //formData.append("nomeDocumento", nomeCampo);
       listaNomes.push(nomeCampo);
     });
   });
