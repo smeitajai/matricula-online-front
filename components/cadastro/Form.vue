@@ -119,7 +119,7 @@
       />
 
       <CoreFileInput
-        v-model="documentos.cpf_rg_responsaveis"
+        v-model="documentos.cpf_rg_responsavel1"
         chips
         clearable
         counter
@@ -128,7 +128,7 @@
       />
 
       <CoreFileInput
-        v-model="documentos.cpf_rg_responsaveis"
+        v-model="documentos.cpf_rg_responsavel2"
         chips
         clearable
         counter
@@ -252,6 +252,7 @@ const loading = ref(false);
 const loadingButton = ref(false);
 const timeout = ref(5000);
 const inscricaoAtiva = ref(null);
+const alunoCarregadoErudio = ref(null);
 const alunoState = useAluno();
 
 onMounted(() => {
@@ -364,6 +365,7 @@ const validarInscricao = async () => {
   }
 
   const alunoErudio = await carregarAlunoErudio(); // Verifica se o aluno existe no Erudio
+  alunoCarregadoErudio.value = alunoErudio;
 
   loading.value = false;
 
@@ -505,9 +507,12 @@ const salvarInscricao = async () => {
       alunoId: alunoState.value.id.toString(),
       processoEtapaId: etapaAtiva.value.id,
       unidadeEnsinoProximoAnoId:
-        alunoState.value.unidadeEnsinoProximoAnoId?.toString() || "16142",
-      etapaProximoAnoId: alunoState.value.etapaProximoAnoId?.toString() || "1",
-      turnoProximoAnoId: alunoState.value.turnoProximoAnoId?.toString() || "1",
+        alunoCarregadoErudio.value.unidadeEnsinoProximoAnoId?.toString() ||
+        "16142",
+      etapaProximoAnoId:
+        alunoCarregadoErudio.value.etapaProximoAnoId?.toString() || "1",
+      turnoProximoAnoId:
+        alunoCarregadoErudio.value.turnoProximoAnoId?.toString() || "1",
     },
   });
 
