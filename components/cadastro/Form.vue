@@ -1,10 +1,25 @@
 <template>
   <v-form ref="form" class="pa-10">
     <v-row class="mb-3">
+      <CoreSelect
+        v-model="opcaoProcessoSelecionada"
+        :items="opcoesProcesso"
+        full-width
+        item-title="nome"
+        label="Tipo de cadastro*"
+        required
+        @input="onChangeOpcaoProcesso"
+      />
+    </v-row>
+
+    <v-row
+      v-if="isEtapaAtivaSelecionada || isPreCadastroSelecionado"
+      class="mb-3"
+    >
       <CoreInput
         v-model="dadosForm.cpf"
         :counter="11"
-        :disabled="!etapaAtiva"
+        :disabled="isEtapaAtivaSelecionada && !etapaAtiva"
         clearable
         full-width
         hint="Digite apenas números"
@@ -12,7 +27,7 @@
         persistent-hint
         placeholder="123456789000"
         required
-        @input="((dadosForm.cpf = $event), onInputCPF())"
+        @input="((dadosForm.cpf = $event), onInputCPFPorTipo())"
       />
     </v-row>
     <template v-if="loading">
@@ -96,111 +111,113 @@
         @input="dadosForm.etapa = $event"
       /> -->
 
-      <v-col cols="12">
-        <v-divider></v-divider>
-      </v-col>
+      <template v-if="isEtapaAtivaSelecionada">
+        <v-col cols="12">
+          <v-divider></v-divider>
+        </v-col>
 
-      <v-col cols="12">
-        <p>
-          Informe os documentos, conforme item 2.2.4 do Edital de Matrícula
-          2026.
-        </p>
-        <p class="font-italic text-body-2">
-          Os documentos marcados com (*) são obrigatórios
-        </p>
-      </v-col>
+        <v-col cols="12">
+          <p>
+            Informe os documentos, conforme item 2.2.4 do Edital de Matrícula
+            2026.
+          </p>
+          <p class="font-italic text-body-2">
+            Os documentos marcados com (*) são obrigatórios
+          </p>
+        </v-col>
 
-      <CoreFileInput
-        v-model="documentos.certidao_identidade"
-        chips
-        clearable
-        label="Certidão de nascimento ou documento de identidade do estudante*"
-        required
-      />
+        <CoreFileInput
+          v-model="documentos.certidao_identidade"
+          chips
+          clearable
+          label="Certidão de nascimento ou documento de identidade do estudante*"
+          required
+        />
 
-      <CoreFileInput
-        v-model="documentos.cpf_rg_responsavel1"
-        chips
-        clearable
-        counter
-        label="CPF e RG do responsável 1*"
-        required
-      />
+        <CoreFileInput
+          v-model="documentos.cpf_rg_responsavel1"
+          chips
+          clearable
+          counter
+          label="CPF e RG do responsável 1*"
+          required
+        />
 
-      <CoreFileInput
-        v-model="documentos.cpf_rg_responsavel2"
-        chips
-        clearable
-        counter
-        label="CPF e RG do responsável 2"
-      />
+        <CoreFileInput
+          v-model="documentos.cpf_rg_responsavel2"
+          chips
+          clearable
+          counter
+          label="CPF e RG do responsável 2"
+        />
 
-      <CoreFileInput
-        v-model="documentos.comprovante_residencia"
-        chips
-        clearable
-        label="Comprovante de residência*"
-        required
-      />
+        <CoreFileInput
+          v-model="documentos.comprovante_residencia"
+          chips
+          clearable
+          label="Comprovante de residência*"
+          required
+        />
 
-      <CoreFileInput
-        v-model="documentos.foto_estudante"
-        chips
-        clearable
-        label="Foto do(a) estudante (Rosto com fundo branco)*"
-        required
-      />
+        <CoreFileInput
+          v-model="documentos.foto_estudante"
+          chips
+          clearable
+          label="Foto do(a) estudante (Rosto com fundo branco)*"
+          required
+        />
 
-      <CoreFileInput
-        v-model="documentos.declaracao_vacinacao"
-        chips
-        clearable
-        label="Declaração de vacinação"
-        @input="documentos.declaracao_vacinacao = $event"
-      />
+        <CoreFileInput
+          v-model="documentos.declaracao_vacinacao"
+          chips
+          clearable
+          label="Declaração de vacinação"
+          @input="documentos.declaracao_vacinacao = $event"
+        />
 
-      <CoreFileInput
-        v-model="documentos.cartao_cns"
-        chips
-        clearable
-        label="Cartão Nacional de Saúde (CNS)"
-        @input="documentos.cartao_cns = $event"
-      />
+        <CoreFileInput
+          v-model="documentos.cartao_cns"
+          chips
+          clearable
+          label="Cartão Nacional de Saúde (CNS)"
+          @input="documentos.cartao_cns = $event"
+        />
 
-      <CoreFileInput
-        v-model="documentos.cartao_social"
-        chips
-        clearable
-        label="Cartão Social (NIS)"
-        @input="documentos.cartao_social = $event"
-      />
+        <CoreFileInput
+          v-model="documentos.cartao_social"
+          chips
+          clearable
+          label="Cartão Social (NIS)"
+          @input="documentos.cartao_social = $event"
+        />
 
-      <CoreFileInput
-        v-model="documentos.cartao_bpc"
-        chips
-        clearable
-        label="Cartão Benefício de Prestação Continuada (BPC)"
-        @input="documentos.cartao_bpc = $event"
-      />
+        <CoreFileInput
+          v-model="documentos.cartao_bpc"
+          chips
+          clearable
+          label="Cartão Benefício de Prestação Continuada (BPC)"
+          @input="documentos.cartao_bpc = $event"
+        />
 
-      <CoreFileInput
-        v-model="documentos.tutela_provisoria"
-        chips
-        clearable
-        label="Tutela provisória"
-        @input="documentos.tutela_provisoria = $event"
-      />
+        <CoreFileInput
+          v-model="documentos.tutela_provisoria"
+          chips
+          clearable
+          label="Tutela provisória"
+          @input="documentos.tutela_provisoria = $event"
+        />
 
-      <CoreFileInput
-        v-model="documentos.laudo_medico"
-        chips
-        clearable
-        label="Laudo Médico"
-        @input="documentos.laudo_medico = $event"
-      />
+        <CoreFileInput
+          v-model="documentos.laudo_medico"
+          chips
+          clearable
+          label="Laudo Médico"
+          @input="documentos.laudo_medico = $event"
+        />
+      </template>
     </v-row>
 
-    <v-row v-if="showAllInputs" justify="end">
+    <v-row v-if="showAllInputs && isEtapaAtivaSelecionada" justify="end">
       <CoreButton
         label="salvar"
         prepend-icon="mdi-content-save"
@@ -245,6 +262,7 @@ const showDialogProcessoInterno = ref(false);
 const showMessage = ref(false);
 const message = ref("");
 const form = ref(null);
+const opcaoProcessoSelecionada = ref(null);
 const etapaAtiva = ref(null);
 const dadosForm = ref({});
 const documentos = ref({});
@@ -255,19 +273,61 @@ const hasInscricaoAtiva = ref(false);
 const alunoCarregadoErudio = ref(null);
 const alunoState = useAluno();
 
-onMounted(() => {
-  etapaAtiva.value =
-    processo.value && processo.value.processoEtapas
-      ? processo.value.processoEtapas.find((etapa) => etapa.emAndamento)
-      : null;
+const OPCAO_PRE_CADASTRO_ID = "pre-cadastro";
 
-  if (!etapaAtiva.value) {
-    message.value = "Erro: Nenhuma etapa em andamento.";
-    return (showMessage.value = true);
-  }
+const opcoesProcesso = computed(() => {
+  const etapasEmAndamento =
+    processo.value && processo.value.processoEtapas
+      ? processo.value.processoEtapas.filter((etapa) => etapa.emAndamento)
+      : [];
+
+  return [
+    { id: OPCAO_PRE_CADASTRO_ID, nome: "Pré cadastro" },
+    ...etapasEmAndamento,
+  ];
 });
 
-const onInputCPF = async () => {
+const isEtapaAtivaSelecionada = computed(
+  () =>
+    !!opcaoProcessoSelecionada.value &&
+    opcaoProcessoSelecionada.value.id !== OPCAO_PRE_CADASTRO_ID,
+);
+
+const isPreCadastroSelecionado = computed(
+  () => opcaoProcessoSelecionada.value?.id === OPCAO_PRE_CADASTRO_ID,
+);
+
+const limparEstadoFormulario = () => {
+  showAllInputs.value = false;
+  showDialogProcessoExterno.value = false;
+  showDialogProcessoInterno.value = false;
+  dadosForm.value = {};
+  documentos.value = {};
+  loading.value = false;
+  loadingButton.value = false;
+  timeout.value = 5000;
+  hasInscricaoAtiva.value = false;
+  alunoCarregadoErudio.value = null;
+};
+
+const onChangeOpcaoProcesso = (opcao) => {
+  opcaoProcessoSelecionada.value = opcao;
+  limparEstadoFormulario();
+
+  etapaAtiva.value = opcao && opcao.id !== OPCAO_PRE_CADASTRO_ID ? opcao : null;
+};
+
+const onInputCPFPorTipo = async () => {
+  if (isEtapaAtivaSelecionada.value) {
+    return onInputCPFEtapaAtiva();
+  }
+
+  if (isPreCadastroSelecionado.value) {
+    return onInputCPFPreCadastro();
+  }
+};
+
+const onInputCPFEtapaAtiva = async () => {
   showAllInputs.value = false;
 
   if (dadosForm.value.cpf && dadosForm.value.cpf.length)
@@ -278,6 +338,82 @@ const onInputCPF = async () => {
       ? await validarInscricao()
       : ((message.value = "Erro: CPF Inválido."), (showMessage.value = true));
   }
+};
+
+const onInputCPFPreCadastro = async () => {
+  showAllInputs.value = false;
+
+  if (dadosForm.value.cpf && dadosForm.value.cpf.length)
+    dadosForm.value.cpf = dadosForm.value.cpf.replace(/\D/g, "");
+
+  if (dadosForm.value.cpf && dadosForm.value.cpf.length == 11) {
+    return validateCPF(dadosForm.value.cpf)
+      ? await validarPreCadastro()
+      : ((message.value = "Erro: CPF Inválido."), (showMessage.value = true));
+  }
+};
+
+const carregarAlunoPreCadastro = async () => {
+  const { data: alunoPreCadastro, error } = await useFetch(
+    "/api/pre-cadastro/aluno",
+    {
+      query: {
+        cpf: dadosForm.value.cpf,
+      },
+    },
+  );
+
+  if (
+    error.value ||
+    alunoPreCadastro.value?.statusCode ||
+    alunoPreCadastro.value?.error
+  ) {
+    message.value =
+      error.value ||
+      alunoPreCadastro.value?.error ||
+      alunoPreCadastro.value?.message;
+    showMessage.value = true;
+    return null;
+  }
+
+  if (Array.isArray(alunoPreCadastro.value)) {
+    return alunoPreCadastro.value.length ? alunoPreCadastro.value[0] : null;
+  }
+
+  return alunoPreCadastro.value;
+};
+
+const validarPreCadastro = async () => {
+  dadosForm.value = { cpf: dadosForm.value.cpf };
+  loading.value = true;
+
+  const alunoPreCadastro = await carregarAlunoPreCadastro();
+
+  loading.value = false;
+
+  if (
+    !alunoPreCadastro ||
+    (typeof alunoPreCadastro === "object" &&
+      !Array.isArray(alunoPreCadastro) &&
+      !Object.keys(alunoPreCadastro).length)
+  ) {
+    message.value = "Aluno não encontrado para pré cadastro.";
+    return (showMessage.value = true);
+  }
+
+  dadosForm.value = {
+    ...dadosForm.value,
+    id: alunoPreCadastro.id,
+    cpf: alunoPreCadastro.cpf || dadosForm.value.cpf,
+    nome: alunoPreCadastro.nome,
+    responsavelNome: alunoPreCadastro.responsavelNome,
+    email: alunoPreCadastro.email,
+    telefone1: alunoPreCadastro.telefone1,
+    telefone2: alunoPreCadastro.telefone2,
+    dataNascimento: alunoPreCadastro.dataNascimento,
+  };
+
+  showAllInputs.value = true;
 };
 
 const carregarAlunoMatriculaOnline = async () => {
