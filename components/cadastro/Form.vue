@@ -275,6 +275,19 @@ const alunoState = useAluno();
 
 const OPCAO_PRE_CADASTRO_ID = "pre-cadastro";
 
+onMounted(() => {
+  console.log("Processo em andamentooooo:", processo.value);
+  etapaAtiva.value =
+    processo.value && processo.value.processoEtapas
+      ? processo.value.processoEtapas.find((etapa) => etapa.emAndamento)
+      : null;
+
+  if (!etapaAtiva.value) {
+    message.value = "Erro: Nenhuma etapa em andamento.";
+    return (showMessage.value = true);
+  }
+});
+
 const opcoesProcesso = computed(() => {
   const etapasEmAndamento =
     processo.value && processo.value.processoEtapas
@@ -352,6 +365,7 @@ const onInputCPFPreCadastro = async () => {
       : ((message.value = "Erro: CPF Inválido."), (showMessage.value = true));
   }
 };
+
 
 const carregarAlunoPreCadastro = async () => {
   const { data: alunoPreCadastro, error } = await useFetch(
