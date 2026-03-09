@@ -276,7 +276,6 @@ const alunoState = useAluno();
 const OPCAO_PRE_CADASTRO_ID = "pre-cadastro";
 
 onMounted(() => {
-  console.log("Processo em andamentooooo:", processo.value);
   etapaAtiva.value =
     processo.value && processo.value.processoEtapas
       ? processo.value.processoEtapas.find((etapa) => etapa.emAndamento)
@@ -359,13 +358,13 @@ const onInputCPFPreCadastro = async () => {
   if (dadosForm.value.cpf && dadosForm.value.cpf.length)
     dadosForm.value.cpf = dadosForm.value.cpf.replace(/\D/g, "");
 
+  // valida cpf
   if (dadosForm.value.cpf && dadosForm.value.cpf.length == 11) {
     return validateCPF(dadosForm.value.cpf)
       ? await validarPreCadastro()
       : ((message.value = "Erro: CPF Inválido."), (showMessage.value = true));
   }
 };
-
 
 const carregarAlunoPreCadastro = async () => {
   const { data: alunoPreCadastro, error } = await useFetch(
