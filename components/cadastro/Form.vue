@@ -47,15 +47,38 @@
           ></v-skeleton-loader></v-col
       ></v-row>
     </template>
-    <v-row v-if="showAllInputs">
+    <CadastroPreCadastroForm
+      v-if="showAllInputs && isPreCadastroSelecionado"
+      :endereco="dadosEndereco"
+      :form-data="dadosForm"
+      :genero-options="generoOptions"
+      :is-cpf-cnpj-obrigatorio="isCpfCnpjObrigatorio"
+      :is-protocolo-cpf-obrigatorio="isProtocoloCpfObrigatorio"
+      :nacionalidade-options="nacionalidadeOptions"
+      @update:form-data="dadosForm = $event"
+      @update:endereco="dadosEndereco = $event"
+      @validate-address="validateAddress = $event"
+    />
+
+    <v-row v-if="showAllInputs && isEtapaAtivaSelecionada">
+      <CoreFormSubtitle label="Responsável" />
       <CoreInput
         v-model="dadosForm.responsavelNome"
         autofocus
         clearable
-        disabled
         label="Nome do(a) responsável*"
         required
         @input="dadosForm.responsavelNome = $event"
+      />
+      <CoreInput
+        v-model="dadosForm.cpfResponsavel"
+        :counter="11"
+        clearable
+        hint="Digite apenas números"
+        label="CPF do(a) responsável"
+        persistent-hint
+        placeholder="12345678901"
+        @input="dadosForm.cpfResponsavel = $event"
       />
       <CoreInput
         v-model="dadosForm.email"
@@ -64,28 +87,16 @@
         placeholder="email@email.com"
         @input="dadosForm.email = $event"
       />
-
       <CoreInput
-        v-model="dadosForm.telefone1"
+        v-model="dadosForm.conselheiroNome"
         clearable
-        label="Telefone do(a) responsável (1)"
-        placeholder="(99) 99999-9999"
-        required
-        @input="dadosForm.telefone1 = $event"
+        label="Nome do(a) conselheiro(a)"
+        @input="dadosForm.conselheiroNome = $event"
       />
 
-      <CoreInput
-        v-model="dadosForm.telefone2"
-        clearable
-        label="Telefone do(a) responsável (2)"
-        placeholder="(99) 99999-9999"
-        required
-        @input="dadosForm.telefone2 = $event"
-      />
-
+      <CoreFormSubtitle label="Aluno(a)" />
       <CoreInput
         v-model="dadosForm.nome"
-        disabled
         label="Nome do aluno(a)*"
         required
         @input="dadosForm.nome = $event"
@@ -93,11 +104,175 @@
 
       <CoreInput
         v-model="dadosForm.dataNascimento"
-        disabled
         label="Data de nascimento*"
         type="date"
         required
         @input="dadosForm.dataNascimento = $event"
+      />
+      <v-col cols="12" class="py-1 px-1" md="6">
+        <v-select
+          v-model="dadosForm.genero"
+          :items="generoOptions"
+          item-title="label"
+          item-value="value"
+          label="Gênero*"
+          :rules="[(v) => !!v || 'Campo obrigatório']"
+          variant="outlined"
+        />
+      </v-col>
+      <v-col cols="12" class="py-1 px-1" md="6">
+        <v-select
+          v-model="dadosForm.nacionalidade"
+          :items="nacionalidadeOptions"
+          item-title="label"
+          item-value="value"
+          label="Nacionalidade*"
+          :rules="[(v) => !!v || 'Campo obrigatório']"
+          variant="outlined"
+        />
+      </v-col>
+      <CoreInput
+        v-model="dadosForm.cpfCnpj"
+        :counter="14"
+        :required="isCpfCnpjObrigatorio"
+        clearable
+        hint="Digite apenas números"
+        label="CPF/CNPJ"
+        persistent-hint
+        @input="dadosForm.cpfCnpj = $event"
+      />
+      <CoreInput
+        v-model="dadosForm.protocoloRequerimentoCpf"
+        :required="isProtocoloCpfObrigatorio"
+        clearable
+        label="Protocolo de requerimento do CPF"
+        @input="dadosForm.protocoloRequerimentoCpf = $event"
+      />
+      <CoreInput
+        v-model="dadosForm.estadoCivilId"
+        clearable
+        label="ID do estado civil"
+        type="number"
+        @input="dadosForm.estadoCivilId = $event"
+      />
+      <CoreInput
+        v-model="dadosForm.racaId"
+        clearable
+        label="ID da raça/cor"
+        type="number"
+        @input="dadosForm.racaId = $event"
+      />
+      <CoreInput
+        v-model="dadosForm.paisOrigemId"
+        clearable
+        label="ID do país de origem"
+        type="number"
+        @input="dadosForm.paisOrigemId = $event"
+      />
+      <CoreInput
+        v-model="dadosForm.naturalidadeId"
+        clearable
+        label="ID da naturalidade"
+        type="number"
+        @input="dadosForm.naturalidadeId = $event"
+      />
+      <CoreInput
+        v-model="dadosForm.registroCivil"
+        clearable
+        label="Registro civil"
+        @input="dadosForm.registroCivil = $event"
+      />
+      <v-col cols="12" class="py-1 px-1">
+        <v-checkbox
+          v-model="dadosForm.nomeSocial"
+          color="primary"
+          hide-details
+          label="Aluno(a) utiliza nome social"
+        />
+      </v-col>
+
+      <CoreFormSubtitle label="Filiação" />
+      <CoreInput
+        v-model="dadosForm.nomeMae"
+        clearable
+        label="Nome da mãe"
+        @input="dadosForm.nomeMae = $event"
+      />
+      <CoreInput
+        v-model="dadosForm.cpfMae"
+        :counter="11"
+        clearable
+        hint="Digite apenas números"
+        label="CPF da mãe"
+        persistent-hint
+        @input="dadosForm.cpfMae = $event"
+      />
+      <CoreInput
+        v-model="dadosForm.nomePai"
+        clearable
+        label="Nome do pai"
+        @input="dadosForm.nomePai = $event"
+      />
+      <CoreInput
+        v-model="dadosForm.cpfPai"
+        :counter="11"
+        clearable
+        hint="Digite apenas números"
+        label="CPF do pai"
+        persistent-hint
+        @input="dadosForm.cpfPai = $event"
+      />
+
+      <CoreFormSubtitle label="Documentos" />
+      <CoreInput
+        v-model="dadosForm.numeroRg"
+        clearable
+        label="Número do RG"
+        @input="dadosForm.numeroRg = $event"
+      />
+      <CoreInput
+        v-model="dadosForm.orgaoExpedidorRg"
+        clearable
+        label="Órgão expedidor do RG"
+        @input="dadosForm.orgaoExpedidorRg = $event"
+      />
+      <CoreInput
+        v-model="dadosForm.dataExpedicaoRg"
+        clearable
+        label="Data de expedição do RG"
+        type="date"
+        @input="dadosForm.dataExpedicaoRg = $event"
+      />
+      <CoreInput
+        v-model="dadosForm.certidaoNascimento"
+        clearable
+        label="Certidão de nascimento"
+        @input="dadosForm.certidaoNascimento = $event"
+      />
+      <CoreInput
+        v-model="dadosForm.dataExpedicaoCertidaoNascimento"
+        clearable
+        label="Data de expedição da certidão"
+        type="date"
+        @input="dadosForm.dataExpedicaoCertidaoNascimento = $event"
+      />
+      <CoreInput
+        v-model="dadosForm.nis"
+        clearable
+        label="NIS"
+        @input="dadosForm.nis = $event"
+      />
+      <CoreInput
+        v-model="dadosForm.pisPasep"
+        clearable
+        label="PIS/PASEP"
+        @input="dadosForm.pisPasep = $event"
+      />
+
+      <CoreFormSubtitle label="Endereço" />
+      <CoreAddress
+        v-model="dadosEndereco"
+        @validate="validateAddress = $event"
       />
 
       <!-- <CoreSelect
@@ -264,7 +439,8 @@ const message = ref("");
 const form = ref(null);
 const opcaoProcessoSelecionada = ref(null);
 const etapaAtiva = ref(null);
-const dadosForm = ref({});
+const dadosForm = ref(createEmptyDadosForm());
+const dadosEndereco = ref(createEmptyEndereco());
 const documentos = ref({});
 const loading = ref(false);
 const loadingButton = ref(false);
@@ -272,8 +448,19 @@ const timeout = ref(5000);
 const hasInscricaoAtiva = ref(false);
 const alunoCarregadoErudio = ref(null);
 const alunoState = useAluno();
+const validateAddress = ref(true);
 
 const OPCAO_PRE_CADASTRO_ID = "pre-cadastro";
+const generoOptions = [
+  { label: "Masculino", value: "M" },
+  { label: "Feminino", value: "F" },
+];
+
+const nacionalidadeOptions = [
+  { label: "Brasileiro", value: "BRASILEIRO" },
+  { label: "Naturalizado", value: "NATURALIZADO" },
+  { label: "Estrangeiro", value: "ESTRANGEIRO" },
+];
 
 onMounted(() => {
   etapaAtiva.value =
@@ -309,17 +496,28 @@ const isPreCadastroSelecionado = computed(
   () => opcaoProcessoSelecionada.value?.id === OPCAO_PRE_CADASTRO_ID,
 );
 
+const isCpfCnpjObrigatorio = computed(
+  () => dadosForm.value.nacionalidade !== "ESTRANGEIRO",
+);
+
+const isProtocoloCpfObrigatorio = computed(
+  () =>
+    dadosForm.value.nacionalidade === "ESTRANGEIRO" && !dadosForm.value.cpfCnpj,
+);
+
 const limparEstadoFormulario = () => {
   showAllInputs.value = false;
   showDialogProcessoExterno.value = false;
   showDialogProcessoInterno.value = false;
-  dadosForm.value = {};
+  dadosForm.value = createEmptyDadosForm();
+  dadosEndereco.value = createEmptyEndereco();
   documentos.value = {};
   loading.value = false;
   loadingButton.value = false;
   timeout.value = 5000;
   hasInscricaoAtiva.value = false;
   alunoCarregadoErudio.value = null;
+  validateAddress.value = true;
 };
 
 const onChangeOpcaoProcesso = (opcao) => {
@@ -344,6 +542,7 @@ const onInputCPFEtapaAtiva = async () => {
 
   if (dadosForm.value.cpf && dadosForm.value.cpf.length)
     dadosForm.value.cpf = dadosForm.value.cpf.replace(/\D/g, "");
+  dadosForm.value.cpfCnpj = dadosForm.value.cpf;
 
   if (dadosForm.value.cpf && dadosForm.value.cpf.length == 11) {
     return validateCPF(dadosForm.value.cpf)
@@ -357,6 +556,7 @@ const onInputCPFPreCadastro = async () => {
 
   if (dadosForm.value.cpf && dadosForm.value.cpf.length)
     dadosForm.value.cpf = dadosForm.value.cpf.replace(/\D/g, "");
+  dadosForm.value.cpfCnpj = dadosForm.value.cpf;
 
   // valida cpf
   if (dadosForm.value.cpf && dadosForm.value.cpf.length == 11) {
@@ -397,7 +597,11 @@ const carregarAlunoPreCadastro = async () => {
 };
 
 const validarPreCadastro = async () => {
-  dadosForm.value = { cpf: dadosForm.value.cpf };
+  dadosForm.value = {
+    ...createEmptyDadosForm(),
+    cpf: dadosForm.value.cpf,
+    cpfCnpj: dadosForm.value.cpf,
+  };
   loading.value = true;
 
   const alunoPreCadastro = await carregarAlunoPreCadastro();
@@ -414,17 +618,7 @@ const validarPreCadastro = async () => {
     return (showMessage.value = true);
   }
 
-  dadosForm.value = {
-    ...dadosForm.value,
-    id: alunoPreCadastro.id,
-    cpf: alunoPreCadastro.cpf || dadosForm.value.cpf,
-    nome: alunoPreCadastro.nome,
-    responsavelNome: alunoPreCadastro.responsavelNome,
-    email: alunoPreCadastro.email,
-    telefone1: alunoPreCadastro.telefone1,
-    telefone2: alunoPreCadastro.telefone2,
-    dataNascimento: alunoPreCadastro.dataNascimento,
-  };
+  await preencherDadosFormulario(normalizePreCadastroData(alunoPreCadastro));
 
   showAllInputs.value = true;
 };
@@ -488,7 +682,11 @@ const carregarAlunoErudio = async () => {
 };
 
 const validarInscricao = async () => {
-  dadosForm.value = { cpf: dadosForm.value.cpf };
+  dadosForm.value = {
+    ...createEmptyDadosForm(),
+    cpf: dadosForm.value.cpf,
+    cpfCnpj: dadosForm.value.cpf,
+  };
 
   if (!etapaAtiva.value)
     return (
@@ -501,7 +699,7 @@ const validarInscricao = async () => {
   const aluno = await carregarAlunoMatriculaOnline(); // Verifica se o aluno existe no Matricula On-line
 
   if (aluno) {
-    dadosForm.value = { ...aluno };
+    await preencherDadosFormulario(aluno);
     hasInscricaoAtiva.value = await possuiInscricaoEtapaAtiva(aluno); // Verifica se já possui inscricao na etapa ativa
 
     if (hasInscricaoAtiva.value) {
@@ -546,8 +744,10 @@ const validarInscricao = async () => {
       }
 
       dadosForm.value = {
+        ...createEmptyDadosForm(),
         ...dadosForm.value,
         cpf: alunoErudio.cpf,
+        cpfCnpj: alunoErudio.cpf,
         nome: alunoErudio.nome,
         responsavelNome: alunoErudio.responsavelNome,
         dataNascimento: alunoErudio.dataNascimento,
@@ -585,59 +785,108 @@ const onSubmit = async () => {
       (showMessage.value = true)
     );
 
+  if (!validateAddressPayload(dadosEndereco.value))
+    return (
+      (message.value = "Preencha os campos obrigatórios do endereço."),
+      (showMessage.value = true)
+    );
+
   if (dadosForm.value.email && !validateEmail(dadosForm.value.email))
     return (
       (message.value = "Erro: E-mail inválido."), (showMessage.value = true)
     );
 
-  if (dadosForm.value.email && !dadosForm.value.email.length)
-    delete dadosForm.value.email;
+  if (isCpfCnpjObrigatorio.value && !normalizeDigits(dadosForm.value.cpfCnpj))
+    return (
+      (message.value = "Informe o CPF/CNPJ do aluno(a)."),
+      (showMessage.value = true)
+    );
+
+  if (
+    isProtocoloCpfObrigatorio.value &&
+    !normalizeOptionalValue(dadosForm.value.protocoloRequerimentoCpf)
+  )
+    return (
+      (message.value = "Informe o protocolo de requerimento do CPF."),
+      (showMessage.value = true)
+    );
 
   loadingButton.value = true;
 
-  dadosForm.value.id ? editarAluno() : criarAluno();
+  await (dadosForm.value.id ? editarPessoa() : criarPessoa());
 };
 
-const editarAluno = async () => {
-  const dadosAluno = { ...dadosForm.value };
-  delete dadosAluno.etapa;
-  delete dadosAluno.unidadeEnsinoId;
+const editarPessoa = async () => {
+  const enderecoId = await persistirEndereco();
+  if (!enderecoId) return;
 
-  const { data: alunoEditado, error } = await useFetch("/api/alunos", {
+  const { data: pessoaEditada, error } = await useFetch("/api/pessoas", {
     method: "PUT",
-    body: dadosAluno,
+    body: buildPessoaPayload(enderecoId),
   });
 
-  if (error.value || alunoEditado.value.statusCode) {
-    message.value = error.value || alunoEditado.value.message;
+  if (error.value || pessoaEditada.value.statusCode) {
+    message.value = error.value || pessoaEditada.value.message;
     loadingButton.value = false;
     return (showMessage.value = true);
   }
 
-  alunoState.value = alunoEditado.value; // Grava o aluno editado no State
+  alunoState.value = pessoaEditada.value; // Grava a pessoa editada no State
 
   salvarInscricao();
 };
 
-const criarAluno = async () => {
-  const dadosAluno = { ...dadosForm.value };
-  delete dadosAluno.id;
-  delete dadosAluno.etapa;
-  delete dadosAluno.unidadeEnsinoId;
-  const { data: alunoCriado, error } = await useFetch("/api/alunos", {
+const criarPessoa = async () => {
+  const enderecoId = await persistirEndereco();
+  if (!enderecoId) return;
+
+  const { data: pessoaCriada, error } = await useFetch("/api/pessoas", {
     method: "POST",
-    body: dadosAluno,
+    body: buildPessoaPayload(enderecoId),
   });
 
-  if (error.value || alunoCriado.value.statusCode) {
-    message.value = error.value || alunoCriado.value.message;
+  if (error.value || pessoaCriada.value.statusCode) {
+    message.value = error.value || pessoaCriada.value.message;
     loadingButton.value = false;
     return (showMessage.value = true);
   }
 
-  alunoState.value = alunoCriado.value; // Grava o aluno criado no State
+  alunoState.value = pessoaCriada.value; // Grava a pessoa criada no State
 
   salvarInscricao();
+};
+
+const persistirEndereco = async () => {
+  const dadosMapeados = {
+    ...dadosEndereco.value,
+    cep: dadosEndereco.value.cep ? dadosEndereco.value.cep.toString() : null,
+    numero: dadosEndereco.value.numero
+      ? dadosEndereco.value.numero.toString()
+      : null,
+  };
+
+  const endpoint = dadosForm.value.enderecoId ? "PUT" : "POST";
+  if (dadosForm.value.enderecoId) dadosMapeados.id = dadosForm.value.enderecoId;
+
+  const { data: enderecoSalvo, error } = await useFetch("/api/enderecos", {
+    method: endpoint,
+    body: dadosMapeados,
+  });
+
+  if (
+    error.value ||
+    enderecoSalvo.value?.error ||
+    enderecoSalvo.value?.statusCode
+  ) {
+    message.value =
+      error.value || enderecoSalvo.value?.message || "Erro ao salvar endereço.";
+    loadingButton.value = false;
+    showMessage.value = true;
+    return null;
+  }
+
+  dadosForm.value.enderecoId = enderecoSalvo.value.id;
+  return enderecoSalvo.value.id;
 };
 
 const salvarInscricao = async () => {
@@ -724,6 +973,222 @@ const gerarprotocolo = async (inscricao) => {
     },
   });
 };
+
+async function preencherDadosFormulario(dados = {}) {
+  const endereco = dados.endereco || null;
+  const enderecoId = endereco?.id || dados.enderecoId || null;
+
+  dadosForm.value = {
+    ...createEmptyDadosForm(),
+    ...dadosForm.value,
+    id: dados.id || null,
+    cpf: dados.cpf || dados.cpfCnpj || dadosForm.value.cpf || "",
+    cpfCnpj: dados.cpfCnpj || dados.cpf || dadosForm.value.cpf || "",
+    nome: dados.nome || "",
+    dataNascimento: dados.dataNascimento || "",
+    email: dados.email || "",
+    genero: dados.genero || "",
+    estadoCivilId: dados.estadoCivil?.id || dados.estadoCivilId || null,
+    racaId: dados.raca?.id || dados.racaId || null,
+    nacionalidade: dados.nacionalidade || "BRASILEIRO",
+    paisOrigemId: dados.paisOrigem?.id || dados.paisOrigemId || null,
+    naturalidadeId: dados.naturalidade?.id || dados.naturalidadeId || null,
+    nomeMae: dados.nomeMae || "",
+    cpfMae: dados.cpfMae || "",
+    nomePai: dados.nomePai || "",
+    cpfPai: dados.cpfPai || "",
+    responsavelNome: dados.responsavelNome || "",
+    cpfResponsavel: dados.cpfResponsavel || "",
+    conselheiroNome: dados.conselheiroNome || "",
+    nomeSocial: Boolean(dados.nomeSocial),
+    registroCivil: dados.registroCivil || "",
+    numeroRg: dados.numeroRg || "",
+    dataExpedicaoRg: dados.dataExpedicaoRg || "",
+    orgaoExpedidorRg: dados.orgaoExpedidorRg || "",
+    pisPasep: dados.pisPasep || "",
+    certidaoNascimento: dados.certidaoNascimento || "",
+    dataExpedicaoCertidaoNascimento:
+      dados.dataExpedicaoCertidaoNascimento || "",
+    nis: dados.nis || "",
+    protocoloRequerimentoCpf: dados.protocoloRequerimentoCpf || "",
+    enderecoId,
+    etapa: dados.etapa || dadosForm.value.etapa || null,
+    unidadeEnsinoId: dados.unidadeEnsinoId || dadosForm.value.unidadeEnsinoId,
+  };
+
+  if (endereco?.logradouro || endereco?.bairro || endereco?.cep) {
+    dadosEndereco.value = {
+      ...createEmptyEndereco(),
+      ...endereco,
+    };
+    return;
+  }
+
+  if (enderecoId) {
+    await carregarEndereco(enderecoId);
+    return;
+  }
+
+  dadosEndereco.value = createEmptyEndereco();
+}
+
+async function carregarEndereco(id) {
+  const { data: endereco, error } = await useFetch(`/api/enderecos/${id}`);
+
+  if (error.value || endereco.value?.error || endereco.value?.statusCode) {
+    dadosEndereco.value = createEmptyEndereco();
+    return;
+  }
+
+  dadosEndereco.value = {
+    ...createEmptyEndereco(),
+    ...endereco.value,
+  };
+}
+
+function buildPessoaPayload(enderecoId) {
+  const payload = {
+    id: dadosForm.value.id || undefined,
+    nome: normalizeOptionalValue(dadosForm.value.nome),
+    dataNascimento: normalizeOptionalValue(dadosForm.value.dataNascimento),
+    cpfCnpj: normalizeDigits(dadosForm.value.cpfCnpj),
+    email: normalizeOptionalValue(dadosForm.value.email),
+    genero: normalizeOptionalValue(dadosForm.value.genero),
+    estadoCivil: buildReference(dadosForm.value.estadoCivilId),
+    raca: buildReference(dadosForm.value.racaId),
+    nacionalidade: normalizeOptionalValue(dadosForm.value.nacionalidade),
+    paisOrigem: buildReference(dadosForm.value.paisOrigemId),
+    naturalidade: buildReference(dadosForm.value.naturalidadeId),
+    nomeMae: normalizeOptionalValue(dadosForm.value.nomeMae),
+    cpfMae: normalizeDigits(dadosForm.value.cpfMae),
+    nomePai: normalizeOptionalValue(dadosForm.value.nomePai),
+    cpfPai: normalizeDigits(dadosForm.value.cpfPai),
+    responsavelNome: normalizeOptionalValue(dadosForm.value.responsavelNome),
+    cpfResponsavel: normalizeDigits(dadosForm.value.cpfResponsavel),
+    conselheiroNome: normalizeOptionalValue(dadosForm.value.conselheiroNome),
+    nomeSocial: Boolean(dadosForm.value.nomeSocial),
+    registroCivil: normalizeOptionalValue(dadosForm.value.registroCivil),
+    endereco: buildReference(enderecoId),
+    numeroRg: normalizeOptionalValue(dadosForm.value.numeroRg),
+    dataExpedicaoRg: normalizeOptionalValue(dadosForm.value.dataExpedicaoRg),
+    orgaoExpedidorRg: normalizeOptionalValue(dadosForm.value.orgaoExpedidorRg),
+    pisPasep: normalizeOptionalValue(dadosForm.value.pisPasep),
+    certidaoNascimento: normalizeOptionalValue(
+      dadosForm.value.certidaoNascimento,
+    ),
+    dataExpedicaoCertidaoNascimento: normalizeOptionalValue(
+      dadosForm.value.dataExpedicaoCertidaoNascimento,
+    ),
+    nis: normalizeOptionalValue(dadosForm.value.nis),
+    protocoloRequerimentoCpf: normalizeOptionalValue(
+      dadosForm.value.protocoloRequerimentoCpf,
+    ),
+  };
+
+  return payload;
+}
+
+function normalizePreCadastroData(data = {}) {
+  const pessoa = data.payload?.pessoa || {};
+  const aluno = data.aluno || {};
+  const matricula = data.matricula || {};
+
+  return {
+    ...pessoa,
+    id: pessoa.id || aluno.id || null,
+    codigo: pessoa.codigo || aluno.codigo || null,
+    cpf: aluno.cpf || pessoa.cpfCnpj || null,
+    cpfCnpj: pessoa.cpfCnpj || aluno.cpf || null,
+    nome: pessoa.nome || aluno.nome || null,
+    dataNascimento: pessoa.dataNascimento || aluno.dataNascimento || null,
+    responsavelNome:
+      pessoa.responsavelNome || aluno.responsavelNome || null,
+    endereco: pessoa.endereco || null,
+    etapa:
+      matricula.etapa?.id && matricula.etapa?.nome
+        ? {
+            id: matricula.etapa.id,
+            nome: matricula.etapa.nome,
+          }
+        : null,
+    unidadeEnsinoId:
+      pessoa.matricula?.unidadeEnsino?.id || matricula.unidadeEnsino?.id || null,
+  };
+}
+
+function buildReference(id) {
+  return id ? { id } : null;
+}
+
+function normalizeOptionalValue(value) {
+  if (value === undefined || value === null) return null;
+
+  if (typeof value === "string") {
+    const normalized = value.trim();
+    return normalized.length ? normalized : null;
+  }
+
+  return value;
+}
+
+function normalizeDigits(value) {
+  const normalized = normalizeOptionalValue(value);
+  if (typeof normalized !== "string") return normalized;
+
+  const digits = normalized.replace(/\D/g, "");
+  return digits.length ? digits : null;
+}
+
+function validateAddressPayload(endereco = {}) {
+  return Boolean(endereco.bairro && endereco.logradouro && endereco.numero);
+}
+
+function createEmptyDadosForm() {
+  return {
+    id: null,
+    cpf: "",
+    cpfCnpj: "",
+    nome: "",
+    dataNascimento: "",
+    email: "",
+    genero: "",
+    estadoCivilId: null,
+    racaId: null,
+    nacionalidade: "BRASILEIRO",
+    paisOrigemId: null,
+    naturalidadeId: null,
+    nomeMae: "",
+    cpfMae: "",
+    nomePai: "",
+    cpfPai: "",
+    responsavelNome: "",
+    cpfResponsavel: "",
+    conselheiroNome: "",
+    nomeSocial: false,
+    registroCivil: "",
+    numeroRg: "",
+    dataExpedicaoRg: "",
+    orgaoExpedidorRg: "",
+    pisPasep: "",
+    certidaoNascimento: "",
+    dataExpedicaoCertidaoNascimento: "",
+    nis: "",
+    protocoloRequerimentoCpf: "",
+    enderecoId: null,
+    etapa: null,
+    unidadeEnsinoId: null,
+  };
+}
+
+function createEmptyEndereco() {
+  return {
+    cep: null,
+    bairro: null,
+    logradouro: null,
+    numero: null,
+    complemento: null,
+  };
+}
 </script>
 
 <style scoped>
