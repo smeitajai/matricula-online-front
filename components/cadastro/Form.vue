@@ -12,10 +12,7 @@
       />
     </v-row>
 
-    <v-row
-      v-if="isEtapaAtivaSelecionada || isPreCadastroSelecionado"
-      class="mb-3"
-    >
+    <v-row v-if="isEtapaAtivaSelecionada" class="mb-3">
       <CoreInput
         v-model="dadosForm.cpf"
         :counter="11"
@@ -439,6 +436,7 @@ const message = ref("");
 const form = ref(null);
 const opcaoProcessoSelecionada = ref(null);
 const etapaAtiva = ref(null);
+const etapaAtivaAtual = ref(null);
 const dadosForm = ref(createEmptyDadosForm());
 const dadosEndereco = ref(createEmptyEndereco());
 const documentos = ref({});
@@ -463,26 +461,23 @@ const nacionalidadeOptions = [
 ];
 
 onMounted(() => {
-  etapaAtiva.value =
+  etapaAtivaAtual.value =
     processo.value && processo.value.processoEtapas
       ? processo.value.processoEtapas.find((etapa) => etapa.emAndamento)
       : null;
 
-  if (!etapaAtiva.value) {
+  if (!etapaAtivaAtual.value) {
     message.value = "Erro: Nenhuma etapa em andamento.";
     return (showMessage.value = true);
   }
 });
 
 const opcoesProcesso = computed(() => {
-  const etapasEmAndamento =
-    processo.value && processo.value.processoEtapas
-      ? processo.value.processoEtapas.filter((etapa) => etapa.emAndamento)
-      : [];
+  if (!etapaAtivaAtual.value) return [];
 
   return [
+    etapaAtivaAtual.value,
     { id: OPCAO_PRE_CADASTRO_ID, nome: "Pré cadastro" },
-    ...etapasEmAndamento,
   ];
 });
 
@@ -524,7 +519,8 @@ const onChangeOpcaoProcesso = (opcao) => {
   opcaoProcessoSelecionada.value = opcao;
   limparEstadoFormulario();
 
-  etapaAtiva.value = opcao && opcao.id !== OPCAO_PRE_CADASTRO_ID ? opcao : null;
+  etapaAtiva.value =
+    opcao && opcao.id !== OPCAO_PRE_CADASTRO_ID ? etapaAtivaAtual.value : null;
 };
 
 const onInputCPFPorTipo = async () => {
