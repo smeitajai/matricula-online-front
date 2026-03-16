@@ -46,257 +46,26 @@
     </template>
     <CadastroPreCadastroAlunoForm
       v-if="showAllInputs && isPreCadastroSelecionado"
+      :bairros-preferenciais="bairrosPreferenciais || []"
+      :documentos="documentos"
+      :endereco="dadosEndereco"
+      :etapa-options="etapas"
       :form-data="dadosForm"
+      :genero-options="generoOptions"
+      :is-cpf-cnpj-obrigatorio="isCpfCnpjObrigatorio"
+      :is-protocolo-cpf-obrigatorio="isProtocoloCpfObrigatorio"
+      :loading-bairros="loadingBairros"
       :loading="loading"
+      :nacionalidade-options="nacionalidadeOptions"
+      :turno-options="turnos || []"
+      :unidade-options="unidades || []"
       @buscar-por-cpf="buscarAlunoPorCpfPreCadastro"
       @cpf-invalido="onCpfInvalidoPreCadastro"
-      @update:form-data="dadosForm = $event"
+      @update:documentos="documentos = $event"
+      @update:endereco="dadosEndereco = $event"
+      @update:formData="dadosForm = $event"
+      @validateAddress="validateAddress = $event"
     />
-
-    <v-row v-if="showAllInputs && isPreCadastroSelecionado">
-      <CoreFormSubtitle label="Dados Complementares" />
-      <v-col cols="12" class="py-1 px-1" md="6">
-        <v-select
-          v-model="dadosForm.genero"
-          :items="generoOptions"
-          item-title="label"
-          item-value="value"
-          label="Gênero*"
-          :rules="[(v) => !!v || 'Campo obrigatório']"
-          variant="outlined"
-        />
-      </v-col>
-      <v-col cols="12" class="py-1 px-1" md="6">
-        <v-select
-          v-model="dadosForm.nacionalidade"
-          :items="nacionalidadeOptions"
-          item-title="label"
-          item-value="value"
-          label="Nacionalidade*"
-          :rules="[(v) => !!v || 'Campo obrigatório']"
-          variant="outlined"
-        />
-      </v-col>
-      <CoreInput
-        v-model="dadosForm.cpfCnpj"
-        :counter="14"
-        :required="isCpfCnpjObrigatorio"
-        clearable
-        hint="Digite apenas números"
-        label="CPF/CNPJ"
-        persistent-hint
-        @input="dadosForm.cpfCnpj = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.protocoloRequerimentoCpf"
-        :required="isProtocoloCpfObrigatorio"
-        clearable
-        label="Protocolo de requerimento do CPF"
-        @input="dadosForm.protocoloRequerimentoCpf = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.nomeMae"
-        clearable
-        label="Nome da mãe"
-        @input="dadosForm.nomeMae = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.cpfMae"
-        :counter="11"
-        clearable
-        hint="Digite apenas números"
-        label="CPF da mãe"
-        persistent-hint
-        @input="dadosForm.cpfMae = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.nomePai"
-        clearable
-        label="Nome do pai"
-        @input="dadosForm.nomePai = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.cpfPai"
-        :counter="11"
-        clearable
-        hint="Digite apenas números"
-        label="CPF do pai"
-        persistent-hint
-        @input="dadosForm.cpfPai = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.numeroRg"
-        clearable
-        label="Número do RG"
-        @input="dadosForm.numeroRg = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.orgaoExpedidorRg"
-        clearable
-        label="Órgão expedidor do RG"
-        @input="dadosForm.orgaoExpedidorRg = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.dataExpedicaoRg"
-        clearable
-        label="Data de expedição do RG"
-        type="date"
-        @input="dadosForm.dataExpedicaoRg = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.certidaoNascimento"
-        clearable
-        label="Certidão de nascimento"
-        @input="dadosForm.certidaoNascimento = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.dataExpedicaoCertidaoNascimento"
-        clearable
-        label="Data de expedição da certidão"
-        type="date"
-        @input="dadosForm.dataExpedicaoCertidaoNascimento = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.nis"
-        clearable
-        label="NIS"
-        @input="dadosForm.nis = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.pisPasep"
-        clearable
-        label="PIS/PASEP"
-        @input="dadosForm.pisPasep = $event"
-      />
-
-      <CoreFormSubtitle label="Preferências" />
-      <v-col cols="12" class="py-1 px-1" md="6">
-        <v-select
-          v-model="dadosForm.bairroPreferencial"
-          :items="bairrosPreferenciais || []"
-          :loading="loadingBairros"
-          item-title="nome"
-          item-value="nome"
-          label="Bairro Preferencial*"
-          :rules="[(v) => !!v || 'Campo obrigatório']"
-          variant="outlined"
-        />
-      </v-col>
-      <v-col cols="12" class="py-1 px-1" md="6">
-        <v-select
-          v-model="dadosForm.turnoPreferencialId"
-          :items="turnos || []"
-          item-title="nome"
-          item-value="id"
-          label="Turno Preferencial*"
-          :rules="[(v) => !!v || 'Campo obrigatório']"
-          variant="outlined"
-        />
-      </v-col>
-      <v-col cols="12" class="py-1 px-1">
-        <v-checkbox
-          v-model="dadosForm.criancaAbrigo"
-          color="primary"
-          hide-details
-          label="Criança em abrigo"
-        />
-      </v-col>
-      <CoreFileInput
-        v-if="dadosForm.criancaAbrigo"
-        v-model="documentos.anexo_cras"
-        chips
-        clearable
-        label="Anexo CRAS*"
-        required
-      />
-      <CoreInput
-        v-model="dadosForm.processoJudicial"
-        clearable
-        full-width
-        label="Processo Judicial"
-        @input="dadosForm.processoJudicial = $event"
-      />
-
-      <CoreFormSubtitle label="Endereço" />
-      <CoreAddress
-        v-model="dadosEndereco"
-        @validate="validateAddress = $event"
-      />
-
-      <CoreFormSubtitle label="Documentos Obrigatórios" />
-      <CoreFileInput
-        v-model="documentos.certidao_identidade"
-        chips
-        clearable
-        label="Certidão de nascimento ou documento de identidade do estudante*"
-        required
-      />
-      <CoreFileInput
-        v-model="documentos.cpf_rg_responsavel"
-        chips
-        clearable
-        label="CPF e RG dos pais ou responsáveis, ou guarda*"
-        required
-      />
-      <CoreFileInput
-        v-model="documentos.declaracao_vacinacao"
-        chips
-        clearable
-        label="Declaração de vacinação atualizada*"
-        required
-      />
-      <CoreFileInput
-        v-model="documentos.cartao_cns"
-        chips
-        clearable
-        label="Cartão Nacional de Saúde (CNS)*"
-        required
-      />
-      <CoreFileInput
-        v-model="documentos.comprovante_residencia"
-        chips
-        clearable
-        label="Comprovante de residência atualizado*"
-        required
-      />
-      <CoreFileInput
-        v-model="documentos.declaracao_proprietario_residencia"
-        chips
-        clearable
-        label="Declaração do proprietário da residência"
-      />
-      <CoreFileInput
-        v-model="documentos.foto_estudante"
-        chips
-        clearable
-        label="Fotografia 3x4 do estudante*"
-        required
-      />
-      <CoreFileInput
-        v-model="documentos.cartao_social"
-        chips
-        clearable
-        label="Cartão Social - NIS"
-      />
-      <CoreFileInput
-        v-model="documentos.cartao_bpc"
-        chips
-        clearable
-        label="Cartão BPC"
-      />
-      <CoreFileInput
-        v-model="documentos.tutela_provisoria"
-        chips
-        clearable
-        label="Tutela provisória ou comprovante do processo judicial"
-      />
-      <CoreFileInput
-        v-model="documentos.laudo_medico"
-        chips
-        clearable
-        label="Laudo médico"
-      />
-    </v-row>
 
     <v-row v-if="showAllInputs && isEtapaAtivaSelecionada">
       <CoreFormSubtitle label="Responsável" />
@@ -304,19 +73,10 @@
         v-model="dadosForm.responsavelNome"
         autofocus
         clearable
+        disabled
         label="Nome do(a) responsável*"
         required
         @input="dadosForm.responsavelNome = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.cpfResponsavel"
-        :counter="11"
-        clearable
-        hint="Digite apenas números"
-        label="CPF do(a) responsável"
-        persistent-hint
-        placeholder="12345678901"
-        @input="dadosForm.cpfResponsavel = $event"
       />
       <CoreInput
         v-model="dadosForm.email"
@@ -326,15 +86,26 @@
         @input="dadosForm.email = $event"
       />
       <CoreInput
-        v-model="dadosForm.conselheiroNome"
+        v-model="dadosForm.telefone1"
         clearable
-        label="Nome do(a) conselheiro(a)"
-        @input="dadosForm.conselheiroNome = $event"
+        label="Telefone do(a) responsável (1)"
+        placeholder="(99) 99999-9999"
+        required
+        @input="dadosForm.telefone1 = $event"
+      />
+      <CoreInput
+        v-model="dadosForm.telefone2"
+        clearable
+        label="Telefone do(a) responsável (2)"
+        placeholder="(99) 99999-9999"
+        required
+        @input="dadosForm.telefone2 = $event"
       />
 
       <CoreFormSubtitle label="Aluno(a)" />
       <CoreInput
         v-model="dadosForm.nome"
+        disabled
         label="Nome do aluno(a)*"
         required
         @input="dadosForm.nome = $event"
@@ -342,175 +113,11 @@
 
       <CoreInput
         v-model="dadosForm.dataNascimento"
+        disabled
         label="Data de nascimento*"
         type="date"
         required
         @input="dadosForm.dataNascimento = $event"
-      />
-      <v-col cols="12" class="py-1 px-1" md="6">
-        <v-select
-          v-model="dadosForm.genero"
-          :items="generoOptions"
-          item-title="label"
-          item-value="value"
-          label="Gênero*"
-          :rules="[(v) => !!v || 'Campo obrigatório']"
-          variant="outlined"
-        />
-      </v-col>
-      <v-col cols="12" class="py-1 px-1" md="6">
-        <v-select
-          v-model="dadosForm.nacionalidade"
-          :items="nacionalidadeOptions"
-          item-title="label"
-          item-value="value"
-          label="Nacionalidade*"
-          :rules="[(v) => !!v || 'Campo obrigatório']"
-          variant="outlined"
-        />
-      </v-col>
-      <CoreInput
-        v-model="dadosForm.cpfCnpj"
-        :counter="14"
-        :required="isCpfCnpjObrigatorio"
-        clearable
-        hint="Digite apenas números"
-        label="CPF/CNPJ"
-        persistent-hint
-        @input="dadosForm.cpfCnpj = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.protocoloRequerimentoCpf"
-        :required="isProtocoloCpfObrigatorio"
-        clearable
-        label="Protocolo de requerimento do CPF"
-        @input="dadosForm.protocoloRequerimentoCpf = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.estadoCivilId"
-        clearable
-        label="ID do estado civil"
-        type="number"
-        @input="dadosForm.estadoCivilId = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.racaId"
-        clearable
-        label="ID da raça/cor"
-        type="number"
-        @input="dadosForm.racaId = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.paisOrigemId"
-        clearable
-        label="ID do país de origem"
-        type="number"
-        @input="dadosForm.paisOrigemId = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.naturalidadeId"
-        clearable
-        label="ID da naturalidade"
-        type="number"
-        @input="dadosForm.naturalidadeId = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.registroCivil"
-        clearable
-        label="Registro civil"
-        @input="dadosForm.registroCivil = $event"
-      />
-      <v-col cols="12" class="py-1 px-1">
-        <v-checkbox
-          v-model="dadosForm.nomeSocial"
-          color="primary"
-          hide-details
-          label="Aluno(a) utiliza nome social"
-        />
-      </v-col>
-
-      <CoreFormSubtitle label="Filiação" />
-      <CoreInput
-        v-model="dadosForm.nomeMae"
-        clearable
-        label="Nome da mãe"
-        @input="dadosForm.nomeMae = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.cpfMae"
-        :counter="11"
-        clearable
-        hint="Digite apenas números"
-        label="CPF da mãe"
-        persistent-hint
-        @input="dadosForm.cpfMae = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.nomePai"
-        clearable
-        label="Nome do pai"
-        @input="dadosForm.nomePai = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.cpfPai"
-        :counter="11"
-        clearable
-        hint="Digite apenas números"
-        label="CPF do pai"
-        persistent-hint
-        @input="dadosForm.cpfPai = $event"
-      />
-
-      <CoreFormSubtitle label="Documentos" />
-      <CoreInput
-        v-model="dadosForm.numeroRg"
-        clearable
-        label="Número do RG"
-        @input="dadosForm.numeroRg = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.orgaoExpedidorRg"
-        clearable
-        label="Órgão expedidor do RG"
-        @input="dadosForm.orgaoExpedidorRg = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.dataExpedicaoRg"
-        clearable
-        label="Data de expedição do RG"
-        type="date"
-        @input="dadosForm.dataExpedicaoRg = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.certidaoNascimento"
-        clearable
-        label="Certidão de nascimento"
-        @input="dadosForm.certidaoNascimento = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.dataExpedicaoCertidaoNascimento"
-        clearable
-        label="Data de expedição da certidão"
-        type="date"
-        @input="dadosForm.dataExpedicaoCertidaoNascimento = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.nis"
-        clearable
-        label="NIS"
-        @input="dadosForm.nis = $event"
-      />
-      <CoreInput
-        v-model="dadosForm.pisPasep"
-        clearable
-        label="PIS/PASEP"
-        @input="dadosForm.pisPasep = $event"
-      />
-
-      <CoreFormSubtitle label="Endereço" />
-      <CoreAddress
-        v-model="dadosEndereco"
-        @validate="validateAddress = $event"
       />
 
       <!-- <CoreSelect
@@ -668,6 +275,7 @@
 const { data: etapas } = await useFetch("/api/etapas");
 const { data: processo } = await useFetch("/api/processos/em-andamento");
 const { data: turnos } = await useFetch("/api/turnos");
+const { data: unidades } = await useFetch("/api/unidades");
 const {
   data: bairrosPreferenciais,
   pending: loadingBairros,
@@ -783,6 +391,7 @@ const onChangeOpcaoProcesso = async (opcao) => {
     opcao && opcao.id !== OPCAO_PRE_CADASTRO_ID ? etapaAtivaAtual.value : null;
 
   if (opcao?.id === OPCAO_PRE_CADASTRO_ID) {
+    dadosForm.value.etapa = etapaAtivaAtual.value || null;
     if (!bairrosPreferenciais.value?.length) {
       await carregarBairrosPreferenciais();
     }
@@ -879,7 +488,9 @@ const validarPreCadastro = async (cpf = dadosForm.value.cpf) => {
   if (alunoMatriculaOnline?.id) {
     dadosForm.value.id = alunoMatriculaOnline.id;
   }
-  dadosForm.value.tipoInscricaoInferido = "TRANSFERENCIA";
+  dadosForm.value.tipoInscricaoInferido =
+    alunoPreCadastro.tipoInscricaoInferido ||
+    (alunoPreCadastro.matricula ? "TRANSFERENCIA" : "CADASTRO");
 
   showAllInputs.value = true;
 };
@@ -1146,15 +757,32 @@ const persistirAlunoMatriculaOnline = async () => {
 };
 
 const sincronizarAlunoErudio = async () => {
+  const etapaId = Number(
+    dadosForm.value.etapa?.idExterno || dadosForm.value.etapa?.id,
+  );
+  const unidadeEnsinoId = Number(dadosForm.value.unidadeEnsinoId);
+  const turnoId = Number(dadosForm.value.turnoPreferencialId);
+
+  if (!unidadeEnsinoId || !etapaId || !turnoId) {
+    const camposPendentes = [];
+
+    if (!unidadeEnsinoId) camposPendentes.push("unidade de ensino");
+    if (!etapaId) camposPendentes.push("etapa");
+    if (!turnoId) camposPendentes.push("turno");
+
+    message.value = `Não foi possível sincronizar com o Erudio porque ${camposPendentes.join(", ")} não ${camposPendentes.length > 1 ? "foram informados" : "foi informado"}.`;
+    loadingButton.value = false;
+    showMessage.value = true;
+    return null;
+  }
+
   const body = {
     pessoa: buildErudioPessoaPayload(),
-    rematricula: isTransferenciaInferida.value
-      ? {
-          unidadeEnsinoId: Number(dadosForm.value.unidadeEnsinoId),
-          etapaId: Number(dadosForm.value.etapa?.id),
-          turnoId: Number(dadosForm.value.turnoPreferencialId),
-        }
-      : null,
+    rematricula: {
+      unidadeEnsinoId,
+      etapaId,
+      turnoId,
+    },
   };
 
   const { data, error } = await useFetch("/api/erudio/alunos/sincronizar", {
@@ -1508,6 +1136,7 @@ function normalizePreCadastroData(data = {}) {
   const pessoa = data.payload?.pessoa || {};
   const aluno = data.aluno || {};
   const matricula = data.matricula || {};
+  const telefones = Array.isArray(pessoa.telefones) ? pessoa.telefones : [];
 
   return {
     ...pessoa,
@@ -1517,6 +1146,9 @@ function normalizePreCadastroData(data = {}) {
     cpfCnpj: pessoa.cpfCnpj || aluno.cpf || null,
     nome: pessoa.nome || aluno.nome || null,
     dataNascimento: pessoa.dataNascimento || aluno.dataNascimento || null,
+    email: pessoa.email || aluno.email || null,
+    telefone1: telefones[0]?.numero || null,
+    telefone2: telefones[1]?.numero || null,
     responsavelNome:
       pessoa.responsavelNome || aluno.responsavelNome || null,
     endereco: pessoa.endereco || null,
@@ -1531,6 +1163,9 @@ function normalizePreCadastroData(data = {}) {
         : null,
     unidadeEnsinoId:
       pessoa.matricula?.unidadeEnsino?.id || matricula.unidadeEnsino?.id || null,
+    tipoInscricaoInferido:
+      data.tipoInscricaoInferido ||
+      (matricula?.id ? "TRANSFERENCIA" : "CADASTRO"),
   };
 }
 
