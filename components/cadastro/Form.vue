@@ -238,7 +238,9 @@
     </v-row>
 
     <v-row
-      v-if="showAllInputs && (isEtapaAtivaSelecionada || isPreCadastroSelecionado)"
+      v-if="
+        showAllInputs && (isEtapaAtivaSelecionada || isPreCadastroSelecionado)
+      "
       justify="end"
     >
       <CoreButton
@@ -694,7 +696,8 @@ const onSubmit = async () => {
 
   if (isPreCadastroSelecionado.value && !validatePreCadastroDocuments())
     return (
-      (message.value = "Anexe todos os documentos obrigatórios do pré-cadastro."),
+      (message.value =
+        "Anexe todos os documentos obrigatórios do pré-cadastro."),
       (showMessage.value = true)
     );
 
@@ -723,17 +726,17 @@ const salvarPreCadastro = async () => {
   const aluno = await persistirAlunoMatriculaOnline();
   if (!aluno) return;
 
-  const sincronizacao = await sincronizarAlunoErudio();
-  if (!sincronizacao) return;
-
   loadingButton.value = false;
   message.value = `Pré-cadastro salvo com sucesso como ${dadosForm.value.tipoInscricaoInferido?.toLowerCase() || "cadastro"}.`;
   showMessage.value = true;
 };
 
 const persistirAlunoMatriculaOnline = async () => {
+  const alunoPayload = buildAlunoPayload();
+  if (!alunoPayload) return null;
+
   const payload = {
-    ...buildAlunoPayload(),
+    ...alunoPayload,
     ...(dadosForm.value.id ? { id: dadosForm.value.id } : {}),
   };
   const endpoint = "/api/alunos";
@@ -753,50 +756,6 @@ const persistirAlunoMatriculaOnline = async () => {
 
   dadosForm.value.id = data.value.id;
   alunoState.value = data.value;
-  return data.value;
-};
-
-const sincronizarAlunoErudio = async () => {
-  const etapaId = Number(
-    dadosForm.value.etapa?.idExterno || dadosForm.value.etapa?.id,
-  );
-  const unidadeEnsinoId = Number(dadosForm.value.unidadeEnsinoId);
-  const turnoId = Number(dadosForm.value.turnoPreferencialId);
-
-  if (!unidadeEnsinoId || !etapaId || !turnoId) {
-    const camposPendentes = [];
-
-    if (!unidadeEnsinoId) camposPendentes.push("unidade de ensino");
-    if (!etapaId) camposPendentes.push("etapa");
-    if (!turnoId) camposPendentes.push("turno");
-
-    message.value = `Não foi possível sincronizar com o Erudio porque ${camposPendentes.join(", ")} não ${camposPendentes.length > 1 ? "foram informados" : "foi informado"}.`;
-    loadingButton.value = false;
-    showMessage.value = true;
-    return null;
-  }
-
-  const body = {
-    pessoa: buildErudioPessoaPayload(),
-    rematricula: {
-      unidadeEnsinoId,
-      etapaId,
-      turnoId,
-    },
-  };
-
-  const { data, error } = await useFetch("/api/erudio/alunos/sincronizar", {
-    method: "POST",
-    body,
-  });
-
-  if (error.value || data.value?.statusCode || data.value?.error) {
-    message.value = error.value || data.value?.error || data.value?.message;
-    loadingButton.value = false;
-    showMessage.value = true;
-    return null;
-  }
-
   return data.value;
 };
 
@@ -1076,7 +1035,7 @@ function buildPessoaPayload(enderecoId) {
 }
 
 function buildAlunoPayload() {
-  return {
+  const payload = {
     nome: normalizeOptionalValue(dadosForm.value.nome),
     cpf: normalizeDigits(dadosForm.value.cpf),
     email: normalizeOptionalValue(dadosForm.value.email),
@@ -1084,6 +1043,46 @@ function buildAlunoPayload() {
     telefone1: normalizeOptionalValue(dadosForm.value.telefone1),
     telefone2: normalizeOptionalValue(dadosForm.value.telefone2),
     responsavelNome: normalizeOptionalValue(dadosForm.value.responsavelNome),
+  };
+
+  if (isPreCadastroSelecionado.value) {
+    const sincronizacaoErudio = buildSincronizacaoErudioPayload();
+    if (!sincronizacaoErudio) return null;
+    payload.sincronizacaoErudio = sincronizacaoErudio;
+  }
+
+  return payload;
+}
+
+function buildSincronizacaoErudioPayload() {
+  const etapaId = Number(
+    dadosForm.value.etapa?.idExterno || dadosForm.value.etapa?.id,
+  );
+  const ordem = Number(etapaAtiva.value?.ordem || dadosForm.value.etapa?.ordem);
+  const unidadeEnsinoId = Number(dadosForm.value.unidadeEnsinoId);
+  const turnoId = Number(dadosForm.value.turnoPreferencialId);
+
+  if (!unidadeEnsinoId || !etapaId || !turnoId) {
+    const camposPendentes = [];
+
+    if (!unidadeEnsinoId) camposPendentes.push("unidade de ensino");
+    if (!etapaId) camposPendentes.push("etapa");
+    if (!turnoId) camposPendentes.push("turno");
+
+    message.value = `Não foi possível sincronizar com o Erudio porque ${camposPendentes.join(", ")} não ${camposPendentes.length > 1 ? "foram informados" : "foi informado"}.`;
+    loadingButton.value = false;
+    showMessage.value = true;
+    return null;
+  }
+
+  return {
+    ordem: ordem || null,
+    pessoa: buildErudioPessoaPayload(),
+    rematricula: {
+      unidadeEnsinoId,
+      etapaId,
+      turnoId,
+    },
   };
 }
 
@@ -1149,8 +1148,7 @@ function normalizePreCadastroData(data = {}) {
     email: pessoa.email || aluno.email || null,
     telefone1: telefones[0]?.numero || null,
     telefone2: telefones[1]?.numero || null,
-    responsavelNome:
-      pessoa.responsavelNome || aluno.responsavelNome || null,
+    responsavelNome: pessoa.responsavelNome || aluno.responsavelNome || null,
     endereco: pessoa.endereco || null,
     turnoAtualId: matricula.turno?.id || null,
     turnoAtualNome: matricula.turno?.nome || null,
@@ -1162,7 +1160,9 @@ function normalizePreCadastroData(data = {}) {
           }
         : null,
     unidadeEnsinoId:
-      pessoa.matricula?.unidadeEnsino?.id || matricula.unidadeEnsino?.id || null,
+      pessoa.matricula?.unidadeEnsino?.id ||
+      matricula.unidadeEnsino?.id ||
+      null,
     tipoInscricaoInferido:
       data.tipoInscricaoInferido ||
       (matricula?.id ? "TRANSFERENCIA" : "CADASTRO"),
@@ -1210,13 +1210,16 @@ function validatePreCadastroDocuments() {
     obrigatorios.push("anexo_cras");
   }
 
-  return obrigatorios.every((campo) => normalizeFiles(documentos.value[campo]).length);
+  return obrigatorios.every(
+    (campo) => normalizeFiles(documentos.value[campo]).length,
+  );
 }
 
 function validateTurnoTransferencia() {
   return (
     !dadosForm.value.turnoAtualId ||
-    String(dadosForm.value.turnoAtualId) !== String(dadosForm.value.turnoPreferencialId)
+    String(dadosForm.value.turnoAtualId) !==
+      String(dadosForm.value.turnoPreferencialId)
   );
 }
 

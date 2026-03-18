@@ -12,6 +12,4 @@ export default defineEventHandler(async (event) => {
   
   const data = await response.json();
   return data;
-  
-
 });
