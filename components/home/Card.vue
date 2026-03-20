@@ -55,11 +55,23 @@
         />
       </v-col> -->
     </v-row>
+    <v-row v-if="showBtn" class="pt-4 px-4">
+      <CoreSelect
+        v-model="tipoCadastroSelecionado"
+        :items="opcoesTipoCadastro"
+        full-width
+        item-title="nome"
+        label="Tipo de cadastro*"
+        required
+        @input="tipoCadastroSelecionado = $event"
+      />
+    </v-row>
     <v-row justify="center" class="py-4">
       <CoreButton
         v-if="showBtn"
         label="clique aqui para começar"
-        link="/cadastro"
+        :disabled="!tipoCadastroSelecionado"
+        :link="linkCadastro"
         rounded="xl"
         size="x-large"
       />
@@ -86,6 +98,11 @@ const { data: processo, error: errorProcesso } = await useFetch(
 const showMessage = ref(false);
 const message = ref("");
 const showBtn = ref(true);
+const tipoCadastroSelecionado = ref(null);
+const opcoesTipoCadastro = [
+  { id: "cadastro", nome: "Cadastro" },
+  { id: "pre-cadastro", nome: "Pré cadastro" },
+];
 const showDates = computed(() => {
   return (
     processo.value &&
@@ -95,6 +112,11 @@ const showDates = computed(() => {
 });
 const themeColor = computed(() => {
   return theme.global.name.value === "customLightTheme" ? "primary" : "white";
+});
+const linkCadastro = computed(() => {
+  if (!tipoCadastroSelecionado.value) return null;
+
+  return `/cadastro?tipo=${tipoCadastroSelecionado.value.id}`;
 });
 
 onMounted(() => {

@@ -1,17 +1,5 @@
 <template>
   <v-form ref="form" class="pa-10">
-    <v-row class="mb-3">
-      <CoreSelect
-        v-model="opcaoProcessoSelecionada"
-        :items="opcoesProcesso"
-        full-width
-        item-title="nome"
-        label="Tipo de cadastro*"
-        required
-        @input="onChangeOpcaoProcesso"
-      />
-    </v-row>
-
     <v-row v-if="isEtapaAtivaSelecionada" class="mb-3">
       <CoreInput
         v-model="dadosForm.cpf"
@@ -274,6 +262,7 @@
 </template>
 
 <script setup>
+const route = useRoute();
 const { data: etapas } = await useFetch("/api/etapas");
 const { data: processo } = await useFetch("/api/processos/em-andamento");
 const { data: turnos } = await useFetch("/api/turnos");
@@ -336,15 +325,8 @@ onMounted(() => {
     message.value = "Erro: Nenhuma etapa em andamento.";
     return (showMessage.value = true);
   }
-});
 
-const opcoesProcesso = computed(() => {
-  if (!etapaAtivaAtual.value) return [];
-
-  return [
-    etapaAtivaAtual.value,
-    { id: OPCAO_PRE_CADASTRO_ID, nome: "Pré cadastro" },
-  ];
+  syncOpcaoProcessoPorTipo();
 });
 
 const isEtapaAtivaSelecionada = computed(
@@ -400,6 +382,25 @@ const onChangeOpcaoProcesso = async (opcao) => {
     showAllInputs.value = true;
   }
 };
+
+const syncOpcaoProcessoPorTipo = async () => {
+  if (!etapaAtivaAtual.value) return;
+
+  const tipoSelecionado = route.query.tipo;
+  const opcao =
+    tipoSelecionado === OPCAO_PRE_CADASTRO_ID
+      ? { id: OPCAO_PRE_CADASTRO_ID, nome: "Pré cadastro" }
+      : etapaAtivaAtual.value;
+
+  await onChangeOpcaoProcesso(opcao);
+};
+
+watch(
+  () => route.query.tipo,
+  async () => {
+    await syncOpcaoProcessoPorTipo();
+  },
+);
 
 const onInputCPFPorTipo = async () => {
   if (isEtapaAtivaSelecionada.value) {
