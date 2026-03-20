@@ -1,5 +1,15 @@
 <template>
   <v-form ref="form" class="pa-10">
+      <CoreSelect
+        v-model="dadosForm.processoEtapa"
+        :items="processoEtapas"
+        :hint="`para o ano letivo de ${ANO_INSCRICAO}`"
+        item-title="nome"
+        label="Etapa*"
+        persistent-hint
+        required
+        @input="dadosForm.processoEtapa = $event"
+      />
     <v-row v-if="isEtapaAtivaSelecionada" class="mb-3">
       <CoreInput
         v-model="dadosForm.cpf"
@@ -33,10 +43,11 @@
       ></v-row>
     </template>
     <CadastroPreCadastroAlunoForm
-      v-if="showAllInputs && isPreCadastroSelecionado"
+      v-if="dadosForm.processoEtapa?.tipo === 'MATRICULA'"
       :bairros-preferenciais="bairrosPreferenciais || []"
       :documentos="documentos"
       :endereco="dadosEndereco"
+      :processo-etapas="processoEtapas"
       :etapa-options="etapas"
       :form-data="dadosForm"
       :genero-options="generoOptions"
@@ -55,7 +66,7 @@
       @validateAddress="validateAddress = $event"
     />
 
-    <v-row v-if="showAllInputs && isEtapaAtivaSelecionada">
+    <v-row v-if="dadosForm.processoEtapa?.tipo === 'TRANSFERENCIA'">
       <CoreFormSubtitle label="Responsável" />
       <CoreInput
         v-model="dadosForm.responsavelNome"
@@ -226,9 +237,6 @@
     </v-row>
 
     <v-row
-      v-if="
-        showAllInputs && (isEtapaAtivaSelecionada || isPreCadastroSelecionado)
-      "
       justify="end"
     >
       <CoreButton
@@ -264,7 +272,7 @@
 <script setup>
 const route = useRoute();
 const { data: etapas } = await useFetch("/api/etapas");
-const { data: processo } = await useFetch("/api/processos/em-andamento");
+const { data: processos } = await useFetch("/api/processos");
 const { data: turnos } = await useFetch("/api/turnos");
 const { data: unidades } = await useFetch("/api/unidades");
 const {
@@ -313,10 +321,14 @@ const nacionalidadeOptions = [
   { label: "Estrangeiro", value: "ESTRANGEIRO" },
 ];
 
+const { data: processoEtapas, error: errorProcessoEtapas } = await useFetch(
+  `/api/processo-etapas?processoId=${route.query.tipo}`,
+);
+
 onMounted(() => {
   etapaAtivaAtual.value =
-    processo.value && processo.value.processoEtapas
-      ? processo.value.processoEtapas.find((etapa) => etapa.emAndamento)
+    processos.value && processos.value.processoEtapas
+      ? processos.value.processoEtapas.find((etapa) => etapa.emAndamento)
       : null;
 
   carregarBairrosPreferenciais();
@@ -735,17 +747,18 @@ const salvarPreCadastro = async () => {
 const persistirAlunoMatriculaOnline = async () => {
   const alunoPayload = buildAlunoPayload();
   if (!alunoPayload) return null;
+  console.log("alunoPayload",alunoPayload)
 
-  const payload = {
-    ...alunoPayload,
-    ...(dadosForm.value.id ? { id: dadosForm.value.id } : {}),
-  };
+  // const payload = {
+  //   ...alunoPayload,
+  //   ...(dadosForm.value.id ? { id: dadosForm.value.id } : {}),
+  // };
   const endpoint = "/api/alunos";
   const method = dadosForm.value.id ? "PUT" : "POST";
 
   const { data, error } = await useFetch(endpoint, {
     method,
-    body: payload,
+    body: alunoPayload,
   });
 
   if (error.value || data.value?.statusCode || data.value?.error) {
@@ -786,7 +799,7 @@ const criarPessoa = async () => {
 
   const { data: pessoaCriada, error } = await useFetch("/api/pessoas", {
     method: "POST",
-    body: buildPessoaPayload(enderecoId),
+    body: buildAlunoPayload(enderecoId),
   });
 
   if (error.value || pessoaCriada.value.statusCode) {
@@ -1046,11 +1059,12 @@ function buildAlunoPayload() {
     responsavelNome: normalizeOptionalValue(dadosForm.value.responsavelNome),
   };
 
-  if (isPreCadastroSelecionado.value) {
-    const sincronizacaoErudio = buildSincronizacaoErudioPayload();
-    if (!sincronizacaoErudio) return null;
-    payload.sincronizacaoErudio = sincronizacaoErudio;
-  }
+  // if (isPreCadastroSelecionado.value) {
+  //   const sincronizacaoErudio = buildSincronizacaoErudioPayload();
+  //   if (!sincronizacaoErudio) return null;
+  //   payload.sincronizacaoErudio = sincronizacaoErudio;
+  // }
+  console.log("PAYLOAD", payload)
 
   return payload;
 }

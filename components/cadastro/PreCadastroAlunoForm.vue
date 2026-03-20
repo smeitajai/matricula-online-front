@@ -187,6 +187,16 @@
       @input="updateField('conselheiroNome', $event)"
     />
 
+    <CoreFormSubtitle label="Endereço" />
+    <v-col cols="12" class="pa-0">
+      <CoreAddress
+        class="w-100"
+        :model-value="endereco"
+        @input="updateEndereco"
+        @validate="emit('validateAddress', $event)"
+      />
+    </v-col>
+
     <CoreFormSubtitle label="Preferências" />
     <v-col cols="12" class="py-1 px-1" md="6">
       <v-select
@@ -261,13 +271,6 @@
       full-width
       label="Processo Judicial"
       @input="updateField('processoJudicial', $event)"
-    />
-
-    <CoreFormSubtitle label="Endereço" />
-    <CoreAddress
-      :model-value="endereco"
-      @input="updateEndereco"
-      @validate="emit('validateAddress', $event)"
     />
 
     <CoreFormSubtitle label="Documentos Obrigatórios" />
@@ -365,6 +368,10 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  processoEtapas: {
+    type: Array,
+    default: () => [],
+  },
   loading: {
     type: Boolean,
     default: false,
@@ -458,6 +465,6 @@ const updateCpf = (value) => {
     return;
   }
 
-  emit("buscar-por-cpf", cpf);
+  // emit("buscar-por-cpf", cpf);
 };
 </script>

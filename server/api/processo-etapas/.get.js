@@ -3,6 +3,7 @@ export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
   const params = '?' + new URLSearchParams(query).toString();
 
+  console.log(`${config.public.baseURL}/processo-etapas${params}`)
   const response = await fetch(`${config.public.baseURL}/processo-etapas${params}`);
   const data = await response.json();
   return data;

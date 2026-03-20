@@ -1,0 +1,32 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Nuxt: Dev Server",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run dev",
+      "cwd": "${workspaceFolder}",
+      "serverReadyAction": {
+        "pattern": "http://localhost:3001",
+        "uriFormat": "http://localhost:3001",
+        "action": "debugWithChrome"
+      }
+    },
+    {
+      "name": "Nuxt: Chrome",
+      "type": "pwa-chrome",
+      "request": "launch",
+      "url": "http://localhost:3001",
+      "webRoot": "${workspaceFolder}"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Nuxt: Full Debug",
+      "configurations": [
+        "Nuxt: Dev Server"
+      ]
+    }
+  ]
+}

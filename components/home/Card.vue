@@ -26,7 +26,16 @@
         </span>
       </v-col>
     </v-row>
-
+    <v-row v-if="showBtn" class="pt-4 px-4">
+      <v-col cols="12" justify="center" class="py-2" v-for="p in processo" :key="processo.id">
+        <CoreButton
+          :label="p.nome"
+          :link="'/cadastro?tipo=' + p.id"
+          rounded="xl"
+          size="x-large"
+        />
+      </v-col>
+    </v-row>
     <v-row>
       <v-col cols="12">
         <CoreButton
@@ -55,27 +64,6 @@
         />
       </v-col> -->
     </v-row>
-    <v-row v-if="showBtn" class="pt-4 px-4">
-      <CoreSelect
-        v-model="tipoCadastroSelecionado"
-        :items="opcoesTipoCadastro"
-        full-width
-        item-title="nome"
-        label="Tipo de cadastro*"
-        required
-        @input="tipoCadastroSelecionado = $event"
-      />
-    </v-row>
-    <v-row justify="center" class="py-4">
-      <CoreButton
-        v-if="showBtn"
-        label="clique aqui para começar"
-        :disabled="!tipoCadastroSelecionado"
-        :link="linkCadastro"
-        rounded="xl"
-        size="x-large"
-      />
-    </v-row>
   </CoreCard>
 
   <CoreSnackbar
@@ -92,17 +80,13 @@ import { useTheme } from "vuetify";
 const theme = useTheme();
 
 const { data: processo, error: errorProcesso } = await useFetch(
-  "/api/processos/em-andamento",
+  "/api/processos/",
 );
 
 const showMessage = ref(false);
 const message = ref("");
 const showBtn = ref(true);
 const tipoCadastroSelecionado = ref(null);
-const opcoesTipoCadastro = [
-  { id: "cadastro", nome: "Cadastro" },
-  { id: "pre-cadastro", nome: "Pré cadastro" },
-];
 const showDates = computed(() => {
   return (
     processo.value &&
@@ -124,24 +108,6 @@ onMounted(() => {
     errorProcesso.value
       ? (message.value = errorProcesso.value.message)
       : (message.value = processos.value.message);
-    return (showMessage.value = true);
-  }
-
-  if (!processo.value.id) {
-    message.value = "Nenhum processo ativo no momento";
-    return (showMessage.value = true);
-  }
-
-  if (!processo.value.processoEtapas.length) {
-    message.value = "Nenhuma etapa de inscrição cadastrada";
-    return (showMessage.value = true);
-  }
-
-  const etapaEmAndamento = processo.value.processoEtapas.some(
-    (etapa) => etapa.emAndamento,
-  );
-  if (!etapaEmAndamento) {
-    message.value = "Nenhuma etapa em andamento";
     return (showMessage.value = true);
   }
 
