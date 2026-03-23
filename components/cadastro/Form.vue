@@ -3,7 +3,6 @@
       <CoreSelect
         v-model="dadosForm.processoEtapa"
         :items="processoEtapas"
-        :hint="`para o ano letivo de ${ANO_INSCRICAO}`"
         item-title="nome"
         label="Etapa*"
         persistent-hint
@@ -64,6 +63,7 @@
       @update:endereco="dadosEndereco = $event"
       @update:formData="dadosForm = $event"
       @validateAddress="validateAddress = $event"
+      @submit="onSubmit()"
     />
 
     <v-row v-if="dadosForm.processoEtapa?.tipo === 'TRANSFERENCIA'">
@@ -237,6 +237,7 @@
     </v-row>
 
     <v-row
+      v-if="dadosForm.processoEtapa?.tipo !== 'MATRICULA'"
       justify="end"
     >
       <CoreButton
