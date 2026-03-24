@@ -853,12 +853,12 @@ const salvarInscricao = async () => {
       alunoId: alunoState.value.id.toString(),
       processoEtapaId: etapaAtiva.value.id,
       unidadeEnsinoProximoAnoId:
-        alunoCarregadoErudio.value.unidadeEnsinoProximoAnoId?.toString() ||
+        alunoCarregadoErudio.value?.unidadeEnsinoProximoAnoId?.toString() ||
         "16142",
       etapaProximoAnoId:
-        alunoCarregadoErudio.value.etapaProximoAnoId?.toString() || "1",
+        alunoCarregadoErudio.value?.etapaProximoAnoId?.toString() || "1",
       turnoProximoAnoId:
-        alunoCarregadoErudio.value.turnoProximoAnoId?.toString() || "1",
+        alunoCarregadoErudio.value?.turnoProximoAnoId?.toString() || "1",
     },
   });
 
