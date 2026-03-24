@@ -301,7 +301,7 @@
               clearable
               label="Anexo CRAS*"
               required
-              @input="updateDocumento('anexo_cras', $event)"
+              @update:model-value="updateDocumento('anexo_cras', $event)"
             />
             <CoreInput
               :model-value="formData.processoJudicial"
@@ -323,7 +323,7 @@
               clearable
               label="Certidão de nascimento ou documento de identidade do estudante*"
               required
-              @input="updateDocumento('certidao_identidade', $event)"
+              @update:model-value="updateDocumento('certidao_identidade', $event)"
             />
             <CoreFileInput
               :model-value="documentos.cpf_rg_responsavel"
@@ -331,7 +331,7 @@
               clearable
               label="CPF e RG dos pais ou responsáveis, ou guarda*"
               required
-              @input="updateDocumento('cpf_rg_responsavel', $event)"
+              @update:model-value="updateDocumento('cpf_rg_responsavel', $event)"
             />
             <CoreFileInput
               :model-value="documentos.declaracao_vacinacao"
@@ -339,7 +339,7 @@
               clearable
               label="Declaração de vacinação atualizada*"
               required
-              @input="updateDocumento('declaracao_vacinacao', $event)"
+              @update:model-value="updateDocumento('declaracao_vacinacao', $event)"
             />
             <CoreFileInput
               :model-value="documentos.cartao_cns"
@@ -347,7 +347,7 @@
               clearable
               label="Cartão Nacional de Saúde (CNS)*"
               required
-              @input="updateDocumento('cartao_cns', $event)"
+              @update:model-value="updateDocumento('cartao_cns', $event)"
             />
             <CoreFileInput
               :model-value="documentos.comprovante_residencia"
@@ -355,14 +355,14 @@
               clearable
               label="Comprovante de residência atualizado*"
               required
-              @input="updateDocumento('comprovante_residencia', $event)"
+              @update:model-value="updateDocumento('comprovante_residencia', $event)"
             />
             <CoreFileInput
               :model-value="documentos.declaracao_proprietario_residencia"
               chips
               clearable
               label="Declaração do proprietário da residência"
-              @input="updateDocumento('declaracao_proprietario_residencia', $event)"
+              @update:model-value="updateDocumento('declaracao_proprietario_residencia', $event)"
             />
             <CoreFileInput
               :model-value="documentos.foto_estudante"
@@ -370,35 +370,35 @@
               clearable
               label="Fotografia 3x4 do estudante*"
               required
-              @input="updateDocumento('foto_estudante', $event)"
+              @update:model-value="updateDocumento('foto_estudante', $event)"
             />
             <CoreFileInput
               :model-value="documentos.cartao_social"
               chips
               clearable
               label="Cartão Social - NIS"
-              @input="updateDocumento('cartao_social', $event)"
+              @update:model-value="updateDocumento('cartao_social', $event)"
             />
             <CoreFileInput
               :model-value="documentos.cartao_bpc"
               chips
               clearable
               label="Cartão BPC"
-              @input="updateDocumento('cartao_bpc', $event)"
+              @update:model-value="updateDocumento('cartao_bpc', $event)"
             />
             <CoreFileInput
               :model-value="documentos.tutela_provisoria"
               chips
               clearable
               label="Tutela provisória ou comprovante do processo judicial"
-              @input="updateDocumento('tutela_provisoria', $event)"
+              @update:model-value="updateDocumento('tutela_provisoria', $event)"
             />
             <CoreFileInput
               :model-value="documentos.laudo_medico"
               chips
               clearable
               label="Laudo médico"
-              @input="updateDocumento('laudo_medico', $event)"
+              @update:model-value="updateDocumento('laudo_medico', $event)"
             />
           </v-row>
         </v-window-item>

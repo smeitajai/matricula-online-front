@@ -191,7 +191,7 @@
           chips
           clearable
           label="Declaração de vacinação"
-          @input="documentos.declaracao_vacinacao = $event"
+          @update:model-value="documentos.declaracao_vacinacao = $event"
         />
 
         <CoreFileInput
@@ -199,7 +199,7 @@
           chips
           clearable
           label="Cartão Nacional de Saúde (CNS)"
-          @input="documentos.cartao_cns = $event"
+          @update:model-value="documentos.cartao_cns = $event"
         />
 
         <CoreFileInput
@@ -207,7 +207,7 @@
           chips
           clearable
           label="Cartão Social (NIS)"
-          @input="documentos.cartao_social = $event"
+          @update:model-value="documentos.cartao_social = $event"
         />
 
         <CoreFileInput
@@ -215,7 +215,7 @@
           chips
           clearable
           label="Cartão Benefício de Prestação Continuada (BPC)"
-          @input="documentos.cartao_bpc = $event"
+          @update:model-value="documentos.cartao_bpc = $event"
         />
 
         <CoreFileInput
@@ -223,7 +223,7 @@
           chips
           clearable
           label="Tutela provisória"
-          @input="documentos.tutela_provisoria = $event"
+          @update:model-value="documentos.tutela_provisoria = $event"
         />
 
         <CoreFileInput
@@ -231,7 +231,7 @@
           chips
           clearable
           label="Laudo Médico"
-          @input="documentos.laudo_medico = $event"
+          @update:model-value="documentos.laudo_medico = $event"
         />
       </template>
     </v-row>
@@ -884,9 +884,12 @@ const salvarDocumentos = async (inscricao) => {
 
   const categoriasDocumentos = {
     certidao_identidade: documentos.value.certidao_identidade,
+    cpf_rg_responsavel: documentos.value.cpf_rg_responsavel,
     cpf_rg_responsavel1: documentos.value.cpf_rg_responsavel1,
     cpf_rg_responsavel2: documentos.value.cpf_rg_responsavel2,
     comprovante_residencia: documentos.value.comprovante_residencia,
+    declaracao_proprietario_residencia:
+      documentos.value.declaracao_proprietario_residencia,
     foto_estudante: documentos.value.foto_estudante,
     declaracao_vacinacao: documentos.value.declaracao_vacinacao,
     cartao_cns: documentos.value.cartao_cns,
