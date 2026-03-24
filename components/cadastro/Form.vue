@@ -272,6 +272,7 @@
 
 <script setup>
 const route = useRoute();
+const router = useRouter();
 const { data: etapas } = await useFetch("/api/etapas");
 const { data: processos } = await useFetch("/api/processos");
 const { data: turnos } = await useFetch("/api/turnos");
@@ -743,8 +744,10 @@ const salvarPreCadastro = async () => {
   if (!aluno) return;
 
   loadingButton.value = false;
-  message.value = `Pré-cadastro salvo com sucesso como ${dadosForm.value.tipoInscricaoInferido?.toLowerCase() || "cadastro"}.`;
-  showMessage.value = true;
+  await gerarprotocolo({
+    inscricao: aluno.inscricaoId || aluno.inscricao?.id || "",
+    protocolo: aluno.protocolo || aluno.inscricao?.protocolo || "",
+  });
 };
 
 const persistirAlunoMatriculaOnline = async () => {
@@ -789,7 +792,7 @@ const editarPessoa = async () => {
 
   alunoState.value = pessoaEditada.value; // Grava a pessoa editada no State
 
-  salvarInscricao();
+  await salvarInscricao();
 };
 
 const criarPessoa = async () => {
@@ -809,7 +812,7 @@ const criarPessoa = async () => {
 
   alunoState.value = pessoaCriada.value; // Grava a pessoa criada no State
 
-  salvarInscricao();
+  await salvarInscricao();
 };
 
 // TODO: adicionar funcao de remover endereço caso a inclusao de pessoa dê errado
@@ -868,7 +871,7 @@ const salvarInscricao = async () => {
     return (showMessage.value = true);
   }
 
-  salvarDocumentos(inscricaoCriada.value);
+  await salvarDocumentos(inscricaoCriada.value);
 };
 
 const normalizeFiles = (value) => {
@@ -923,16 +926,26 @@ const salvarDocumentos = async (inscricao) => {
     return (showMessage.value = true);
   }
 
-  gerarprotocolo(inscricao);
+  await gerarprotocolo(inscricao);
 };
 
 const gerarprotocolo = async (inscricao) => {
-  await navigateTo({
-    path: "/cadastro/solicitacao-efetivada",
-    query: {
-      inscricao: inscricao.id,
-    },
-  });
+  const query = {
+    inscricao: inscricao.id || inscricao.inscricao || "",
+    protocolo: inscricao.protocolo || "",
+  };
+
+  try {
+    return await router.push({
+      path: "/cadastro/solicitacao-efetivada",
+      query,
+    });
+  } catch (_) {
+    if (import.meta.client) {
+      const search = new URLSearchParams(query).toString();
+      window.location.href = `/cadastro/solicitacao-efetivada?${search}`;
+    }
+  }
 };
 
 async function preencherDadosFormulario(dados = {}) {
@@ -1067,7 +1080,6 @@ function buildAlunoPayload() {
   //   if (!sincronizacaoErudio) return null;
   //   payload.sincronizacaoErudio = sincronizacaoErudio;
   // }
-  console.log("PAYLOAD", payload)
 
   return payload;
 }

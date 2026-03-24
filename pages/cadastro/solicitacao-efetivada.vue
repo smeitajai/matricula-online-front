@@ -5,22 +5,22 @@
         <v-card class="confirmation-card pa-6 pa-md-8" elevation="2">
           <div class="text-overline mb-2">Pre-cadastro efetivado</div>
           <h1 class="text-h4 font-weight-bold mb-4">
-            Sua solicitacao de matricula foi registrada.
+            Solicitação de matrícula efetivada com sucesso.
           </h1>
           <p class="text-body-1 mb-3">
-            A solicitacao de matricula foi efetivada com sucesso e o protocolo
-            ja esta disponivel para consulta.
+            A solicitação de matrícula foi efetivada com sucesso.
           </p>
           <p class="text-body-1 mb-6">
-            Guarde o numero do protocolo para acompanhar o andamento da
-            inscricao.
-            <span v-if="inscricaoId" class="font-weight-medium">
-              Protocolo: {{ inscricaoId }}
+            Guarde o número do protocolo para acompanhar o andamento da
+            inscrição.
+            <span v-if="protocoloExibicao" class="font-weight-medium">
+              Protocolo: {{ protocoloExibicao }}
             </span>
           </p>
 
           <div class="d-flex flex-column flex-sm-row ga-3">
             <CoreButton
+              v-if="inscricaoId"
               label="Ver protocolo"
               prepend-icon="mdi-file-document-outline"
               @click="onClickVerProtocolo()"
@@ -41,6 +41,9 @@
 const route = useRoute();
 
 const inscricaoId = computed(() => route.query.inscricao || "");
+const protocoloExibicao = computed(
+  () => route.query.protocolo || route.query.inscricao || "",
+);
 
 const onClickVerProtocolo = async () => {
   await navigateTo({
