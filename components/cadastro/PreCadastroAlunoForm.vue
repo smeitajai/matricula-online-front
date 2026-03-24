@@ -3,14 +3,17 @@
     <!-- Stepper Header -->
     <v-stepper
       v-model="currentStep"
-      alt-labels
+      :alt-labels="!mobile"
       flat
-      :items="steps"
+      :items="stepperItems"
       hide-actions
       class="stepper-header-only"
     >
       <template #[`item.${i}`] v-for="(_, i) in steps" :key="i" />
     </v-stepper>
+    <div v-if="mobile" class="mobile-step-title">
+      {{ currentStepLabel }}
+    </div>
 
     <!-- Step Content -->
     <v-card-text class="step-content pt-4">
@@ -440,7 +443,8 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
+import { useDisplay } from "vuetify";
 import validateCPF from "../../utils/validateCPF";
 
 const props = defineProps({
@@ -512,6 +516,8 @@ const emit = defineEmits([
   "submit",
 ]);
 
+const { mobile } = useDisplay();
+
 // Stepper state
 const currentStep = ref(1);
 const totalSteps = 5;
@@ -523,6 +529,14 @@ const steps = [
   { title: "Preferências", value: 4 },
   { title: "Documentos", value: 5 },
 ];
+
+const stepperItems = computed(() =>
+  mobile.value ? steps.map((step) => ({ ...step, title: "" })) : steps,
+);
+
+const currentStepLabel = computed(
+  () => steps.find((step) => step.value === currentStep.value)?.title || "",
+);
 
 const nextStep = () => {
   if (currentStep.value < totalSteps) currentStep.value++;
@@ -584,6 +598,14 @@ const updateCpf = (value) => {
 .step-content {
   min-height: 300px;
   overflow: visible;
+}
+
+.mobile-step-title {
+  padding: 8px 16px 0;
+  text-align: center;
+  font-size: 0.95rem;
+  color: rgb(var(--v-theme-primary));
+  font-weight: 600;
 }
 
 .step-actions {

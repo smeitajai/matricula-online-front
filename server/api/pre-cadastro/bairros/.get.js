@@ -1,8 +1,10 @@
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
-  const response = await fetch(
-    `${config.public.erudioBaseURL}/integracoes/pre-cadastro/public/bairros`,
-  );
+  const query = getQuery(event);
+  const queryString = new URLSearchParams(query).toString();
+  const params = queryString ? `?${queryString}` : '';
+
+  const response = await fetch(`${config.public.baseURL}/pre-cadastro/bairros${params}`);
 
   let data = {};
   const text = await response.text();

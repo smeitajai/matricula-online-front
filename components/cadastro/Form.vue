@@ -9,21 +9,6 @@
         required
         @input="dadosForm.processoEtapa = $event"
       />
-    <v-row v-if="isEtapaAtivaSelecionada" class="mb-3">
-      <CoreInput
-        v-model="dadosForm.cpf"
-        :counter="11"
-        :disabled="isEtapaAtivaSelecionada && !etapaAtiva"
-        clearable
-        full-width
-        hint="Digite apenas números"
-        label="CPF do aluno(a)*"
-        persistent-hint
-        placeholder="123456789000"
-        required
-        @input="((dadosForm.cpf = $event), onInputCPFPorTipo())"
-      />
-    </v-row>
     <template v-if="loading">
       <v-row v-for="n in 4" :key="n" class="align-skeleton-loading">
         <v-col cols="6" class="py-0">
@@ -67,6 +52,21 @@
     />
 
     <v-row v-if="dadosForm.processoEtapa?.tipo === 'TRANSFERENCIA'">
+      <v-row>
+        <CoreInput
+          v-model="dadosForm.cpf"
+          :counter="11"
+          :disabled="isEtapaAtivaSelecionada && !etapaAtiva"
+          clearable
+          full-width
+          hint="Digite apenas números"
+          label="CPF do aluno(a)*"
+          persistent-hint
+          placeholder="123456789000"
+          required
+          @input="((dadosForm.cpf = $event), onInputCPFPorTipo())"
+        />
+      </v-row>
       <CoreFormSubtitle label="Responsável" />
       <CoreInput
         v-model="dadosForm.responsavelNome"
@@ -327,10 +327,12 @@ const { data: processoEtapas, error: errorProcessoEtapas } = await useFetch(
 );
 
 onMounted(() => {
-  etapaAtivaAtual.value =
-    processos.value && processos.value.processoEtapas
-      ? processos.value.processoEtapas.find((etapa) => etapa.emAndamento)
-      : null;
+  const tipo = Number(route.query.tipo);
+
+  etapaAtivaAtual.value = processos.value
+    ?.flatMap(p => p.processoEtapas)
+    .find(etapa => etapa.id === tipo) || null;
+
 
   carregarBairrosPreferenciais();
 
@@ -379,7 +381,6 @@ const limparEstadoFormulario = () => {
   alunoCarregadoErudio.value = null;
   validateAddress.value = true;
 };
-
 const onChangeOpcaoProcesso = async (opcao) => {
   opcaoProcessoSelecionada.value = opcao;
   limparEstadoFormulario();
@@ -728,6 +729,7 @@ const onSubmit = async () => {
 
   loadingButton.value = true;
 
+  // TODO: verificar se estpá sendo usado em algum fluxo
   if (isPreCadastroSelecionado.value) {
     await salvarPreCadastro();
     return;
@@ -750,10 +752,6 @@ const persistirAlunoMatriculaOnline = async () => {
   if (!alunoPayload) return null;
   console.log("alunoPayload",alunoPayload)
 
-  // const payload = {
-  //   ...alunoPayload,
-  //   ...(dadosForm.value.id ? { id: dadosForm.value.id } : {}),
-  // };
   const endpoint = "/api/alunos";
   const method = dadosForm.value.id ? "PUT" : "POST";
 
@@ -814,6 +812,7 @@ const criarPessoa = async () => {
   salvarInscricao();
 };
 
+// TODO: adicionar funcao de remover endereço caso a inclusao de pessoa dê errado
 const persistirEndereco = async () => {
   const dadosMapeados = {
     ...dadosEndereco.value,
@@ -926,7 +925,7 @@ const salvarDocumentos = async (inscricao) => {
 
 const gerarprotocolo = async (inscricao) => {
   await navigateTo({
-    path: "/protocolo",
+    path: "/cadastro/solicitacao-efetivada",
     query: {
       inscricao: inscricao.id,
     },
