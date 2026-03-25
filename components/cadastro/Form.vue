@@ -1,14 +1,5 @@
 <template>
   <v-form ref="form" class="pa-10">
-      <CoreSelect
-        v-model="dadosForm.processoEtapa"
-        :items="processoEtapas"
-        item-title="nome"
-        label="Etapa*"
-        persistent-hint
-        required
-        @input="dadosForm.processoEtapa = $event"
-      />
     <template v-if="loading">
       <v-row v-for="n in 4" :key="n" class="align-skeleton-loading">
         <v-col cols="6" class="py-0">
@@ -26,6 +17,17 @@
           ></v-skeleton-loader></v-col
       ></v-row>
     </template>
+    <CoreSelect
+        v-model="dadosForm.processoEtapa"
+        :items="processoEtapas"
+        item-title="nome"
+        label="Etapa*"
+        persistent-hint
+        required
+        @input="dadosForm.processoEtapa = $event"
+    />
+
+    <!-- TODO: retirar essa quantidade ridícula de props -->
     <CadastroPreCadastroAlunoForm
       v-if="dadosForm.processoEtapa?.tipo === 'MATRICULA'"
       :bairros-preferenciais="bairrosPreferenciais || []"
@@ -352,7 +354,9 @@ const isEtapaAtivaSelecionada = computed(
 );
 
 const isPreCadastroSelecionado = computed(
-  () => opcaoProcessoSelecionada.value?.id === OPCAO_PRE_CADASTRO_ID,
+  () =>
+    opcaoProcessoSelecionada.value?.id === OPCAO_PRE_CADASTRO_ID ||
+    dadosForm.value.processoEtapa?.tipo === "MATRICULA",
 );
 
 const isCpfCnpjObrigatorio = computed(
@@ -730,49 +734,7 @@ const onSubmit = async () => {
 
   loadingButton.value = true;
 
-  // TODO: verificar se estpá sendo usado em algum fluxo
-  if (isPreCadastroSelecionado.value) {
-    await salvarPreCadastro();
-    return;
-  }
-
   await (dadosForm.value.id ? editarPessoa() : criarPessoa());
-};
-
-const salvarPreCadastro = async () => {
-  const aluno = await persistirAlunoMatriculaOnline();
-  if (!aluno) return;
-
-  loadingButton.value = false;
-  await gerarprotocolo({
-    inscricao: aluno.inscricaoId || aluno.inscricao?.id || "",
-    protocolo: aluno.protocolo || aluno.inscricao?.protocolo || "",
-  });
-};
-
-const persistirAlunoMatriculaOnline = async () => {
-  const alunoPayload = buildAlunoPayload();
-  if (!alunoPayload) return null;
-  console.log("alunoPayload",alunoPayload)
-
-  const endpoint = "/api/alunos";
-  const method = dadosForm.value.id ? "PUT" : "POST";
-
-  const { data, error } = await useFetch(endpoint, {
-    method,
-    body: alunoPayload,
-  });
-
-  if (error.value || data.value?.statusCode || data.value?.error) {
-    message.value = error.value || data.value?.error || data.value?.message;
-    loadingButton.value = false;
-    showMessage.value = true;
-    return null;
-  }
-
-  dadosForm.value.id = data.value.id;
-  alunoState.value = data.value;
-  return data.value;
 };
 
 const editarPessoa = async () => {
@@ -799,9 +761,12 @@ const criarPessoa = async () => {
   const enderecoId = await persistirEndereco();
   if (!enderecoId) return;
 
+  const payload = buildAlunoPayload();
+  if (!payload) return;
+
   const { data: pessoaCriada, error } = await useFetch("/api/pessoas", {
     method: "POST",
-    body: buildAlunoPayload(enderecoId),
+    body: payload,
   });
 
   if (error.value || pessoaCriada.value.statusCode) {
@@ -818,11 +783,13 @@ const criarPessoa = async () => {
 // TODO: adicionar funcao de remover endereço caso a inclusao de pessoa dê errado
 const persistirEndereco = async () => {
   const dadosMapeados = {
-    ...dadosEndereco.value,
+    logradouro: normalizeOptionalValue(dadosEndereco.value.logradouro),
+    bairro: normalizeOptionalValue(dadosEndereco.value.bairro),
     cep: dadosEndereco.value.cep ? dadosEndereco.value.cep.toString() : null,
     numero: dadosEndereco.value.numero
       ? dadosEndereco.value.numero.toString()
       : null,
+    complemento: normalizeOptionalValue(dadosEndereco.value.complemento),
   };
 
   const endpoint = dadosForm.value.enderecoId ? "PUT" : "POST";
@@ -1075,11 +1042,11 @@ function buildAlunoPayload() {
     responsavelNome: normalizeOptionalValue(dadosForm.value.responsavelNome),
   };
 
-  // if (isPreCadastroSelecionado.value) {
-  //   const sincronizacaoErudio = buildSincronizacaoErudioPayload();
-  //   if (!sincronizacaoErudio) return null;
-  //   payload.sincronizacaoErudio = sincronizacaoErudio;
-  // }
+  if (isPreCadastroSelecionado.value) {
+    const sincronizacaoErudio = buildSincronizacaoErudioPayload();
+    if (!sincronizacaoErudio) return null;
+    payload.sincronizacaoErudio = sincronizacaoErudio;
+  }
 
   return payload;
 }
@@ -1088,7 +1055,6 @@ function buildSincronizacaoErudioPayload() {
   const etapaId = Number(
     dadosForm.value.etapa?.idExterno || dadosForm.value.etapa?.id,
   );
-  const ordem = Number(etapaAtiva.value?.ordem || dadosForm.value.etapa?.ordem);
   const unidadeEnsinoId = Number(dadosForm.value.unidadeEnsinoId);
   const turnoId = Number(dadosForm.value.turnoPreferencialId);
 
@@ -1106,7 +1072,6 @@ function buildSincronizacaoErudioPayload() {
   }
 
   return {
-    ordem: ordem || null,
     pessoa: buildErudioPessoaPayload(),
     rematricula: {
       unidadeEnsinoId,
@@ -1223,7 +1188,9 @@ function normalizeDigits(value) {
 }
 
 function validateAddressPayload(endereco = {}) {
-  return Boolean(endereco.bairro && endereco.logradouro && endereco.numero);
+  return Boolean(
+    endereco.cep && endereco.bairro && endereco.logradouro && endereco.numero,
+  );
 }
 
 function validatePreCadastroDocuments() {
