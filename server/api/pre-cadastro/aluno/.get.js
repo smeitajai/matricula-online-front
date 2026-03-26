@@ -1,12 +1,10 @@
 export default defineEventHandler(async (event) => {
-  const query = getQuery(event);
   const config = useRuntimeConfig();
+  const query = getQuery(event);
   const queryString = new URLSearchParams(query).toString();
   const params = queryString ? `?${queryString}` : "";
 
-  const response = await fetch(
-    `${config.public.erudioBaseURL}/integracoes/pre-cadastro/public/aluno${params}`,
-  );
+  const response = await fetch(`${config.public.baseURL}/pre-cadastro/aluno${params}`);
 
   let data = {};
   const string = await response.text();

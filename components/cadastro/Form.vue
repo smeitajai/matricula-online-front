@@ -458,7 +458,7 @@ const carregarAlunoPreCadastro = async (cpf) => {
   ) {
     if (
       alunoPreCadastro.value?.statusCode === 404 ||
-      alunoPreCadastro.value?.message === "Aluno matriculado não encontrado"
+      alunoPreCadastro.value?.message === "Pessoa nao encontrada no Erudio."
     ) {
       return null;
     }
@@ -479,15 +479,17 @@ const carregarAlunoPreCadastro = async (cpf) => {
 };
 
 const validarPreCadastro = async (cpf = dadosForm.value.cpf) => {
+  const processoEtapa = dadosForm.value.processoEtapa || null;
+
   dadosForm.value = {
     ...createEmptyDadosForm(),
+    processoEtapa,
     cpf,
     cpfCnpj: cpf,
   };
   loading.value = true;
 
   const alunoPreCadastro = await carregarAlunoPreCadastro(cpf);
-  const alunoMatriculaOnline = await carregarAlunoMatriculaOnline();
 
   loading.value = false;
 
@@ -499,20 +501,14 @@ const validarPreCadastro = async (cpf = dadosForm.value.cpf) => {
   ) {
     dadosForm.value = {
       ...dadosForm.value,
-      ...(alunoMatriculaOnline ? { id: alunoMatriculaOnline.id } : {}),
       tipoInscricaoInferido: "CADASTRO",
     };
     showAllInputs.value = true;
     return;
   }
 
-  await preencherDadosFormulario(normalizePreCadastroData(alunoPreCadastro));
-  if (alunoMatriculaOnline?.id) {
-    dadosForm.value.id = alunoMatriculaOnline.id;
-  }
-  dadosForm.value.tipoInscricaoInferido =
-    alunoPreCadastro.tipoInscricaoInferido ||
-    (alunoPreCadastro.matricula ? "TRANSFERENCIA" : "CADASTRO");
+  await preencherDadosFormulario(alunoPreCadastro);
+  dadosForm.value.tipoInscricaoInferido = "CADASTRO";
 
   showAllInputs.value = true;
 };
@@ -526,10 +522,10 @@ const onCpfInvalidoPreCadastro = () => {
   showMessage.value = true;
 };
 
-const carregarAlunoMatriculaOnline = async () => {
+const carregarAlunoMatriculaOnline = async (cpf = dadosForm.value.cpf) => {
   const { data, error } = await useFetch("/api/alunos", {
     query: {
-      cpf: dadosForm.value.cpf,
+      cpf,
     },
   });
 
@@ -954,6 +950,8 @@ async function preencherDadosFormulario(dados = {}) {
       dados.dataExpedicaoCertidaoNascimento || "",
     nis: dados.nis || "",
     protocoloRequerimentoCpf: dados.protocoloRequerimentoCpf || "",
+    turnoPreferencialId:
+      dados.turnoPreferencialId || dadosForm.value.turnoPreferencialId || null,
     enderecoId,
     etapa: dados.etapa || dadosForm.value.etapa || null,
     unidadeEnsinoId: dados.unidadeEnsinoId || dadosForm.value.unidadeEnsinoId,
@@ -1123,44 +1121,6 @@ function buildErudioPessoaPayload() {
       numero: normalizeOptionalValue(dadosEndereco.value.numero),
       complemento: normalizeOptionalValue(dadosEndereco.value.complemento),
     },
-  };
-}
-
-function normalizePreCadastroData(data = {}) {
-  const pessoa = data.payload?.pessoa || {};
-  const aluno = data.aluno || {};
-  const matricula = data.matricula || {};
-  const telefones = Array.isArray(pessoa.telefones) ? pessoa.telefones : [];
-
-  return {
-    ...pessoa,
-    id: null,
-    codigo: pessoa.codigo || aluno.codigo || null,
-    cpf: aluno.cpf || pessoa.cpfCnpj || null,
-    cpfCnpj: pessoa.cpfCnpj || aluno.cpf || null,
-    nome: pessoa.nome || aluno.nome || null,
-    dataNascimento: pessoa.dataNascimento || aluno.dataNascimento || null,
-    email: pessoa.email || aluno.email || null,
-    telefone1: telefones[0]?.numero || null,
-    telefone2: telefones[1]?.numero || null,
-    responsavelNome: pessoa.responsavelNome || aluno.responsavelNome || null,
-    endereco: pessoa.endereco || null,
-    turnoAtualId: matricula.turno?.id || null,
-    turnoAtualNome: matricula.turno?.nome || null,
-    etapa:
-      matricula.etapa?.id && matricula.etapa?.nome
-        ? {
-            id: matricula.etapa.id,
-            nome: matricula.etapa.nome,
-          }
-        : null,
-    unidadeEnsinoId:
-      pessoa.matricula?.unidadeEnsino?.id ||
-      matricula.unidadeEnsino?.id ||
-      null,
-    tipoInscricaoInferido:
-      data.tipoInscricaoInferido ||
-      (matricula?.id ? "TRANSFERENCIA" : "CADASTRO"),
   };
 }
 

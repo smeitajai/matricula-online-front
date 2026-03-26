@@ -580,7 +580,7 @@ const updateCpf = (value) => {
     return;
   }
 
-  // emit("buscar-por-cpf", cpf);
+  emit("buscar-por-cpf", cpf);
 };
 </script>
 
