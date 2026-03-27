@@ -786,13 +786,13 @@ const editarPessoa = async () => {
 
   alunoState.value = pessoaEditada.value; // Grava a pessoa editada no State
 
-  await salvarInscricao();
+  const inscricaoCriada = await salvarInscricao();
+  if (!inscricaoCriada) return;
+
+  await salvarDocumentos(inscricaoCriada);
 };
 
 const criarPessoa = async () => {
-  const enderecoId = await persistirEndereco();
-  if (!enderecoId) return;
-
   const payload = buildAlunoPayload();
   if (!payload) return;
 
@@ -809,7 +809,14 @@ const criarPessoa = async () => {
 
   alunoState.value = pessoaCriada.value; // Grava a pessoa criada no State
 
-  await salvarInscricao();
+  const inscricaoCriada = await salvarInscricao();
+  if (!inscricaoCriada) return;
+
+  const sincronizacaoConcluida =
+    await sincronizarAlunoErudio(inscricaoCriada);
+  if (!sincronizacaoConcluida) return;
+
+  await salvarDocumentos(inscricaoCriada);
 };
 
 // TODO: adicionar funcao de remover endereço caso a inclusao de pessoa dê errado
@@ -870,7 +877,38 @@ const salvarInscricao = async () => {
     return (showMessage.value = true);
   }
 
-  await salvarDocumentos(inscricaoCriada.value);
+  return inscricaoCriada.value;
+};
+
+const sincronizarAlunoErudio = async (inscricao) => {
+  if (!isPreCadastroSelecionado.value) return true;
+
+  const payload = buildSincronizacaoErudioPayload(inscricao?.id);
+  if (!payload) return false;
+
+  const { data: sincronizacao, error } = await useFetch(
+    "/api/erudio/alunos/sincronizar",
+    {
+      method: "POST",
+      body: payload,
+    },
+  );
+
+  if (
+    error.value ||
+    sincronizacao.value?.statusCode ||
+    sincronizacao.value?.error
+  ) {
+    message.value =
+      error.value ||
+      sincronizacao.value?.message ||
+      "Erro ao sincronizar aluno no Erudio.";
+    loadingButton.value = false;
+    showMessage.value = true;
+    return false;
+  }
+
+  return true;
 };
 
 const normalizeFiles = (value) => {
@@ -1068,7 +1106,7 @@ function buildPessoaPayload(enderecoId) {
 }
 
 function buildAlunoPayload() {
-  const payload = {
+  return {
     nome: normalizeOptionalValue(dadosForm.value.nome),
     cpf: normalizeDigits(dadosForm.value.cpf),
     email: normalizeOptionalValue(dadosForm.value.email),
@@ -1077,17 +1115,9 @@ function buildAlunoPayload() {
     telefone2: normalizeOptionalValue(dadosForm.value.telefone2),
     responsavelNome: normalizeOptionalValue(dadosForm.value.responsavelNome),
   };
-
-  if (isPreCadastroSelecionado.value) {
-    const sincronizacaoErudio = buildSincronizacaoErudioPayload();
-    if (!sincronizacaoErudio) return null;
-    payload.sincronizacaoErudio = sincronizacaoErudio;
-  }
-
-  return payload;
 }
 
-function buildSincronizacaoErudioPayload() {
+function buildSincronizacaoErudioPayload(inscricaoId) {
   const etapaId = Number(
     dadosForm.value.etapa?.idExterno || dadosForm.value.etapa?.id,
   );
@@ -1126,6 +1156,7 @@ function buildSincronizacaoErudioPayload() {
       telefoneResponsavel: normalizeOptionalValue(
         dadosForm.value.telefoneResponsavel || dadosForm.value.telefone1,
       ),
+      inscricaoId: normalizeOptionalValue(inscricaoId),
     },
   };
 }
