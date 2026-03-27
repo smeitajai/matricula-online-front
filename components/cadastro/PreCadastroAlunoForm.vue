@@ -50,25 +50,6 @@
               type="date"
               @input="updateField('dataNascimento', $event)"
             />
-            <CoreInput
-              :model-value="formData.email"
-              clearable
-              label="E-mail"
-              placeholder="email@email.com"
-              @input="updateField('email', $event)"
-            />
-            <CoreInput
-              :model-value="formData.telefone1"
-              clearable
-              label="Telefone 1"
-              @input="updateField('telefone1', $event)"
-            />
-            <CoreInput
-              :model-value="formData.telefone2"
-              clearable
-              label="Telefone 2"
-              @input="updateField('telefone2', $event)"
-            />
             <v-col cols="12" class="py-1 px-1" md="6">
               <v-select
                 :items="generoOptions"
@@ -203,9 +184,31 @@
               :counter="11"
               clearable
               hint="Digite apenas números"
-              label="CPF do(a) responsável"
+              label="CPF do(a) responsável*"
               persistent-hint
+              required
               @input="updateField('cpfResponsavel', $event)"
+            />
+            <CoreInput
+              :model-value="formData.emailResponsavel"
+              clearable
+              label="E-mail do(a) responsável*"
+              placeholder="email@email.com"
+              required
+              @input="updateField('emailResponsavel', $event)"
+            />
+            <CoreInput
+              :model-value="formData.telefoneResponsavel"
+              clearable
+              label="Telefone do(a) responsável*"
+              required
+              @input="updateField('telefoneResponsavel', $event)"
+            />
+            <CoreInput
+              :model-value="formData.telefone2"
+              clearable
+              label="Telefone adicional do(a) responsável"
+              @input="updateField('telefone2', $event)"
             />
             <CoreInput
               :model-value="formData.conselheiroNome"

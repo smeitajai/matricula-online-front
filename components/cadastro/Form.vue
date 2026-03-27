@@ -457,9 +457,14 @@ const carregarAlunoPreCadastro = async (cpf) => {
     alunoPreCadastro.value?.error
   ) {
     if (
+      error.value?.statusCode === 404 ||
+      error.value?.status === 404 ||
       alunoPreCadastro.value?.statusCode === 404 ||
       alunoPreCadastro.value?.message === "Pessoa nao encontrada no Erudio."
     ) {
+      message.value =
+        "Nenhum pre-cadastro foi encontrado para este CPF. Você pode continuar preenchendo os dados manualmente.";
+      showMessage.value = true;
       return null;
     }
 
@@ -489,7 +494,10 @@ const validarPreCadastro = async (cpf = dadosForm.value.cpf) => {
   };
   loading.value = true;
 
-  const alunoPreCadastro = await carregarAlunoPreCadastro(cpf);
+  const [alunoPreCadastro, alunoMatriculaOnline] = await Promise.all([
+    carregarAlunoPreCadastro(cpf),
+    carregarAlunoMatriculaOnline(cpf),
+  ]);
 
   loading.value = false;
 
@@ -501,6 +509,7 @@ const validarPreCadastro = async (cpf = dadosForm.value.cpf) => {
   ) {
     dadosForm.value = {
       ...dadosForm.value,
+      ...(alunoMatriculaOnline?.id ? { id: alunoMatriculaOnline.id } : {}),
       tipoInscricaoInferido: "CADASTRO",
     };
     showAllInputs.value = true;
@@ -508,6 +517,9 @@ const validarPreCadastro = async (cpf = dadosForm.value.cpf) => {
   }
 
   await preencherDadosFormulario(alunoPreCadastro);
+  if (alunoMatriculaOnline?.id) {
+    dadosForm.value.id = alunoMatriculaOnline.id;
+  }
   dadosForm.value.tipoInscricaoInferido = "CADASTRO";
 
   showAllInputs.value = true;
@@ -690,9 +702,33 @@ const onSubmit = async () => {
       (showMessage.value = true)
     );
 
-  if (dadosForm.value.email && !validateEmail(dadosForm.value.email))
+  if (isPreCadastroSelecionado.value && !normalizeOptionalValue(dadosForm.value.emailResponsavel))
+    return (
+      (message.value = "Informe o e-mail do(a) responsável."),
+      (showMessage.value = true)
+    );
+
+  if (dadosForm.value.email && !validateEmail(dadosForm.value.emailResponsavel))
     return (
       (message.value = "Erro: E-mail inválido."), (showMessage.value = true)
+    );
+
+  if (
+    isPreCadastroSelecionado.value &&
+    !normalizeOptionalValue(dadosForm.value.telefoneResponsavel)
+  )
+    return (
+      (message.value = "Informe o telefone do(a) responsável."),
+      (showMessage.value = true)
+    );
+
+  if (
+    isPreCadastroSelecionado.value &&
+    !normalizeDigits(dadosForm.value.cpfResponsavel)
+  )
+    return (
+      (message.value = "Informe o CPF do(a) responsável."),
+      (showMessage.value = true)
     );
 
   if (isCpfCnpjObrigatorio.value && !normalizeDigits(dadosForm.value.cpfCnpj))
@@ -994,6 +1030,8 @@ function buildPessoaPayload(enderecoId) {
     dataNascimento: normalizeOptionalValue(dadosForm.value.dataNascimento),
     cpfCnpj: normalizeDigits(dadosForm.value.cpfCnpj),
     email: normalizeOptionalValue(dadosForm.value.email),
+    telefone1: normalizeOptionalValue(dadosForm.value.telefone1),
+    telefone2: normalizeOptionalValue(dadosForm.value.telefone2),
     genero: normalizeOptionalValue(dadosForm.value.genero),
     estadoCivil: buildReference(dadosForm.value.estadoCivilId),
     raca: buildReference(dadosForm.value.racaId),
@@ -1055,6 +1093,7 @@ function buildSincronizacaoErudioPayload() {
   );
   const unidadeEnsinoId = Number(dadosForm.value.unidadeEnsinoId);
   const turnoId = Number(dadosForm.value.turnoPreferencialId);
+  const bairroPreferencialId = getBairroPreferencialId();
 
   if (!unidadeEnsinoId || !etapaId || !turnoId) {
     const camposPendentes = [];
@@ -1072,11 +1111,39 @@ function buildSincronizacaoErudioPayload() {
   return {
     pessoa: buildErudioPessoaPayload(),
     rematricula: {
+      tipo:
+        dadosForm.value.tipoInscricaoInferido === "TRANSFERENCIA"
+          ? "TRANSFERENCIA"
+          : "MATRICULA",
+      bairroPreferencialId,
+      bairroPretendido: bairroPreferencialId,
       unidadeEnsinoId,
       etapaId,
       turnoId,
+      emailResponsavel: normalizeOptionalValue(
+        dadosForm.value.emailResponsavel || dadosForm.value.email,
+      ),
+      telefoneResponsavel: normalizeOptionalValue(
+        dadosForm.value.telefoneResponsavel || dadosForm.value.telefone1,
+      ),
     },
   };
+}
+
+function getBairroPreferencialId() {
+  const bairroPreferencial = normalizeOptionalValue(
+    dadosForm.value.bairroPreferencial,
+  );
+
+  if (!bairroPreferencial || !Array.isArray(bairrosPreferenciais.value)) {
+    return null;
+  }
+
+  const bairroSelecionado = bairrosPreferenciais.value.find(
+    (bairro) => bairro?.nome === bairroPreferencial,
+  );
+
+  return Number(bairroSelecionado?.id) || null;
 }
 
 function buildErudioPessoaPayload() {
@@ -1084,7 +1151,13 @@ function buildErudioPessoaPayload() {
     nome: normalizeOptionalValue(dadosForm.value.nome),
     cpfCnpj: normalizeDigits(dadosForm.value.cpfCnpj || dadosForm.value.cpf),
     dataNascimento: normalizeOptionalValue(dadosForm.value.dataNascimento),
-    email: normalizeOptionalValue(dadosForm.value.email),
+    email: normalizeOptionalValue(
+      dadosForm.value.emailResponsavel || dadosForm.value.email,
+    ),
+    telefone1: normalizeOptionalValue(
+      dadosForm.value.telefoneResponsavel || dadosForm.value.telefone1,
+    ),
+    telefone2: normalizeOptionalValue(dadosForm.value.telefone2),
     genero: normalizeOptionalValue(dadosForm.value.genero),
     estadoCivil: buildReference(dadosForm.value.estadoCivilId),
     raca: buildReference(dadosForm.value.racaId),
@@ -1188,7 +1261,9 @@ function createEmptyDadosForm() {
     nome: "",
     dataNascimento: "",
     email: "",
+    emailResponsavel: "",
     telefone1: "",
+    telefoneResponsavel: "",
     telefone2: "",
     genero: "",
     estadoCivilId: null,
