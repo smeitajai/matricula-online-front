@@ -1,248 +1,299 @@
 <template>
   <v-card class="matricula-stepper" elevation="0">
-    <!-- Stepper Header -->
-    <v-stepper
-      v-model="currentStep"
-      :alt-labels="!mobile"
-      flat
-      :items="stepperItems"
-      hide-actions
-      class="stepper-header-only"
-    >
-      <template #[`item.${i}`] v-for="(_, i) in steps" :key="i" />
-    </v-stepper>
+    <div class="stepper-wrapper">
+      <v-stepper
+        v-model="currentStep"
+        :alt-labels="!mobile"
+        flat
+        :items="stepperItems"
+        hide-actions
+        class="stepper-header-only"
+      >
+        <template #[`item.${i}`] v-for="(_, i) in steps" :key="i" />
+      </v-stepper>
+    </div>
+
     <div v-if="mobile" class="mobile-step-title">
+      <v-chip color="primary" variant="tonal" size="small" class="mobile-step-chip">
+        {{ currentStep }}/{{ totalSteps }}
+      </v-chip>
       {{ currentStepLabel }}
     </div>
 
-    <!-- Step Content -->
-    <v-card-text class="step-content pt-4">
+    <v-card-text class="step-content pa-0">
       <v-window v-model="currentStep">
-
-        <!-- Step 1: Aluno -->
         <v-window-item :value="1">
           <v-form ref="stepOneForm">
-            <v-row>
-            <CoreFormSubtitle label="Aluno(a)" />
-            <CoreInput
-              :model-value="formData.cpf"
-              :counter="11"
-              clearable
-              label="CPF do aluno(a)*"
-              :loading="loading"
-              persistent-hint
-              placeholder="12345678901"
-              required
-              @input="updateCpf($event)"
-            />
-            <CoreInput
-              :model-value="formData.nome"
-              autofocus
-              clearable
-              label="Nome do aluno(a)*"
-              required
-              @input="updateField('nome', $event)"
-            />
-            <CoreInput
-              :model-value="formData.dataNascimento"
-              clearable
-              label="Data de nascimento*"
-              required
-              type="date"
-              @input="updateField('dataNascimento', $event)"
-            />
-            <v-col cols="12" class="py-1 px-1" md="6">
-              <v-select
-                :items="generoOptions"
-                :model-value="formData.genero"
-                item-title="label"
-                item-value="value"
-                label="Gênero*"
-                :rules="[(v) => !!v || 'Campo obrigatório']"
-                variant="outlined"
-                @update:model-value="updateGenero($event)"
-              />
-            </v-col>
-            <v-col cols="12" class="py-1 px-1" md="6">
-              <v-select
-                :items="nacionalidadeOptions"
-                :model-value="formData.nacionalidade"
-                item-title="label"
-                item-value="value"
-                label="Nacionalidade*"
-                :rules="[(v) => !!v || 'Campo obrigatório']"
-                variant="outlined"
-                @update:model-value="updateField('nacionalidade', $event)"
-              />
-            </v-col>
-            <v-col cols="6" class="py-1 px-1">
-              <v-checkbox
-                :model-value="isAlunoEstrangeiro"
-                color="primary"
-                hide-details
-                label="Aluno estrangeiro"
-                @update:model-value="updateAlunoEstrangeiro"
-              />
-            </v-col>
-            <CoreInput
-              v-if="isAlunoEstrangeiro"
-              :model-value="formData.protocoloRequerimentoCpf"
-              :required="isProtocoloCpfObrigatorio"
-              clearable
-              label="Protocolo de requerimento do CPF"
-              @input="updateField('protocoloRequerimentoCpf', $event)"
-            />
-            <CoreInput
-              :model-value="formData.cpfCnpj"
-              :counter="14"
-              :required="isCpfCnpjObrigatorio"
-              clearable
-              hint="Digite apenas números"
-              label="CPF/CNPJ"
-              persistent-hint
-              @input="updateField('cpfCnpj', $event)"
-            />
-            <CoreInput
-              :model-value="formData.nomeMae"
-              clearable
-              label="Filiação 1"
-              @input="updateField('nomeMae', $event)"
-            />
-            <CoreInput
-              :model-value="formData.cpfMae"
-              :counter="11"
-              clearable
-              hint="Digite apenas números"
-              label="CPF da filiação 1"
-              persistent-hint
-              @input="updateField('cpfMae', $event)"
-            />
-            <CoreInput
-              :model-value="formData.nomePai"
-              clearable
-              label="Filiação 2"
-              @input="updateField('nomePai', $event)"
-            />
-            <CoreInput
-              :model-value="formData.cpfPai"
-              :counter="11"
-              clearable
-              hint="Digite apenas números"
-              label="CPF da filiação 2"
-              persistent-hint
-              @input="updateField('cpfPai', $event)"
-            />
-            <CoreInput
-              :model-value="formData.numeroRg"
-              clearable
-              label="Número do RG"
-              @input="updateField('numeroRg', $event)"
-            />
-            <CoreInput
-              :model-value="formData.orgaoExpedidorRg"
-              clearable
-              label="Órgão expedidor do RG"
-              @input="updateField('orgaoExpedidorRg', $event)"
-            />
-            <CoreInput
-              :model-value="formData.dataExpedicaoRg"
-              clearable
-              label="Data de expedição do RG"
-              type="date"
-              @input="updateField('dataExpedicaoRg', $event)"
-            />
-            <CoreInput
-              :model-value="formData.certidaoNascimento"
-              clearable
-              label="Certidão de nascimento"
-              @input="updateField('certidaoNascimento', $event)"
-            />
-            <CoreInput
-              :model-value="formData.dataExpedicaoCertidaoNascimento"
-              clearable
-              label="Data de expedição da certidão"
-              type="date"
-              @input="updateField('dataExpedicaoCertidaoNascimento', $event)"
-            />
-            <CoreInput
-              :model-value="formData.nis"
-              clearable
-              label="NIS"
-              @input="updateField('nis', $event)"
-            />
-            <CoreInput
-              :model-value="formData.pisPasep"
-              clearable
-              label="PIS/PASEP"
-              @input="updateField('pisPasep', $event)"
-            />
-            </v-row>
+            <div class="form-section">
+              <div class="section-header">
+                <v-icon class="section-icon" color="primary">mdi-account-circle-outline</v-icon>
+                <span class="section-title">Dados do Aluno(a)</span>
+              </div>
+
+              <div class="fields-group">
+                <span class="fields-group-label">Identificação</span>
+                <v-row dense>
+                  <CoreInput
+                    :model-value="formData.cpf"
+                    :counter="11"
+                    clearable
+                    label="CPF do aluno(a)*"
+                    :loading="loading"
+                    persistent-hint
+                    placeholder="12345678901"
+                    required
+                    @input="updateCpf($event)"
+                  />
+                  <CoreInput
+                    :model-value="formData.nome"
+                    autofocus
+                    clearable
+                    label="Nome do aluno(a)*"
+                    required
+                    @input="updateField('nome', $event)"
+                  />
+                  <CoreInput
+                    :model-value="formData.dataNascimento"
+                    clearable
+                    label="Data de nascimento*"
+                    required
+                    type="date"
+                    @input="updateField('dataNascimento', $event)"
+                  />
+                  <v-col cols="12" class="py-1 px-1" md="6">
+                    <v-select
+                      :items="generoOptions"
+                      :model-value="formData.genero"
+                      item-title="label"
+                      item-value="value"
+                      label="Gênero*"
+                      :rules="[(v) => !!v || 'Campo obrigatório']"
+                      variant="outlined"
+                      @update:model-value="updateGenero($event)"
+                    />
+                  </v-col>
+                  <v-col cols="12" class="py-1 px-1" md="6">
+                    <v-select
+                      :items="nacionalidadeOptions"
+                      :model-value="formData.nacionalidade"
+                      item-title="label"
+                      item-value="value"
+                      label="Nacionalidade*"
+                      :rules="[(v) => !!v || 'Campo obrigatório']"
+                      variant="outlined"
+                      @update:model-value="updateField('nacionalidade', $event)"
+                    />
+                  </v-col>
+                  <v-col cols="12" class="py-0 px-1">
+                    <v-checkbox
+                      :model-value="isAlunoEstrangeiro"
+                      color="primary"
+                      hide-details
+                      label="Aluno estrangeiro"
+                      @update:model-value="updateAlunoEstrangeiro"
+                    />
+                  </v-col>
+                  <CoreInput
+                    v-if="isAlunoEstrangeiro"
+                    :model-value="formData.protocoloRequerimentoCpf"
+                    :required="isProtocoloCpfObrigatorio"
+                    clearable
+                    label="Protocolo de requerimento do CPF"
+                    @input="updateField('protocoloRequerimentoCpf', $event)"
+                  />
+                  <CoreInput
+                    :model-value="formData.cpfCnpj"
+                    :counter="14"
+                    :required="isCpfCnpjObrigatorio"
+                    clearable
+                    hint="Digite apenas números"
+                    label="CPF/CNPJ"
+                    persistent-hint
+                    @input="updateField('cpfCnpj', $event)"
+                  />
+                </v-row>
+              </div>
+
+              <v-divider class="section-divider" />
+
+              <div class="fields-group">
+                <span class="fields-group-label">Filiação</span>
+                <v-row dense>
+                  <CoreInput
+                    :model-value="formData.nomeMae"
+                    clearable
+                    label="Filiação 1"
+                    @input="updateField('nomeMae', $event)"
+                  />
+                  <CoreInput
+                    :model-value="formData.cpfMae"
+                    :counter="11"
+                    clearable
+                    hint="Digite apenas números"
+                    label="CPF da filiação 1"
+                    persistent-hint
+                    @input="updateField('cpfMae', $event)"
+                  />
+                  <CoreInput
+                    :model-value="formData.nomePai"
+                    clearable
+                    label="Filiação 2"
+                    @input="updateField('nomePai', $event)"
+                  />
+                  <CoreInput
+                    :model-value="formData.cpfPai"
+                    :counter="11"
+                    clearable
+                    hint="Digite apenas números"
+                    label="CPF da filiação 2"
+                    persistent-hint
+                    @input="updateField('cpfPai', $event)"
+                  />
+                </v-row>
+              </div>
+
+              <v-divider class="section-divider" />
+
+              <div class="fields-group">
+                <span class="fields-group-label">Documentos</span>
+                <v-row dense>
+                  <CoreInput
+                    :model-value="formData.numeroRg"
+                    clearable
+                    label="Número do RG"
+                    @input="updateField('numeroRg', $event)"
+                  />
+                  <CoreInput
+                    :model-value="formData.orgaoExpedidorRg"
+                    clearable
+                    label="Órgão expedidor do RG"
+                    @input="updateField('orgaoExpedidorRg', $event)"
+                  />
+                  <CoreInput
+                    :model-value="formData.dataExpedicaoRg"
+                    clearable
+                    label="Data de expedição do RG"
+                    type="date"
+                    @input="updateField('dataExpedicaoRg', $event)"
+                  />
+                  <CoreInput
+                    :model-value="formData.certidaoNascimento"
+                    clearable
+                    label="Certidão de nascimento"
+                    @input="updateField('certidaoNascimento', $event)"
+                  />
+                  <CoreInput
+                    :model-value="formData.dataExpedicaoCertidaoNascimento"
+                    clearable
+                    label="Data de expedição da certidão"
+                    type="date"
+                    @input="updateField('dataExpedicaoCertidaoNascimento', $event)"
+                  />
+                  <CoreInput
+                    :model-value="formData.nis"
+                    clearable
+                    label="NIS"
+                    @input="updateField('nis', $event)"
+                  />
+                  <CoreInput
+                    :model-value="formData.pisPasep"
+                    clearable
+                    label="PIS/PASEP"
+                    @input="updateField('pisPasep', $event)"
+                  />
+                </v-row>
+              </div>
+            </div>
           </v-form>
         </v-window-item>
 
-        <!-- Step 2: Responsável -->
         <v-window-item :value="2">
           <v-form ref="stepTwoForm">
-            <v-row>
-            <CoreFormSubtitle label="Responsável" />
-            <CoreInput
-              :model-value="formData.responsavelNome"
-              clearable
-              label="Nome do(a) responsável*"
-              required
-              @input="updateField('responsavelNome', $event)"
-            />
-            <CoreInput
-              :model-value="formData.cpfResponsavel"
-              :counter="11"
-              clearable
-              hint="Digite apenas números"
-              label="CPF do(a) responsável*"
-              persistent-hint
-              required
-              @input="updateField('cpfResponsavel', $event)"
-            />
-            <CoreInput
-              :model-value="formData.emailResponsavel"
-              clearable
-              label="E-mail do(a) responsável*"
-              placeholder="email@email.com"
-              required
-              @input="updateField('emailResponsavel', $event)"
-            />
-            <CoreInput
-              :model-value="formData.telefoneResponsavel"
-              clearable
-              label="Telefone do(a) responsável*"
-              required
-              @input="updateField('telefoneResponsavel', $event)"
-            />
-            <CoreInput
-              :model-value="formData.telefone2"
-              clearable
-              label="Telefone adicional do(a) responsável"
-              @input="updateField('telefone2', $event)"
-            />
-            <CoreInput
-              :model-value="formData.conselheiroNome"
-              clearable
-              label="Nome do(a) conselheiro(a)"
-              @input="updateField('conselheiroNome', $event)"
-            />
-            </v-row>
+            <div class="form-section">
+              <div class="section-header">
+                <v-icon class="section-icon" color="primary">mdi-account-tie-outline</v-icon>
+                <span class="section-title">Dados do Responsável</span>
+              </div>
+
+              <div class="fields-group">
+                <span class="fields-group-label">Informações pessoais</span>
+                <v-row dense>
+                  <CoreInput
+                    :model-value="formData.responsavelNome"
+                    clearable
+                    label="Nome do(a) responsável*"
+                    required
+                    @input="updateField('responsavelNome', $event)"
+                  />
+                  <CoreInput
+                    :model-value="formData.cpfResponsavel"
+                    :counter="11"
+                    clearable
+                    hint="Digite apenas números"
+                    label="CPF do(a) responsável*"
+                    persistent-hint
+                    required
+                    @input="updateField('cpfResponsavel', $event)"
+                  />
+                </v-row>
+              </div>
+
+              <v-divider class="section-divider" />
+
+              <div class="fields-group">
+                <span class="fields-group-label">Contato</span>
+                <v-row dense>
+                  <CoreInput
+                    :model-value="formData.emailResponsavel"
+                    clearable
+                    label="E-mail do(a) responsável*"
+                    placeholder="email@email.com"
+                    required
+                    @input="updateField('emailResponsavel', $event)"
+                  />
+                  <CoreInput
+                    :model-value="formData.telefoneResponsavel"
+                    clearable
+                    label="Telefone do(a) responsável*"
+                    required
+                    @input="updateField('telefoneResponsavel', $event)"
+                  />
+                  <CoreInput
+                    :model-value="formData.telefone2"
+                    clearable
+                    label="Telefone adicional do(a) responsável"
+                    @input="updateField('telefone2', $event)"
+                  />
+                  <CoreInput
+                    :model-value="formData.conselheiroNome"
+                    clearable
+                    label="Nome do(a) conselheiro(a)"
+                    @input="updateField('conselheiroNome', $event)"
+                  />
+                </v-row>
+              </div>
+            </div>
           </v-form>
         </v-window-item>
 
-        <!-- Step 3: Endereço -->
         <v-window-item :value="3">
-          <v-row>
-            <CoreFormSubtitle label="Endereço" />
-            <v-col v-if="showAddressStepError" cols="12" class="pb-0">
-              <span class="text-error">
-                Preencha os campos obrigatórios do endereço para continuar.
-              </span>
-            </v-col>
-            <v-col cols="12" class="pa-0">
+          <div class="form-section">
+            <div class="section-header">
+              <v-icon class="section-icon" color="primary">mdi-map-marker-outline</v-icon>
+              <span class="section-title">Endereço</span>
+            </div>
+
+            <v-alert
+              v-if="showAddressStepError"
+              type="error"
+              variant="tonal"
+              density="compact"
+              class="address-alert"
+            >
+              Preencha os campos obrigatórios do endereço para continuar.
+            </v-alert>
+
+            <div class="address-card">
               <CoreAddress
                 class="w-100"
                 :rules="[(v) => !!v || 'Campo obrigatório']"
@@ -250,221 +301,264 @@
                 @input="updateEndereco"
                 @validate="emit('validateAddress', $event)"
               />
-            </v-col>
-          </v-row>
+            </div>
+          </div>
         </v-window-item>
 
-        <!-- Step 4: Preferências -->
         <v-window-item :value="4">
           <v-form ref="stepFourForm">
-            <v-row>
-            <CoreFormSubtitle label="Preferências" />
-            <v-col cols="12" class="py-1 px-1" md="6">
-              <v-select
-                :items="bairrosPreferenciais"
-                :loading="loadingBairros"
-                :model-value="formData.bairroPreferencial"
-                item-title="nome"
-                item-value="nome"
-                label="Bairro Preferencial*"
-                :rules="[(v) => !!v || 'Campo obrigatório']"
-                variant="outlined"
-                @update:model-value="updateField('bairroPreferencial', $event)"
-              />
-            </v-col>
-            <v-col cols="12" class="py-1 px-1" md="6">
-              <v-select
-                :items="turnoOptions"
-                :model-value="formData.turnoPreferencialId"
-                item-title="nome"
-                item-value="id"
-                label="Turno Preferencial*"
-                :rules="[(v) => !!v || 'Campo obrigatório']"
-                variant="outlined"
-                @update:model-value="updateField('turnoPreferencialId', $event)"
-              />
-            </v-col>
-            <v-col cols="12" class="py-1 px-1" md="6">
-              <v-select
-                :items="unidadeOptions"
-                :model-value="formData.unidadeEnsinoId"
-                item-title="nome"
-                item-value="idExterno"
-                label="Unidade de Ensino*"
-                :rules="[(v) => !!v || 'Campo obrigatório']"
-                variant="outlined"
-                @update:model-value="updateField('unidadeEnsinoId', $event)"
-              />
-            </v-col>
-            <v-col cols="12" class="py-1 px-1" md="6">
-              <v-select
-                :items="etapaOptions"
-                :model-value="formData.etapa"
-                item-title="nome"
-                label="Etapa*"
-                return-object
-                :rules="[(v) => !!v || 'Campo obrigatório']"
-                variant="outlined"
-                @update:model-value="updateField('etapa', $event)"
-              />
-            </v-col>
-            <v-col cols="12" class="py-1 px-1">
-              <v-checkbox
-                :model-value="formData.criancaAbrigo"
-                color="primary"
-                hide-details
-                label="Criança em abrigo"
-                @update:model-value="updateField('criancaAbrigo', $event)"
-              />
-            </v-col>
-            <CoreFileInput
-              v-if="formData.criancaAbrigo"
-              :model-value="documentos.anexo_cras"
-              chips
-              clearable
-              label="Anexo CRAS*"
-              required
-              @update:model-value="updateDocumento('anexo_cras', $event)"
-            />
-            <CoreInput
-              :model-value="formData.processoJudicial"
-              clearable
-              full-width
-              label="Processo Judicial"
-              @input="updateField('processoJudicial', $event)"
-            />
-            </v-row>
+            <div class="form-section">
+              <div class="section-header">
+                <v-icon class="section-icon" color="primary">mdi-tune-variant</v-icon>
+                <span class="section-title">Preferências de Matrícula</span>
+              </div>
+
+              <div class="fields-group">
+                <span class="fields-group-label">Localização e turno</span>
+                <v-row dense>
+                  <v-col cols="12" class="py-1 px-1" md="6">
+                    <v-select
+                      :items="bairrosPreferenciais"
+                      :loading="loadingBairros"
+                      :model-value="formData.bairroPreferencial"
+                      item-title="nome"
+                      item-value="nome"
+                      label="Bairro Preferencial*"
+                      :rules="[(v) => !!v || 'Campo obrigatório']"
+                      variant="outlined"
+                      @update:model-value="updateField('bairroPreferencial', $event)"
+                    />
+                  </v-col>
+                  <v-col cols="12" class="py-1 px-1" md="6">
+                    <v-select
+                      :items="turnoOptions"
+                      :model-value="formData.turnoPreferencialId"
+                      item-title="nome"
+                      item-value="id"
+                      label="Turno Preferencial*"
+                      :rules="[(v) => !!v || 'Campo obrigatório']"
+                      variant="outlined"
+                      @update:model-value="updateField('turnoPreferencialId', $event)"
+                    />
+                  </v-col>
+                  <v-col cols="12" class="py-1 px-1" md="6">
+                    <v-select
+                      :items="unidadeOptions"
+                      :model-value="formData.unidadeEnsinoId"
+                      item-title="nome"
+                      item-value="idExterno"
+                      label="Unidade de Ensino*"
+                      :rules="[(v) => !!v || 'Campo obrigatório']"
+                      variant="outlined"
+                      @update:model-value="updateField('unidadeEnsinoId', $event)"
+                    />
+                  </v-col>
+                  <v-col cols="12" class="py-1 px-1" md="6">
+                    <v-select
+                      :items="etapaOptions"
+                      :model-value="formData.etapa"
+                      item-title="nome"
+                      label="Etapa*"
+                      return-object
+                      :rules="[(v) => !!v || 'Campo obrigatório']"
+                      variant="outlined"
+                      @update:model-value="updateField('etapa', $event)"
+                    />
+                  </v-col>
+                </v-row>
+              </div>
+
+              <v-divider class="section-divider" />
+
+              <div class="fields-group">
+                <span class="fields-group-label">Situação especial</span>
+                <v-row dense>
+                  <v-col cols="12" class="py-0 px-1">
+                    <v-checkbox
+                      :model-value="formData.criancaAbrigo"
+                      color="primary"
+                      hide-details
+                      label="Criança em abrigo"
+                      @update:model-value="updateField('criancaAbrigo', $event)"
+                    />
+                  </v-col>
+                  <CoreFileInput
+                    v-if="formData.criancaAbrigo"
+                    :model-value="documentos.anexo_cras"
+                    chips
+                    clearable
+                    label="Anexo CRAS*"
+                    required
+                    @update:model-value="updateDocumento('anexo_cras', $event)"
+                  />
+                  <CoreInput
+                    :model-value="formData.processoJudicial"
+                    clearable
+                    full-width
+                    label="Processo Judicial"
+                    @input="updateField('processoJudicial', $event)"
+                  />
+                </v-row>
+              </div>
+            </div>
           </v-form>
         </v-window-item>
 
-        <!-- Step 5: Documentos -->
         <v-window-item :value="5">
           <v-form ref="stepFiveForm">
-            <v-row>
-            <CoreFormSubtitle label="Documentos Obrigatórios" />
-            <CoreFileInput
-              :model-value="documentos.certidao_identidade"
-              chips
-              clearable
-              label="Certidão de nascimento ou documento de identidade do estudante*"
-              required
-              @update:model-value="updateDocumento('certidao_identidade', $event)"
-            />
-            <CoreFileInput
-              :model-value="documentos.cpf_rg_responsavel"
-              chips
-              clearable
-              label="CPF e RG dos pais ou responsáveis, ou guarda*"
-              required
-              @update:model-value="updateDocumento('cpf_rg_responsavel', $event)"
-            />
-            <CoreFileInput
-              :model-value="documentos.declaracao_vacinacao"
-              chips
-              clearable
-              label="Declaração de vacinação atualizada*"
-              required
-              @update:model-value="updateDocumento('declaracao_vacinacao', $event)"
-            />
-            <CoreFileInput
-              :model-value="documentos.cartao_cns"
-              chips
-              clearable
-              label="Cartão Nacional de Saúde (CNS)*"
-              required
-              @update:model-value="updateDocumento('cartao_cns', $event)"
-            />
-            <CoreFileInput
-              :model-value="documentos.comprovante_residencia"
-              chips
-              clearable
-              label="Comprovante de residência atualizado*"
-              required
-              @update:model-value="updateDocumento('comprovante_residencia', $event)"
-            />
-            <CoreFileInput
-              :model-value="documentos.declaracao_proprietario_residencia"
-              chips
-              clearable
-              label="Declaração do proprietário da residência"
-              @update:model-value="updateDocumento('declaracao_proprietario_residencia', $event)"
-            />
-            <CoreFileInput
-              :model-value="documentos.foto_estudante"
-              chips
-              clearable
-              label="Fotografia 3x4 do estudante*"
-              required
-              @update:model-value="updateDocumento('foto_estudante', $event)"
-            />
-            <CoreFileInput
-              :model-value="documentos.cartao_social"
-              chips
-              clearable
-              label="Cartão Social - NIS"
-              @update:model-value="updateDocumento('cartao_social', $event)"
-            />
-            <CoreFileInput
-              :model-value="documentos.cartao_bpc"
-              chips
-              clearable
-              label="Cartão BPC"
-              @update:model-value="updateDocumento('cartao_bpc', $event)"
-            />
-            <CoreFileInput
-              :model-value="documentos.tutela_provisoria"
-              chips
-              clearable
-              label="Tutela provisória ou comprovante do processo judicial"
-              @update:model-value="updateDocumento('tutela_provisoria', $event)"
-            />
-            <CoreFileInput
-              :model-value="documentos.laudo_medico"
-              chips
-              clearable
-              label="Laudo médico"
-              @update:model-value="updateDocumento('laudo_medico', $event)"
-            />
-            </v-row>
+            <div class="form-section">
+              <div class="section-header">
+                <v-icon class="section-icon" color="primary">mdi-file-document-multiple-outline</v-icon>
+                <span class="section-title">Documentos</span>
+              </div>
+
+              <div class="fields-group">
+                <span class="fields-group-label">Obrigatórios</span>
+                <v-row dense>
+                  <CoreFileInput
+                    :model-value="documentos.certidao_identidade"
+                    chips
+                    clearable
+                    label="Certidão de nascimento ou documento de identidade do estudante*"
+                    required
+                    @update:model-value="updateDocumento('certidao_identidade', $event)"
+                  />
+                  <CoreFileInput
+                    :model-value="documentos.cpf_rg_responsavel"
+                    chips
+                    clearable
+                    label="CPF e RG dos pais ou responsáveis, ou guarda*"
+                    required
+                    @update:model-value="updateDocumento('cpf_rg_responsavel', $event)"
+                  />
+                  <CoreFileInput
+                    :model-value="documentos.declaracao_vacinacao"
+                    chips
+                    clearable
+                    label="Declaração de vacinação atualizada*"
+                    required
+                    @update:model-value="updateDocumento('declaracao_vacinacao', $event)"
+                  />
+                  <CoreFileInput
+                    :model-value="documentos.cartao_cns"
+                    chips
+                    clearable
+                    label="Cartão Nacional de Saúde (CNS)*"
+                    required
+                    @update:model-value="updateDocumento('cartao_cns', $event)"
+                  />
+                  <CoreFileInput
+                    :model-value="documentos.comprovante_residencia"
+                    chips
+                    clearable
+                    label="Comprovante de residência atualizado*"
+                    required
+                    @update:model-value="updateDocumento('comprovante_residencia', $event)"
+                  />
+                  <CoreFileInput
+                    :model-value="documentos.foto_estudante"
+                    chips
+                    clearable
+                    label="Fotografia 3x4 do estudante*"
+                    required
+                    @update:model-value="updateDocumento('foto_estudante', $event)"
+                  />
+                </v-row>
+              </div>
+
+              <v-divider class="section-divider" />
+
+              <div class="fields-group">
+                <span class="fields-group-label">Complementares</span>
+                <v-row dense>
+                  <CoreFileInput
+                    :model-value="documentos.declaracao_proprietario_residencia"
+                    chips
+                    clearable
+                    label="Declaração do proprietário da residência"
+                    @update:model-value="updateDocumento('declaracao_proprietario_residencia', $event)"
+                  />
+                  <CoreFileInput
+                    :model-value="documentos.cartao_social"
+                    chips
+                    clearable
+                    label="Cartão Social - NIS"
+                    @update:model-value="updateDocumento('cartao_social', $event)"
+                  />
+                  <CoreFileInput
+                    :model-value="documentos.cartao_bpc"
+                    chips
+                    clearable
+                    label="Cartão BPC"
+                    @update:model-value="updateDocumento('cartao_bpc', $event)"
+                  />
+                  <CoreFileInput
+                    :model-value="documentos.tutela_provisoria"
+                    chips
+                    clearable
+                    label="Tutela provisória ou comprovante do processo judicial"
+                    @update:model-value="updateDocumento('tutela_provisoria', $event)"
+                  />
+                  <CoreFileInput
+                    :model-value="documentos.laudo_medico"
+                    chips
+                    clearable
+                    label="Laudo médico"
+                    @update:model-value="updateDocumento('laudo_medico', $event)"
+                  />
+                </v-row>
+              </div>
+            </div>
           </v-form>
         </v-window-item>
-
       </v-window>
     </v-card-text>
 
-    <!-- Navigation Actions -->
-    <v-card-actions class="step-actions px-4 pb-4">
-      <v-btn
-        v-if="currentStep > 1"
-        variant="outlined"
-        @click="prevStep"
-      >
-        <v-icon start>mdi-arrow-left</v-icon>
-        Anterior
-      </v-btn>
 
-      <v-spacer />
+    <div class="step-actions-wrapper">
+      <div class="step-actions">
+        <v-btn
+          v-if="currentStep > 1"
+          variant="outlined"
+          class="nav-btn nav-btn--prev"
+          @click="prevStep"
+        >
+          <v-icon start>mdi-arrow-left</v-icon>
+          Anterior
+        </v-btn>
+        <div v-else class="nav-spacer" />
 
-      <v-btn
-        v-if="currentStep < totalSteps"
-        color="primary"
-        variant="flat"
-        @click="nextStep"
-      >
-        Próximo
-        <v-icon end>mdi-arrow-right</v-icon>
-      </v-btn>
+        <div v-if="!mobile" class="step-counter">
+          <span
+            v-for="s in totalSteps"
+            :key="s"
+            class="step-dot"
+            :class="{ active: s === currentStep, done: s < currentStep }"
+          />
+        </div>
 
-      <v-btn
-        v-else
-        color="primary"
-        variant="flat"
-        @click="emit('submit')"
-      >
-        <v-icon start>mdi-check</v-icon>
-        Concluir
-      </v-btn>
-    </v-card-actions>
+        <v-btn
+          v-if="currentStep < totalSteps"
+          color="primary"
+          variant="flat"
+          class="nav-btn nav-btn--next"
+          @click="nextStep"
+        >
+          Próximo
+          <v-icon end>mdi-arrow-right</v-icon>
+        </v-btn>
+        <v-btn
+          v-else
+          color="primary"
+          variant="flat"
+          class="nav-btn nav-btn--finish"
+          @click="emit('submit')"
+        >
+          <v-icon start>mdi-check-circle-outline</v-icon>
+          Concluir matrícula
+        </v-btn>
+      </div>
+    </div>
   </v-card>
 </template>
 
@@ -586,9 +680,25 @@ const validateVuetifyForm = async (formRef) => {
   return Boolean(result?.valid);
 };
 
+const hasValue = (value) => {
+  if (typeof value === "string") return Boolean(value.trim());
+  return value !== null && value !== undefined && value !== "";
+};
+
+const validateStepOnePayload = () =>
+  hasValue(props.formData.cpf) &&
+  hasValue(props.formData.nome) &&
+  hasValue(props.formData.dataNascimento) &&
+  hasValue(props.formData.genero) &&
+  hasValue(props.formData.nacionalidade) &&
+  (!props.isCpfCnpjObrigatorio || hasValue(props.formData.cpfCnpj)) &&
+  (!props.isProtocoloCpfObrigatorio ||
+    hasValue(props.formData.protocoloRequerimentoCpf));
+
 const validateCurrentStep = async () => {
   if (currentStep.value === 1) {
-    return validateVuetifyForm(stepOneForm.value);
+    await validateVuetifyForm(stepOneForm.value);
+    return validateStepOnePayload();
   }
 
   if (currentStep.value === 2) {
@@ -682,30 +792,184 @@ const updateCpf = (value) => {
 
 <style scoped>
 .matricula-stepper {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(var(--v-theme-surface), 1) 0%,
+      rgba(var(--v-theme-surface), 0.98) 100%
+    );
   border-radius: 12px;
   overflow: visible;
+  border: 1px solid rgba(var(--v-border-color), 0.45);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.06);
+}
+
+.stepper-wrapper {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(var(--v-theme-primary), 0.08) 0%,
+      rgba(var(--v-theme-surface), 1) 45%
+    );
+  border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-radius: 12px 12px 0 0;
+  overflow: hidden;
 }
 
 .stepper-header-only :deep(.v-stepper-header) {
   box-shadow: none;
-  border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 }
 
 .step-content {
-  min-height: 300px;
+  min-height: 420px;
   overflow: visible;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(var(--v-theme-surface), 0.9) 0%,
+      rgba(var(--v-theme-surface-bright), 0.95) 100%
+    );
 }
 
 .mobile-step-title {
-  padding: 8px 16px 0;
-  text-align: center;
-  font-size: 0.95rem;
-  color: rgb(var(--v-theme-primary));
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  font-size: 0.92rem;
+  color: rgba(var(--v-theme-on-surface), 0.76);
   font-weight: 600;
 }
 
-.step-actions {
+.mobile-step-chip {
+  font-weight: 700;
+}
+
+.form-section {
+  padding: 28px 24px 18px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.section-icon {
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(var(--v-theme-primary), 0.08);
+}
+
+.section-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: rgba(var(--v-theme-on-surface), 0.9);
+}
+
+.fields-group {
+  margin-bottom: 8px;
+}
+
+.fields-group-label {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 14px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(var(--v-theme-on-surface), 0.48);
+}
+
+.section-divider {
+  margin: 18px 0 22px;
+}
+
+.address-alert {
+  margin-bottom: 18px;
+}
+
+.address-card {
+  padding: 4px 0;
+}
+
+.step-actions-wrapper {
+  padding: 16px 24px 20px;
   border-top: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  background: rgba(var(--v-theme-surface), 0.82);
+  backdrop-filter: blur(8px);
+  border-radius: 0 0 12px 12px;
+}
+
+.step-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.nav-spacer {
+  min-width: 140px;
+}
+
+.nav-btn {
+  min-width: 140px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: 10px;
+}
+
+.nav-btn--finish {
+  min-width: 210px;
+}
+
+.step-counter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.step-dot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(var(--v-theme-on-surface), 0.14);
+  transition: all 0.2s ease;
+}
+
+.step-dot.done {
+  width: 18px;
+  background: rgba(var(--v-theme-primary), 0.35);
+}
+
+.step-dot.active {
+  width: 24px;
+  background: rgb(var(--v-theme-primary));
+}
+
+@media (max-width: 960px) {
+  .form-section {
+    padding: 22px 18px 14px;
+  }
+
+  .step-actions-wrapper {
+    padding: 14px 18px 18px;
+  }
+
+  .step-actions {
+    gap: 12px;
+  }
+
+  .nav-btn,
+  .nav-btn--finish,
+  .nav-spacer {
+    min-width: unset;
+  }
 }
 
 .matricula-stepper :deep(.v-card-text),
