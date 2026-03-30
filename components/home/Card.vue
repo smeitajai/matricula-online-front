@@ -7,11 +7,13 @@
         <div class="hero-content">
           <div class="hero-badge">
             <v-icon size="16" color="primary">mdi-school-outline</v-icon>
-            <span>Ensino Fundamental — Itajaí/SC</span>
+            <span>Itajaí/SC</span>
           </div>
           <h1 class="hero-title">Matrícula On-line</h1>
-          <p class="hero-subtitle">
+          <p >
             Seja bem-vindo(a) ao sistema de matrículas On-line do Município de Itajaí/SC.
+          </p>
+          <p>
             Realize sua matrícula de forma simples, rápida e segura.
           </p>
         </div>
