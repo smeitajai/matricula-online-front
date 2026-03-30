@@ -2,41 +2,40 @@
   <v-form ref="form">
     <v-row class="mt-1">
       <CoreInput
-        v-model="endereco.cep"
+        :model-value="endereco.cep"
         :counter="8"
         clearable
         label="CEP"
-        type="number"
-        @input="(endereco.cep = $event), onChange()"
+        @input="updateEnderecoField('cep', $event)"
       />
       <CoreInput
-        v-model="endereco.bairro"
+        :model-value="endereco.bairro"
         clearable
         label="Bairro*"
         required
-        @input="(endereco.bairro = $event), onChange()"
+        @input="updateEnderecoField('bairro', $event)"
       />
       <CoreInput
-        v-model="endereco.logradouro"
+        :model-value="endereco.logradouro"
         clearable
         full-width
         label="Logradouro*"
         required
-        @input="(endereco.logradouro = $event), onChange()"
+        @input="updateEnderecoField('logradouro', $event)"
       />
       <CoreInput
-        v-model="endereco.numero"
+        :model-value="endereco.numero"
         clearable
         label="Número*"
         required
         type="number"
-        @input="(endereco.numero = $event), onChange()"
+        @input="updateEnderecoField('numero', $event)"
       />
       <CoreInput
-        v-model="endereco.complemento"
+        :model-value="endereco.complemento"
         clearable
         label="Complemento"
-        @input="(endereco.complemento = $event), onChange()"
+        @input="updateEnderecoField('complemento', $event)"
       />
     </v-row>
   </v-form>
@@ -52,19 +51,53 @@ const props = defineProps({
   },
 });
 
-const endereco = computed({
-  get() {
-    return props.modelValue;
-  },
-  set(dadosForm) {
-    emit("input", dadosForm);
-  },
-});
+const endereco = computed(() => props.modelValue || {});
 
 const form = ref(null);
+const ultimoCepBuscado = ref("");
+
+const normalizeCep = (value) =>
+  (value || "").toString().replace(/\D/g, "").slice(0, 8);
+
+const updateEnderecoField = async (field, value) => {
+  const normalizedValue = field === "cep" ? normalizeCep(value) : value;
+
+  emit("input", {
+    ...endereco.value,
+    [field]: normalizedValue,
+  });
+
+  await nextTick();
+  await onChange();
+};
 
 const onChange = async () => {
   const { valid } = await form.value.validate();
   emit("validate", valid);
 };
+
+watch(
+  () => normalizeCep(endereco.value?.cep),
+  async (cep) => {
+    if (cep.length !== 8 || cep === ultimoCepBuscado.value) return;
+
+    ultimoCepBuscado.value = cep;
+
+    try {
+      const dadosCep = await $fetch(`/api/viacep/${cep}`);
+
+      emit("input", {
+        ...endereco.value,
+        cep,
+        bairro: dadosCep?.bairro || endereco.value?.bairro || "",
+        logradouro: dadosCep?.logradouro || endereco.value?.logradouro || "",
+      });
+
+      await nextTick();
+      await onChange();
+    } catch (error) {
+      console.error("Erro ao buscar CEP no ViaCEP:", error);
+    }
+  },
+);
 </script>
