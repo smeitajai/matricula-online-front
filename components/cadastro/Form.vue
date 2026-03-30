@@ -22,7 +22,7 @@
         full-width
         :items="processoEtapas"
         item-title="nome"
-        label="Etapa*"
+        label="Tipo de Matrícula*"
         persistent-hint
         required
         @input="dadosForm.processoEtapa = $event"
@@ -1009,6 +1009,7 @@ async function preencherDadosFormulario(dados = {}) {
     responsavelNome: dados.responsavelNome || "",
     cpfResponsavel: dados.cpfResponsavel || "",
     conselheiroNome: dados.conselheiroNome || "",
+    grauParentesco: dados.grauParentesco || "",
     nomeSocial: Boolean(dados.nomeSocial),
     registroCivil: dados.registroCivil || "",
     numeroRg: dados.numeroRg || "",
@@ -1079,6 +1080,7 @@ function buildPessoaPayload(enderecoId) {
     responsavelNome: normalizeOptionalValue(dadosForm.value.responsavelNome),
     cpfResponsavel: normalizeDigits(dadosForm.value.cpfResponsavel),
     conselheiroNome: normalizeOptionalValue(dadosForm.value.conselheiroNome),
+    grauParentesco: normalizeOptionalValue(dadosForm.value.grauParentesco),
     nomeSocial: Boolean(dadosForm.value.nomeSocial),
     registroCivil: normalizeOptionalValue(dadosForm.value.registroCivil),
     endereco: buildReference(enderecoId),
@@ -1198,6 +1200,7 @@ function buildErudioPessoaPayload() {
     responsavelNome: normalizeOptionalValue(dadosForm.value.responsavelNome),
     cpfResponsavel: normalizeDigits(dadosForm.value.cpfResponsavel),
     conselheiroNome: normalizeOptionalValue(dadosForm.value.conselheiroNome),
+    grauParentesco: normalizeOptionalValue(dadosForm.value.grauParentesco),
     nomeSocial: Boolean(dadosForm.value.nomeSocial),
     registroCivil: normalizeOptionalValue(dadosForm.value.registroCivil),
     numeroRg: normalizeOptionalValue(dadosForm.value.numeroRg),
@@ -1305,6 +1308,7 @@ function createEmptyDadosForm() {
     responsavelNome: "",
     cpfResponsavel: "",
     conselheiroNome: "",
+    grauParentesco: "",
     nomeSocial: false,
     registroCivil: "",
     numeroRg: "",

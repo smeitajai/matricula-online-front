@@ -84,15 +84,6 @@
                       @update:model-value="updateField('nacionalidade', $event)"
                     />
                   </v-col>
-                  <v-col cols="12" class="py-0 px-1">
-                    <v-checkbox
-                      :model-value="isAlunoEstrangeiro"
-                      color="primary"
-                      hide-details
-                      label="Aluno estrangeiro"
-                      @update:model-value="updateAlunoEstrangeiro"
-                    />
-                  </v-col>
                   <CoreInput
                     v-if="isAlunoEstrangeiro"
                     :model-value="formData.protocoloRequerimentoCpf"
@@ -100,16 +91,6 @@
                     clearable
                     label="Protocolo de requerimento do CPF"
                     @input="updateField('protocoloRequerimentoCpf', $event)"
-                  />
-                  <CoreInput
-                    :model-value="formData.cpfCnpj"
-                    :counter="14"
-                    :required="isCpfCnpjObrigatorio"
-                    clearable
-                    hint="Digite apenas números"
-                    label="CPF/CNPJ"
-                    persistent-hint
-                    @input="updateField('cpfCnpj', $event)"
                   />
                 </v-row>
               </div>
@@ -266,6 +247,17 @@
                     label="Telefone adicional do(a) responsável"
                     @input="updateField('telefone2', $event)"
                   />
+                  <v-col cols="12" class="py-1 px-1" md="6">
+                    <v-select
+                      :items="grauParentescoOptions"
+                      :model-value="formData.grauParentesco"
+                      item-title="label"
+                      item-value="value"
+                      label="Grau de parentesco"
+                      variant="outlined"
+                      @update:model-value="updateField('grauParentesco', $event)"
+                    />
+                  </v-col>
                   <CoreInput
                     :model-value="formData.conselheiroNome"
                     clearable
@@ -630,6 +622,17 @@ const generoOptions = [
   { label: "Masculino", value: "M" },
   { label: "Feminino", value: "F" },
   { label: "Prefiro não informar", value: "NF" },
+];
+
+const grauParentescoOptions = [
+  { label: "Pai", value: "pai" },
+  { label: "Mãe", value: "mãe" },
+  { label: "Tio", value: "tio" },
+  { label: "Tia", value: "tia" },
+  { label: "Avô", value: "avô" },
+  { label: "Avó", value: "avó" },
+  { label: "Conselheiro", value: "conselheiro" },
+  { label: "Outro", value: "outro" },
 ];
 
 const emit = defineEmits([
