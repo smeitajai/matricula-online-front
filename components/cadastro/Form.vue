@@ -22,7 +22,7 @@
         full-width
         :items="processoEtapas"
         item-title="nome"
-        label="Tipo de Matrícula*"
+        label="Tipo de Solicitação*"
         persistent-hint
         required
         @input="dadosForm.processoEtapa = $event"
@@ -446,31 +446,6 @@ const carregarAlunoPreCadastro = async (cpf) => {
       },
     },
   );
-
-  if (
-    error.value ||
-    alunoPreCadastro.value?.statusCode ||
-    alunoPreCadastro.value?.error
-  ) {
-    if (
-      error.value?.statusCode === 404 ||
-      error.value?.status === 404 ||
-      alunoPreCadastro.value?.statusCode === 404 ||
-      alunoPreCadastro.value?.message === "Pessoa nao encontrada no Erudio."
-    ) {
-      message.value =
-        "Nenhum pre-cadastro foi encontrado para este CPF. Você pode continuar preenchendo os dados manualmente.";
-      showMessage.value = true;
-      return null;
-    }
-
-    message.value =
-      error.value ||
-      alunoPreCadastro.value?.error ||
-      alunoPreCadastro.value?.message;
-    showMessage.value = true;
-    return null;
-  }
 
   if (Array.isArray(alunoPreCadastro.value)) {
     return alunoPreCadastro.value.length ? alunoPreCadastro.value[0] : null;
