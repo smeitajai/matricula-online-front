@@ -747,10 +747,9 @@ const prevStep = () => {
 };
 
 const updateField = (field, value) => {
-  const cpf = (value || "").replace(/\D/g, "");
   emit("update:formData", {
     ...props.formData,
-    [field]: cpf,
+    [field]: value,
   });
 };
 
