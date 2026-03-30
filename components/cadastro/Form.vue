@@ -36,7 +36,6 @@
       :processo-etapas="processoEtapas"
       :etapa-options="etapas"
       :form-data="dadosForm"
-      :genero-options="generoOptions"
       :is-cpf-cnpj-obrigatorio="isCpfCnpjObrigatorio"
       :is-protocolo-cpf-obrigatorio="isProtocoloCpfObrigatorio"
       :loading-bairros="loadingBairros"
@@ -49,6 +48,7 @@
       @update:documentos="documentos = $event"
       @update:endereco="dadosEndereco = $event"
       @update:formData="dadosForm = $event"
+      @update:genero="dadosForm.genero = $event"
       @validateAddress="validateAddress = $event"
       @submit="onSubmit()"
     />
@@ -314,10 +314,6 @@ const alunoState = useAluno();
 const validateAddress = ref(true);
 
 const OPCAO_PRE_CADASTRO_ID = "pre-cadastro";
-const generoOptions = [
-  { label: "Masculino", value: "M" },
-  { label: "Feminino", value: "F" },
-];
 
 const nacionalidadeOptions = [
   { label: "Brasileiro", value: "BRASILEIRO" },
@@ -364,8 +360,7 @@ const isCpfCnpjObrigatorio = computed(
 );
 
 const isProtocoloCpfObrigatorio = computed(
-  () =>
-    dadosForm.value.nacionalidade === "ESTRANGEIRO" && !dadosForm.value.cpfCnpj,
+  () => dadosForm.value.nacionalidade === "ESTRANGEIRO",
 );
 
 const isTransferenciaInferida = computed(

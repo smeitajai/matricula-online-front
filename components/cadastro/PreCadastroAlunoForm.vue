@@ -21,7 +21,8 @@
 
         <!-- Step 1: Aluno -->
         <v-window-item :value="1">
-          <v-row>
+          <v-form ref="stepOneForm">
+            <v-row>
             <CoreFormSubtitle label="Aluno(a)" />
             <CoreInput
               :model-value="formData.cpf"
@@ -59,7 +60,7 @@
                 label="Gênero*"
                 :rules="[(v) => !!v || 'Campo obrigatório']"
                 variant="outlined"
-                @update:model-value="updateField('genero', $event)"
+                @update:model-value="updateGenero($event)"
               />
             </v-col>
             <v-col cols="12" class="py-1 px-1" md="6">
@@ -74,6 +75,23 @@
                 @update:model-value="updateField('nacionalidade', $event)"
               />
             </v-col>
+            <v-col cols="6" class="py-1 px-1">
+              <v-checkbox
+                :model-value="isAlunoEstrangeiro"
+                color="primary"
+                hide-details
+                label="Aluno estrangeiro"
+                @update:model-value="updateAlunoEstrangeiro"
+              />
+            </v-col>
+            <CoreInput
+              v-if="isAlunoEstrangeiro"
+              :model-value="formData.protocoloRequerimentoCpf"
+              :required="isProtocoloCpfObrigatorio"
+              clearable
+              label="Protocolo de requerimento do CPF"
+              @input="updateField('protocoloRequerimentoCpf', $event)"
+            />
             <CoreInput
               :model-value="formData.cpfCnpj"
               :counter="14"
@@ -85,16 +103,9 @@
               @input="updateField('cpfCnpj', $event)"
             />
             <CoreInput
-              :model-value="formData.protocoloRequerimentoCpf"
-              :required="isProtocoloCpfObrigatorio"
-              clearable
-              label="Protocolo de requerimento do CPF"
-              @input="updateField('protocoloRequerimentoCpf', $event)"
-            />
-            <CoreInput
               :model-value="formData.nomeMae"
               clearable
-              label="Nome da mãe"
+              label="Filiação 1"
               @input="updateField('nomeMae', $event)"
             />
             <CoreInput
@@ -102,14 +113,14 @@
               :counter="11"
               clearable
               hint="Digite apenas números"
-              label="CPF da mãe"
+              label="CPF da filiação 1"
               persistent-hint
               @input="updateField('cpfMae', $event)"
             />
             <CoreInput
               :model-value="formData.nomePai"
               clearable
-              label="Nome do pai"
+              label="Filiação 2"
               @input="updateField('nomePai', $event)"
             />
             <CoreInput
@@ -117,7 +128,7 @@
               :counter="11"
               clearable
               hint="Digite apenas números"
-              label="CPF do pai"
+              label="CPF da filiação 2"
               persistent-hint
               @input="updateField('cpfPai', $event)"
             />
@@ -165,12 +176,14 @@
               label="PIS/PASEP"
               @input="updateField('pisPasep', $event)"
             />
-          </v-row>
+            </v-row>
+          </v-form>
         </v-window-item>
 
         <!-- Step 2: Responsável -->
         <v-window-item :value="2">
-          <v-row>
+          <v-form ref="stepTwoForm">
+            <v-row>
             <CoreFormSubtitle label="Responsável" />
             <CoreInput
               :model-value="formData.responsavelNome"
@@ -216,13 +229,19 @@
               label="Nome do(a) conselheiro(a)"
               @input="updateField('conselheiroNome', $event)"
             />
-          </v-row>
+            </v-row>
+          </v-form>
         </v-window-item>
 
         <!-- Step 3: Endereço -->
         <v-window-item :value="3">
           <v-row>
             <CoreFormSubtitle label="Endereço" />
+            <v-col v-if="showAddressStepError" cols="12" class="pb-0">
+              <span class="text-error">
+                Preencha os campos obrigatórios do endereço para continuar.
+              </span>
+            </v-col>
             <v-col cols="12" class="pa-0">
               <CoreAddress
                 class="w-100"
@@ -237,7 +256,8 @@
 
         <!-- Step 4: Preferências -->
         <v-window-item :value="4">
-          <v-row>
+          <v-form ref="stepFourForm">
+            <v-row>
             <CoreFormSubtitle label="Preferências" />
             <v-col cols="12" class="py-1 px-1" md="6">
               <v-select
@@ -313,12 +333,14 @@
               label="Processo Judicial"
               @input="updateField('processoJudicial', $event)"
             />
-          </v-row>
+            </v-row>
+          </v-form>
         </v-window-item>
 
         <!-- Step 5: Documentos -->
         <v-window-item :value="5">
-          <v-row>
+          <v-form ref="stepFiveForm">
+            <v-row>
             <CoreFormSubtitle label="Documentos Obrigatórios" />
             <CoreFileInput
               :model-value="documentos.certidao_identidade"
@@ -403,7 +425,8 @@
               label="Laudo médico"
               @update:model-value="updateDocumento('laudo_medico', $event)"
             />
-          </v-row>
+            </v-row>
+          </v-form>
         </v-window-item>
 
       </v-window>
@@ -467,10 +490,6 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
-  generoOptions: {
-    type: Array,
-    default: () => [],
-  },
   nacionalidadeOptions: {
     type: Array,
     default: () => [],
@@ -509,8 +528,15 @@ const props = defineProps({
   },
 });
 
+const generoOptions = [
+  { label: "Masculino", value: "M" },
+  { label: "Feminino", value: "F" },
+  { label: "Prefiro não informar", value: "F" },
+];
+
 const emit = defineEmits([
   "update:formData",
+  "update:genero",
   "update:endereco",
   "update:documentos",
   "buscar-por-cpf",
@@ -523,6 +549,11 @@ const { mobile } = useDisplay();
 
 // Stepper state
 const currentStep = ref(1);
+const stepOneForm = ref(null);
+const stepTwoForm = ref(null);
+const stepFourForm = ref(null);
+const stepFiveForm = ref(null);
+const showAddressStepError = ref(false);
 const totalSteps = 5;
 
 const steps = [
@@ -541,7 +572,51 @@ const currentStepLabel = computed(
   () => steps.find((step) => step.value === currentStep.value)?.title || "",
 );
 
-const nextStep = () => {
+const isAlunoEstrangeiro = computed(
+  () => props.formData.nacionalidade === "ESTRANGEIRO",
+);
+
+const validateAddressPayload = (endereco = {}) =>
+  Boolean(
+    endereco.cep && endereco.bairro && endereco.logradouro && endereco.numero,
+  );
+
+const validateVuetifyForm = async (formRef) => {
+  const result = await formRef?.validate();
+  return Boolean(result?.valid);
+};
+
+const validateCurrentStep = async () => {
+  if (currentStep.value === 1) {
+    return validateVuetifyForm(stepOneForm.value);
+  }
+
+  if (currentStep.value === 2) {
+    return validateVuetifyForm(stepTwoForm.value);
+  }
+
+  if (currentStep.value === 3) {
+    const isAddressValid = validateAddressPayload(props.endereco);
+    showAddressStepError.value = !isAddressValid;
+    emit("validateAddress", isAddressValid);
+    return isAddressValid;
+  }
+
+  if (currentStep.value === 4) {
+    return validateVuetifyForm(stepFourForm.value);
+  }
+
+  if (currentStep.value === 5) {
+    return validateVuetifyForm(stepFiveForm.value);
+  }
+
+  return true;
+};
+
+const nextStep = async () => {
+  const isStepValid = await validateCurrentStep();
+
+  if (!isStepValid) return;
   if (currentStep.value < totalSteps) currentStep.value++;
 };
 
@@ -556,7 +631,25 @@ const updateField = (field, value) => {
   });
 };
 
+const updateGenero = (value) => {
+  updateField("genero", value);
+  emit("update:genero", value);
+};
+
+const updateAlunoEstrangeiro = (value) => {
+  const isEstrangeiro = Boolean(value);
+
+  emit("update:formData", {
+    ...props.formData,
+    nacionalidade: isEstrangeiro ? "ESTRANGEIRO" : "BRASILEIRO",
+    protocoloRequerimentoCpf: isEstrangeiro
+      ? props.formData.protocoloRequerimentoCpf
+      : "",
+  });
+};
+
 const updateEndereco = (value) => {
+  showAddressStepError.value = false;
   emit("update:endereco", value);
 };
 
