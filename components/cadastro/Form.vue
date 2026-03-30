@@ -19,6 +19,7 @@
     </template>
     <CoreSelect
         v-model="dadosForm.processoEtapa"
+        full-width
         :items="processoEtapas"
         item-title="nome"
         label="Etapa*"
@@ -242,12 +243,12 @@
       v-if="dadosForm.processoEtapa?.tipo !== 'MATRICULA'"
       justify="end"
     >
-      <CoreButton
+      <!-- <CoreButton
         label="salvar"
         prepend-icon="mdi-content-save"
         :loading="loadingButton"
         @click="onSubmit()"
-      />
+      /> -->
     </v-row>
 
     <CoreSnackbar

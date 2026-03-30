@@ -122,7 +122,8 @@
                   <CoreInput
                     :model-value="formData.nomeMae"
                     clearable
-                    label="Filiação 1"
+                    label="Filiação 1 *"
+                    required
                     @input="updateField('nomeMae', $event)"
                   />
                   <CoreInput
@@ -130,7 +131,8 @@
                     :counter="11"
                     clearable
                     hint="Digite apenas números"
-                    label="CPF da filiação 1"
+                    label="CPF da filiação 1 *"
+                    required
                     persistent-hint
                     @input="updateField('cpfMae', $event)"
                   />
@@ -221,7 +223,7 @@
                   <CoreInput
                     :model-value="formData.responsavelNome"
                     clearable
-                    label="Nome do(a) responsável*"
+                    label="Nome do(a) responsável pela matrícula*"
                     required
                     @input="updateField('responsavelNome', $event)"
                   />
@@ -230,7 +232,7 @@
                     :counter="11"
                     clearable
                     hint="Digite apenas números"
-                    label="CPF do(a) responsável*"
+                    label="CPF do(a) responsável pela matrícula*"
                     persistent-hint
                     required
                     @input="updateField('cpfResponsavel', $event)"
@@ -246,7 +248,7 @@
                   <CoreInput
                     :model-value="formData.emailResponsavel"
                     clearable
-                    label="E-mail do(a) responsável*"
+                    label="E-mail do(a) responsável pela matrícula*"
                     placeholder="email@email.com"
                     required
                     @input="updateField('emailResponsavel', $event)"
@@ -254,7 +256,7 @@
                   <CoreInput
                     :model-value="formData.telefoneResponsavel"
                     clearable
-                    label="Telefone do(a) responsável*"
+                    label="Telefone do(a) responsável pela matrícula*"
                     required
                     @input="updateField('telefoneResponsavel', $event)"
                   />
@@ -298,6 +300,8 @@
                 class="w-100"
                 :rules="[(v) => !!v || 'Campo obrigatório']"
                 :model-value="endereco"
+                label="CEP*"
+                required
                 @input="updateEndereco"
                 @validate="emit('validateAddress', $event)"
               />
@@ -625,7 +629,7 @@ const props = defineProps({
 const generoOptions = [
   { label: "Masculino", value: "M" },
   { label: "Feminino", value: "F" },
-  { label: "Prefiro não informar", value: "F" },
+  { label: "Prefiro não informar", value: "NF" },
 ];
 
 const emit = defineEmits([
@@ -652,7 +656,7 @@ const totalSteps = 5;
 
 const steps = [
   { title: "Aluno", value: 1 },
-  { title: "Responsável", value: 2 },
+  { title: "Responsável pela Matrícula", value: 2 },
   { title: "Endereço", value: 3 },
   { title: "Preferências", value: 4 },
   { title: "Documentos", value: 5 },
