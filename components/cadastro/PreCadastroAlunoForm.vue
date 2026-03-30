@@ -111,6 +111,7 @@
                     :model-value="formData.cpfMae"
                     :counter="11"
                     clearable
+                    :loading="loading"
                     hint="Digite apenas números"
                     label="CPF da filiação 1 *"
                     required
@@ -199,12 +200,31 @@
               </div>
 
               <div class="fields-group">
+                <span class="fields-group-label">Grau de parentesco</span>
+                <v-row dense>
+                  <v-col cols="12" class="py-1 px-1" md="6">
+                    <v-select
+                      :items="grauParentescoOptions"
+                      :model-value="formData.grauParentesco"
+                      item-title="label"
+                      item-value="value"
+                      label="Grau de parentesco"
+                      variant="outlined"
+                      @update:model-value="updateGrauParentesco($event)"
+                    />
+                  </v-col>
+                </v-row>
+              </div>
+
+              <v-divider class="section-divider" />
+
+              <div class="fields-group">
                 <span class="fields-group-label">Informações pessoais</span>
                 <v-row dense>
                   <CoreInput
                     :model-value="formData.responsavelNome"
                     clearable
-                    label="Nome do(a) responsável pela matrícula*"
+                    label="Nome do(a) responsável pela solicitação da matrícula*"
                     required
                     @input="updateField('responsavelNome', $event)"
                   />
@@ -213,7 +233,7 @@
                     :counter="11"
                     clearable
                     hint="Digite apenas números"
-                    label="CPF do(a) responsável pela matrícula*"
+                    label="CPF do(a) responsável pela solicitação da matrícula*"
                     persistent-hint
                     required
                     @input="updateField('cpfResponsavel', $event)"
@@ -247,17 +267,6 @@
                     label="Telefone adicional do(a) responsável"
                     @input="updateField('telefone2', $event)"
                   />
-                  <v-col cols="12" class="py-1 px-1" md="6">
-                    <v-select
-                      :items="grauParentescoOptions"
-                      :model-value="formData.grauParentesco"
-                      item-title="label"
-                      item-value="value"
-                      label="Grau de parentesco"
-                      variant="outlined"
-                      @update:model-value="updateField('grauParentesco', $event)"
-                    />
-                  </v-col>
                   <CoreInput
                     :model-value="formData.conselheiroNome"
                     clearable
@@ -274,7 +283,7 @@
           <div class="form-section">
             <div class="section-header">
               <v-icon class="section-icon" color="primary">mdi-map-marker-outline</v-icon>
-              <span class="section-title">Endereço</span>
+              <span class="section-title">Endereço do Aluno</span>
             </div>
 
             <v-alert
@@ -625,14 +634,10 @@ const generoOptions = [
 ];
 
 const grauParentescoOptions = [
-  { label: "Pai", value: "pai" },
-  { label: "Mãe", value: "mãe" },
-  { label: "Tio", value: "tio" },
-  { label: "Tia", value: "tia" },
-  { label: "Avô", value: "avô" },
-  { label: "Avó", value: "avó" },
-  { label: "Conselheiro", value: "conselheiro" },
-  { label: "Outro", value: "outro" },
+  { label: "Próprio aluno", value: "proprio_aluno" },
+  { label: "Filiação 1", value: "filiacao_1" },
+  { label: "Filiação 2", value: "filiacao_2" },
+  { label: "Conselho tutelar", value: "conselho_tutelar" },
 ];
 
 const emit = defineEmits([
@@ -742,9 +747,37 @@ const prevStep = () => {
 };
 
 const updateField = (field, value) => {
+  const cpf = (value || "").replace(/\D/g, "");
   emit("update:formData", {
     ...props.formData,
-    [field]: value,
+    [field]: cpf,
+  });
+};
+
+const updateGrauParentesco = (value) => {
+  const responsavelPorParentesco = {
+    proprio_aluno: {
+      responsavelNome: props.formData.nome || "",
+      cpfResponsavel: props.formData.cpf || "",
+    },
+    filiacao_1: {
+      responsavelNome: props.formData.nomeMae || "",
+      cpfResponsavel: props.formData.cpfMae || "",
+    },
+    filiacao_2: {
+      responsavelNome: props.formData.nomePai || "",
+      cpfResponsavel: props.formData.cpfPai || "",
+    },
+  };
+  const dadosResponsavel = responsavelPorParentesco[value] || {};
+
+  emit("update:formData", {
+    ...props.formData,
+    ...dadosResponsavel,
+    grauParentesco: value,
+    conselheiroNome: value === "conselho_tutelar"
+      ? props.formData.conselheiroNome
+      : "",
   });
 };
 
