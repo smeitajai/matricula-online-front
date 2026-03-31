@@ -10,7 +10,7 @@
             <span>Itajaí/SC</span>
           </div>
           <h1 class="hero-title">Matrícula On-line</h1>
-          <p >
+          <p>
             Seja bem-vindo(a) ao sistema de matrículas On-line do Município de Itajaí/SC.
           </p>
           <p>
@@ -18,7 +18,13 @@
           </p>
         </div>
         <div class="hero-illustration" aria-hidden="true">
-          <v-icon size="96" class="hero-icon">mdi-text-box-check-outline</v-icon>
+          <img
+            class="hero-logo"
+            src="/flag_educacao.png"
+            alt="Logo do Município de Itajaí/SC"
+            width="220"
+            height="220"
+          />
         </div>
       </div>
 
@@ -34,12 +40,8 @@
             Datas Importantes
           </div>
           <div class="dates-list">
-            <div
-              v-for="etapa in processo.processoEtapas"
-              :key="etapa.id"
-              class="date-item"
-              :class="{ 'date-item--active': etapa.emAndamento }"
-            >
+            <div v-for="etapa in processo.processoEtapas" :key="etapa.id" class="date-item"
+              :class="{ 'date-item--active': etapa.emAndamento }">
               <div class="date-item-indicator" />
               <div class="date-item-content">
                 <span class="date-item-name">{{ etapa.nome }}</span>
@@ -51,13 +53,7 @@
                   às {{ getHour(etapa.faseInicialDataFim) }}h
                 </span>
               </div>
-              <v-chip
-                v-if="etapa.emAndamento"
-                color="success"
-                size="x-small"
-                variant="tonal"
-                class="ml-auto"
-              >
+              <v-chip v-if="etapa.emAndamento" color="success" size="x-small" variant="tonal" class="ml-auto">
                 Em andamento
               </v-chip>
             </div>
@@ -72,18 +68,8 @@
             Iniciar matrícula
           </div>
           <div class="enrollment-grid">
-            <CoreButton
-              v-for="p in processo"
-              :key="p.id"
-              :label="p.nome"
-              :link="'/cadastro?tipo=' + p.id"
-              color="primary"
-              rounded="lg"
-              size="x-large"
-              block
-              variant="flat"
-              class="enrollment-btn"
-            />
+            <CoreButton v-for="p in processo" :key="p.id" :label="p.nome" :link="'/cadastro?tipo=' + p.id"
+              color="primary" rounded="lg" size="x-large" block variant="flat" class="enrollment-btn" />
           </div>
           <v-divider class="my-5" />
         </template>
@@ -94,31 +80,16 @@
           Documentos
         </div>
         <div class="docs-list">
-          <CoreButton
-            :color="themeColor"
-            :prepend-color="themeColor"
-            :text-color="themeColor"
-            block
-            href="https://drive.google.com/file/d/1Bcfkov-puyI8xD5V04FhQBXXM6US76j6"
-            label="Edital de Matrícula 2026"
-            prepend-icon="mdi-file-document"
-            target="_blank"
-            variant="outlined"
-            rounded="lg"
-            class="doc-btn"
-          />
+          <CoreButton :color="themeColor" :prepend-color="themeColor" :text-color="themeColor" block
+            href="https://drive.google.com/file/d/1Bcfkov-puyI8xD5V04FhQBXXM6US76j6" label="Edital de Matrícula 2026"
+            prepend-icon="mdi-file-document" target="_blank" variant="outlined" rounded="lg" class="doc-btn" />
         </div>
 
       </div>
     </CoreCard>
   </div>
 
-  <CoreSnackbar
-    v-model="showMessage"
-    color="error"
-    :message="message"
-    @hide="showMessage = $event"
-  />
+  <CoreSnackbar v-model="showMessage" color="error" :message="message" @hide="showMessage = $event" />
 </template>
 
 <script setup>
@@ -170,11 +141,9 @@ const getHour = (data) => {
   align-items: center;
   justify-content: space-between;
   padding: 32px 28px 28px;
-  background: linear-gradient(
-    135deg,
-    rgba(var(--v-theme-primary), 0.06) 0%,
-    rgba(var(--v-theme-primary), 0.02) 100%
-  );
+  background: linear-gradient(135deg,
+      rgba(var(--v-theme-primary), 0.06) 0%,
+      rgba(var(--v-theme-primary), 0.02) 100%);
   gap: 16px;
 }
 
@@ -220,10 +189,16 @@ const getHour = (data) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 120px;
-  height: 120px;
-  background: rgba(var(--v-theme-primary), 0.06);
-  border-radius: 24px;
+  width: 220px;
+  padding: 0;
+}
+
+.hero-logo {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.08));
 }
 
 .hero-icon {
@@ -333,9 +308,7 @@ const getHour = (data) => {
   }
 
   .hero-illustration {
-    width: 56px;
-    height: 56px;
-    border-radius: 14px;
+    width: 140px;
     align-self: flex-end;
   }
 
