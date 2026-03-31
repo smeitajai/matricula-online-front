@@ -42,6 +42,7 @@
       :loading-bairros="loadingBairros"
       :loading="loading"
       :nacionalidade-options="nacionalidadeOptions"
+      :curso-options="Array.isArray(cursos) ? cursos : []"
       :turno-options="turnos || []"
       :unidade-options="unidades || []"
       @buscar-por-cpf="buscarAlunoPorCpfPreCadastro"
@@ -278,6 +279,14 @@ const route = useRoute();
 const router = useRouter();
 const { data: etapas } = await useFetch("/api/etapas");
 const { data: processos } = await useFetch("/api/processos");
+const {
+  data: cursos,
+  refresh: carregarCursos,
+} = await useLazyFetch("/api/cursos", {
+  default: () => [],
+  immediate: false,
+  server: false,
+});
 const { data: turnos } = await useFetch("/api/turnos");
 const { data: unidades } = await useFetch("/api/unidades");
 const {
@@ -333,7 +342,7 @@ onMounted(() => {
     ?.flatMap(p => p.processoEtapas)
     .find(etapa => etapa.id === tipo) || null;
 
-
+  carregarCursos();
   carregarBairrosPreferenciais();
 
   if (!etapaAtivaAtual.value) {
@@ -767,24 +776,18 @@ const criarPessoa = async () => {
   const payload = buildAlunoPayload();
   if (!payload) return;
 
-  const { data: pessoaCriada, error } = await useFetch("/api/pessoas", {
+  const pessoaCriada = await useFetch("/api/pessoas", {
     method: "POST",
     body: payload,
-  });
+  })
+  if (!pessoaCriada.value) return
 
-  if (error.value || pessoaCriada.value.statusCode) {
-    message.value = error.value || pessoaCriada.value.message;
-    loadingButton.value = false;
-    return (showMessage.value = true);
-  }
-
-  alunoState.value = pessoaCriada.value; // Grava a pessoa criada no State
+  alunoState.value = pessoaCriada.value
 
   const inscricaoCriada = await salvarInscricao();
   if (!inscricaoCriada) return;
 
-  const sincronizacaoConcluida =
-    await sincronizarAlunoErudio(inscricaoCriada);
+  const sincronizacaoConcluida = await sincronizarAlunoErudio(inscricaoCriada);
   if (!sincronizacaoConcluida) return;
 
   await salvarDocumentos(inscricaoCriada);
@@ -996,6 +999,7 @@ async function preencherDadosFormulario(dados = {}) {
       dados.dataExpedicaoCertidaoNascimento || "",
     nis: dados.nis || "",
     protocoloRequerimentoCpf: dados.protocoloRequerimentoCpf || "",
+    cursoId: dados.cursoId || dadosForm.value.cursoId || null,
     turnoPreferencialId:
       dados.turnoPreferencialId || dadosForm.value.turnoPreferencialId || null,
     enderecoId,
@@ -1294,6 +1298,7 @@ function createEmptyDadosForm() {
     dataExpedicaoCertidaoNascimento: "",
     nis: "",
     protocoloRequerimentoCpf: "",
+    cursoId: null,
     bairroPreferencial: "",
     turnoPreferencialId: null,
     turnoAtualId: null,

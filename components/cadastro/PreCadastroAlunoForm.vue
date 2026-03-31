@@ -323,6 +323,17 @@
                 <v-row dense>
                   <v-col cols="12" class="py-1 px-1" md="6">
                     <v-select
+                      :items="cursoOptions"
+                      :model-value="formData.cursoId"
+                      item-title="nome"
+                      item-value="id"
+                      label="Curso"
+                      variant="outlined"
+                      @update:model-value="updateField('cursoId', $event)"
+                    />
+                  </v-col>
+                  <v-col cols="12" class="py-1 px-1" md="6">
+                    <v-select
                       :items="bairrosPreferenciais"
                       :loading="loadingBairros"
                       :model-value="formData.bairroPreferencial"
@@ -610,6 +621,10 @@ const props = defineProps({
     default: false,
   },
   turnoOptions: {
+    type: Array,
+    default: () => [],
+  },
+  cursoOptions: {
     type: Array,
     default: () => [],
   },
