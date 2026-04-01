@@ -334,15 +334,14 @@
                   </v-col>
                   <v-col cols="12" class="py-1 px-1" md="6">
                     <v-select
-                      :items="bairrosPreferenciais"
-                      :loading="loadingBairros"
-                      :model-value="formData.bairroPreferencial"
+                      :items="etapaOptions"
+                      :model-value="formData.etapa"
                       item-title="nome"
-                      item-value="nome"
-                      label="Bairro Preferencial*"
+                      label="Etapa*"
+                      return-object
                       :rules="[(v) => !!v || 'Campo obrigatório']"
                       variant="outlined"
-                      @update:model-value="updateField('bairroPreferencial', $event)"
+                      @update:model-value="updateField('etapa', $event)"
                     />
                   </v-col>
                   <v-col cols="12" class="py-1 px-1" md="6">
@@ -359,7 +358,21 @@
                   </v-col>
                   <v-col cols="12" class="py-1 px-1" md="6">
                     <v-select
+                      :items="bairrosPreferenciais"
+                      :loading="loadingBairros"
+                      :model-value="formData.bairroPreferencial"
+                      item-title="nome"
+                      item-value="nome"
+                      label="Bairro Preferencial*"
+                      :rules="[(v) => !!v || 'Campo obrigatório']"
+                      variant="outlined"
+                      @update:model-value="updateField('bairroPreferencial', $event)"
+                    />
+                  </v-col>
+                  <v-col cols="12" class="py-1 px-1" md="6">
+                    <v-select
                       :items="unidadeOptions"
+                      :loading="loadingUnidades"
                       :model-value="formData.unidadeEnsinoId"
                       item-title="nome"
                       item-value="idExterno"
@@ -367,18 +380,6 @@
                       :rules="[(v) => !!v || 'Campo obrigatório']"
                       variant="outlined"
                       @update:model-value="updateField('unidadeEnsinoId', $event)"
-                    />
-                  </v-col>
-                  <v-col cols="12" class="py-1 px-1" md="6">
-                    <v-select
-                      :items="etapaOptions"
-                      :model-value="formData.etapa"
-                      item-title="nome"
-                      label="Etapa*"
-                      return-object
-                      :rules="[(v) => !!v || 'Campo obrigatório']"
-                      variant="outlined"
-                      @update:model-value="updateField('etapa', $event)"
                     />
                   </v-col>
                 </v-row>
@@ -617,6 +618,10 @@ const props = defineProps({
     default: () => [],
   },
   loadingBairros: {
+    type: Boolean,
+    default: false,
+  },
+  loadingUnidades: {
     type: Boolean,
     default: false,
   },

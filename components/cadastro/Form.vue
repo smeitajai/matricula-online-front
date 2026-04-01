@@ -35,16 +35,17 @@
       :documentos="documentos"
       :endereco="dadosEndereco"
       :processo-etapas="processoEtapas"
-      :etapa-options="etapas"
+      :etapa-options="etapasCurso"
       :form-data="dadosForm"
       :is-cpf-cnpj-obrigatorio="isCpfCnpjObrigatorio"
       :is-protocolo-cpf-obrigatorio="isProtocoloCpfObrigatorio"
       :loading-bairros="loadingBairros"
+      :loading-unidades="loadingUnidades"
       :loading="loading"
       :nacionalidade-options="nacionalidadeOptions"
       :curso-options="Array.isArray(cursos) ? cursos : []"
       :turno-options="turnos || []"
-      :unidade-options="unidades || []"
+      :unidade-options="unidadeOptions"
       @buscar-por-cpf="buscarAlunoPorCpfPreCadastro"
       @cpf-invalido="onCpfInvalidoPreCadastro"
       @update:documentos="documentos = $event"
@@ -277,32 +278,6 @@
 <script setup>
 const route = useRoute();
 const router = useRouter();
-const { data: etapas } = await useFetch("/api/etapas");
-const { data: processos } = await useFetch("/api/processos");
-const {
-  data: cursos,
-  refresh: carregarCursos,
-} = await useLazyFetch("/api/cursos", {
-  default: () => [],
-  immediate: false,
-  server: false,
-});
-const { data: turnos } = await useFetch("/api/turnos");
-const { data: unidades } = await useFetch("/api/unidades");
-const {
-  data: bairrosPreferenciais,
-  pending: loadingBairros,
-  refresh: carregarBairrosPreferenciais,
-} = await useLazyFetch("/api/pre-cadastro/bairros", {
-  default: () => [],
-  immediate: false,
-  server: false,
-});
-
-const emit = defineEmits(["submit"]);
-
-//const ANO_INSCRICAO = new Date().getFullYear() + 1;
-
 const showAllInputs = ref(false);
 const showDialogProcessoExterno = ref(false);
 const showDialogProcessoInterno = ref(false);
@@ -322,6 +297,72 @@ const hasInscricaoAtiva = ref(false);
 const alunoCarregadoErudio = ref(null);
 const alunoState = useAluno();
 const validateAddress = ref(true);
+
+const { data: etapas } = await useFetch("/api/etapas");
+const {
+  data: etapasCurso,
+  refresh: carregarEtapasCurso,
+} = await useLazyFetch("/api/etapas", {
+  query: computed(() => {
+    const curso = dadosForm.value.cursoId;
+    return curso ? { curso } : {};
+  }),
+  default: () => [],
+  immediate: false,
+  server: false,
+  watch: false,
+});
+const { data: processos } = await useFetch("/api/processos");
+const {
+  data: cursos,
+  refresh: carregarCursos,
+} = await useLazyFetch("/api/cursos", {
+  default: () => [],
+  immediate: false,
+  server: false,
+});
+const { data: turnos } = await useFetch("/api/turnos");
+const {
+  data: unidades,
+  pending: loadingUnidades,
+  refresh: carregarUnidades,
+} = await useLazyFetch("/api/pre-cadastro/unidades", {
+  query: computed(() => {
+    const bairro = getBairroPreferencialId();
+    const etapaOfertada = Number(
+      dadosForm.value.etapa?.idExterno || dadosForm.value.etapa?.id,
+    );
+
+    if (!bairro) return {};
+
+    return etapaOfertada ? { bairro, "etapa-ofertada": etapaOfertada } : { bairro };
+  }),
+  default: () => [],
+  immediate: false,
+  server: false,
+  watch: false,
+});
+const unidadeOptions = computed(() =>
+  Array.isArray(unidades.value)
+    ? unidades.value.map((unidade) => ({
+        ...unidade,
+        idExterno: String(unidade?.idExterno ?? unidade?.id ?? ""),
+      }))
+    : [],
+);
+const {
+  data: bairrosPreferenciais,
+  pending: loadingBairros,
+  refresh: carregarBairrosPreferenciais,
+} = await useLazyFetch("/api/pre-cadastro/bairros", {
+  default: () => [],
+  immediate: false,
+  server: false,
+});
+
+const emit = defineEmits(["submit"]);
+
+//const ANO_INSCRICAO = new Date().getFullYear() + 1;
 
 const OPCAO_PRE_CADASTRO_ID = "pre-cadastro";
 
@@ -377,6 +418,8 @@ const isTransferenciaInferida = computed(
   () => dadosForm.value.tipoInscricaoInferido === "TRANSFERENCIA",
 );
 
+const bairroPreferencialSelecionadoId = computed(() => getBairroPreferencialId());
+
 const limparEstadoFormulario = () => {
   showAllInputs.value = false;
   showDialogProcessoExterno.value = false;
@@ -423,6 +466,65 @@ watch(
   () => route.query.tipo,
   async () => {
     await syncOpcaoProcessoPorTipo();
+  },
+);
+
+watch(
+  () => dadosForm.value.cursoId,
+  async (cursoIdAtual, cursoIdAnterior) => {
+    if (!isPreCadastroSelecionado.value) return;
+
+    if (!cursoIdAtual) {
+      etapasCurso.value = [];
+      dadosForm.value.etapa = null;
+      return;
+    }
+
+    await carregarEtapasCurso();
+
+    const etapaSelecionadaAindaExiste = Array.isArray(etapasCurso.value)
+      ? etapasCurso.value.some(
+          (etapa) => String(etapa?.id) === String(dadosForm.value.etapa?.id),
+        )
+      : false;
+
+    if (
+      cursoIdAtual !== cursoIdAnterior ||
+      !etapaSelecionadaAindaExiste
+    ) {
+      dadosForm.value.etapa = etapaSelecionadaAindaExiste
+        ? dadosForm.value.etapa
+        : null;
+    }
+  },
+);
+
+watch(
+  bairroPreferencialSelecionadoId,
+  async (bairroIdAtual, bairroIdAnterior) => {
+    if (!isPreCadastroSelecionado.value) return;
+
+    if (!bairroIdAtual) {
+      unidades.value = [];
+      dadosForm.value.unidadeEnsinoId = null;
+      return;
+    }
+
+    await carregarUnidades();
+
+    const unidadeSelecionadaAindaExiste = Array.isArray(unidadeOptions.value)
+      ? unidadeOptions.value.some(
+          (unidade) =>
+            String(unidade?.idExterno) ===
+            String(dadosForm.value.unidadeEnsinoId),
+        )
+      : false;
+
+    if (bairroIdAtual !== bairroIdAnterior || !unidadeSelecionadaAindaExiste) {
+      dadosForm.value.unidadeEnsinoId = unidadeSelecionadaAindaExiste
+        ? dadosForm.value.unidadeEnsinoId
+        : null;
+    }
   },
 );
 
@@ -773,16 +875,35 @@ const editarPessoa = async () => {
 };
 
 const criarPessoa = async () => {
+  debugger
   const payload = buildAlunoPayload();
   if (!payload) return;
 
-  const pessoaCriada = await useFetch("/api/pessoas", {
+  const { data: pessoaCriada, error } = await useFetch("/api/pessoas", {
     method: "POST",
     body: payload,
-  })
-  if (!pessoaCriada.value) return
+  });
 
-  alunoState.value = pessoaCriada.value
+  if (
+    error.value ||
+    pessoaCriada.value?.error ||
+    pessoaCriada.value?.statusCode
+  ) {
+    message.value =
+      error.value || pessoaCriada.value?.message || "Erro ao salvar pessoa.";
+    loadingButton.value = false;
+    showMessage.value = true;
+    return;
+  }
+
+  if (!pessoaCriada.value?.id) {
+    message.value = "Pessoa criada sem retorno válido da API.";
+    loadingButton.value = false;
+    showMessage.value = true;
+    return;
+  }
+
+  alunoState.value = pessoaCriada.value;
 
   const inscricaoCriada = await salvarInscricao();
   if (!inscricaoCriada) return;
