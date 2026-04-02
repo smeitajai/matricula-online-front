@@ -493,11 +493,17 @@
         <v-window-item :value="5">
           <v-form ref="stepFiveForm">
             <div class="form-section">
-              <div class="section-header">
+              <div class="section-header d-flex mb-0">
                 <v-icon class="section-icon" color="primary"
                   >mdi-file-document-multiple-outline</v-icon
                 >
+
                 <span class="section-title">Documentos</span>
+              </div>
+              <div class="d-flex mb-3">
+                <small class="font-italic" style="color: rgb(141, 141, 141)">
+                  Certifique-se que todos os documentos estão legíveis
+                </small>
               </div>
 
               <div class="fields-group">
@@ -517,8 +523,17 @@
                     :model-value="documentos.cpf_rg_responsavel"
                     chips
                     clearable
-                    label="CPF e RG dos pais ou responsáveis, ou guarda*"
+                    label="CPF da filiação 1 ou responsável legal*"
                     required
+                    @update:model-value="
+                      updateDocumento('cpf_rg_responsavel', $event)
+                    "
+                  />
+                  <CoreFileInput
+                    :model-value="documentos.cpf_rg_responsavel"
+                    chips
+                    clearable
+                    label="CPF da filiação 2"
                     @update:model-value="
                       updateDocumento('cpf_rg_responsavel', $event)
                     "
@@ -662,7 +677,7 @@
           @click="emit('submit')"
         >
           <v-icon start>mdi-check-circle-outline</v-icon>
-          Concluir matrícula
+          Enviar Solicitação
         </v-btn>
       </div>
     </div>
