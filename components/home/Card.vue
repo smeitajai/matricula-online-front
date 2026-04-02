@@ -9,9 +9,9 @@
             <v-icon size="16" color="primary">mdi-school-outline</v-icon>
             <span>Itajaí/SC</span>
           </div>
-          <h1 class="hero-title">Matrícula On-line</h1>
+          <h1 class="hero-title">Matrícula Online</h1>
           <p>
-            Seja bem-vindo(a) ao sistema de matrículas On-line do Município de Itajaí/SC.
+            Seja bem-vindo(a) ao sistema de matrículas Online do Município de Itajaí/SC.
           </p>
           <p>
             Realize sua matrícula de forma simples, rápida e segura.

@@ -4,7 +4,7 @@
       variant="text"
       @click.stop="drawer = !drawer"
     ></v-app-bar-nav-icon>
-    <v-app-bar-title>Matrícula On-line</v-app-bar-title>
+    <v-app-bar-title>Matrícula Online</v-app-bar-title>
     <ButtonTheme />
     <!-- <ButtonLogin /> -->
   </v-app-bar>

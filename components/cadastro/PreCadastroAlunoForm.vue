@@ -372,7 +372,6 @@
                   <v-col cols="12" class="py-1 px-1" md="6">
                     <v-select
                       :items="unidadeOptions"
-                      :loading="loadingUnidades"
                       :model-value="formData.unidadeEnsinoId"
                       item-title="nome"
                       item-value="idExterno"
@@ -618,10 +617,6 @@ const props = defineProps({
     default: () => [],
   },
   loadingBairros: {
-    type: Boolean,
-    default: false,
-  },
-  loadingUnidades: {
     type: Boolean,
     default: false,
   },

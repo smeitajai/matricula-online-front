@@ -17,20 +17,9 @@
           ></v-skeleton-loader></v-col
       ></v-row>
     </template>
-    <CoreSelect
-        v-model="dadosForm.processoEtapa"
-        full-width
-        :items="processoEtapas"
-        item-title="nome"
-        label="Tipo de Solicitação*"
-        persistent-hint
-        required
-        @input="dadosForm.processoEtapa = $event"
-    />
 
     <!-- TODO: retirar essa quantidade ridícula de props -->
     <CadastroPreCadastroAlunoForm
-      v-if="dadosForm.processoEtapa?.tipo === 'MATRICULA'"
       :bairros-preferenciais="bairrosPreferenciais || []"
       :documentos="documentos"
       :endereco="dadosEndereco"
@@ -40,7 +29,6 @@
       :is-cpf-cnpj-obrigatorio="isCpfCnpjObrigatorio"
       :is-protocolo-cpf-obrigatorio="isProtocoloCpfObrigatorio"
       :loading-bairros="loadingBairros"
-      :loading-unidades="loadingUnidades"
       :loading="loading"
       :nacionalidade-options="nacionalidadeOptions"
       :curso-options="Array.isArray(cursos) ? cursos : []"
@@ -312,6 +300,7 @@ const {
   server: false,
   watch: false,
 });
+
 const { data: processos } = await useFetch("/api/processos");
 const {
   data: cursos,
@@ -324,7 +313,6 @@ const {
 const { data: turnos } = await useFetch("/api/turnos");
 const {
   data: unidades,
-  pending: loadingUnidades,
   refresh: carregarUnidades,
 } = await useLazyFetch("/api/pre-cadastro/unidades", {
   query: computed(() => {
@@ -342,6 +330,7 @@ const {
   server: false,
   watch: false,
 });
+
 const unidadeOptions = computed(() =>
   Array.isArray(unidades.value)
     ? unidades.value.map((unidade) => ({
@@ -398,12 +387,6 @@ const isEtapaAtivaSelecionada = computed(
   () =>
     !!opcaoProcessoSelecionada.value &&
     opcaoProcessoSelecionada.value.id !== OPCAO_PRE_CADASTRO_ID,
-);
-
-const isPreCadastroSelecionado = computed(
-  () =>
-    opcaoProcessoSelecionada.value?.id === OPCAO_PRE_CADASTRO_ID ||
-    dadosForm.value.processoEtapa?.tipo === "MATRICULA",
 );
 
 const isCpfCnpjObrigatorio = computed(
@@ -472,7 +455,6 @@ watch(
 watch(
   () => dadosForm.value.cursoId,
   async (cursoIdAtual, cursoIdAnterior) => {
-    if (!isPreCadastroSelecionado.value) return;
 
     if (!cursoIdAtual) {
       etapasCurso.value = [];
@@ -502,7 +484,6 @@ watch(
 watch(
   bairroPreferencialSelecionadoId,
   async (bairroIdAtual, bairroIdAnterior) => {
-    if (!isPreCadastroSelecionado.value) return;
 
     if (!bairroIdAtual) {
       unidades.value = [];
@@ -784,7 +765,7 @@ const onSubmit = async () => {
       (showMessage.value = true)
     );
 
-  if (isPreCadastroSelecionado.value && !normalizeOptionalValue(dadosForm.value.emailResponsavel))
+  if (!normalizeOptionalValue(dadosForm.value.emailResponsavel))
     return (
       (message.value = "Informe o e-mail do(a) responsável."),
       (showMessage.value = true)
@@ -795,17 +776,13 @@ const onSubmit = async () => {
       (message.value = "Erro: E-mail inválido."), (showMessage.value = true)
     );
 
-  if (
-    isPreCadastroSelecionado.value &&
-    !normalizeOptionalValue(dadosForm.value.telefoneResponsavel)
-  )
+  if (!normalizeOptionalValue(dadosForm.value.telefoneResponsavel))
     return (
       (message.value = "Informe o telefone do(a) responsável."),
       (showMessage.value = true)
     );
 
   if (
-    isPreCadastroSelecionado.value &&
     !normalizeDigits(dadosForm.value.cpfResponsavel)
   )
     return (
@@ -828,7 +805,7 @@ const onSubmit = async () => {
       (showMessage.value = true)
     );
 
-  if (isPreCadastroSelecionado.value && !validatePreCadastroDocuments())
+  if (!validatePreCadastroDocuments())
     return (
       (message.value =
         "Anexe todos os documentos obrigatórios do pré-cadastro."),
@@ -836,7 +813,6 @@ const onSubmit = async () => {
     );
 
   if (
-    isPreCadastroSelecionado.value &&
     isTransferenciaInferida.value &&
     !validateTurnoTransferencia()
   )
@@ -875,7 +851,6 @@ const editarPessoa = async () => {
 };
 
 const criarPessoa = async () => {
-  debugger
   const payload = buildAlunoPayload();
   if (!payload) return;
 
@@ -976,8 +951,6 @@ const salvarInscricao = async () => {
 };
 
 const sincronizarAlunoErudio = async (inscricao) => {
-  if (!isPreCadastroSelecionado.value) return true;
-
   const payload = buildSincronizacaoErudioPayload(inscricao?.id);
   if (!payload) return false;
 
