@@ -813,13 +813,6 @@ const validarInscricao = async () => {
 };
 
 const onSubmit = async () => {
-  const { valid } = await form.value.validate();
-  if (!valid)
-    return (
-      (message.value = "Verifique os campos obrigatórios e tente novamente."),
-      (showMessage.value = true)
-    );
-
   if (!validateAddressPayload(dadosEndereco.value))
     return (
       (message.value = "Preencha os campos obrigatórios do endereço."),
@@ -880,12 +873,12 @@ const onSubmit = async () => {
       (showMessage.value = true)
     );
 
-  if (!validatePreCadastroDocuments())
-    return (
-      (message.value =
-        "Anexe todos os documentos obrigatórios do pré-cadastro."),
-      (showMessage.value = true)
-    );
+  // if (!validatePreCadastroDocuments())
+  //   return (
+  //     (message.value =
+  //       "Anexe todos os documentos obrigatórios do pré-cadastro."),
+  //     (showMessage.value = true)
+  //   );
 
   if (isTransferenciaInferida.value && !validateTurnoTransferencia())
     return (

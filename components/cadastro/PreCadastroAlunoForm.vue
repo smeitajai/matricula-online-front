@@ -530,7 +530,7 @@
                     "
                   />
                   <CoreFileInput
-                    :model-value="documentos.cpf_rg_responsavel"
+                    :model-value="documentos.cpf_rg_responsavel_2"
                     chips
                     clearable
                     label="CPF da filiação 2"
