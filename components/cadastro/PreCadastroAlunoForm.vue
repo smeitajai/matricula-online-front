@@ -61,6 +61,8 @@
                   />
                   <CoreInput
                     :model-value="formData.dataNascimento"
+                    :max="dataMaximaHoje"
+                    :validate="[validateDataNaoFutura]"
                     clearable
                     label="Data de nascimento*"
                     required
@@ -751,6 +753,8 @@ const emit = defineEmits([
 
 const { mobile } = useDisplay();
 
+const dataMaximaHoje = new Date().toLocaleDateString("en-CA");
+
 // Stepper state
 const currentStep = ref(1);
 const stepOneForm = ref(null);
@@ -781,6 +785,11 @@ const isAlunoEstrangeiro = computed(
 );
 
 const normalizeCpf = (value) => (value || "").replace(/\D/g, "");
+
+const validateDataNaoFutura = (value) => {
+  if (!value) return true;
+  return value <= dataMaximaHoje || "A data de nascimento nao pode ser futura.";
+};
 
 const cpfFiliacaoIgualAoAlunoError = computed(() => {
   const cpfAluno = normalizeCpf(props.formData.cpf);

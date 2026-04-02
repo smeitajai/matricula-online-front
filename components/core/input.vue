@@ -9,6 +9,7 @@
       :disabled="disabled"
       :hint="hint"
       :label="label"
+      :max="max"
       :persistent-hint="persistentHint"
       :placeholder="placeholder"
       :rules="validationRules"
@@ -52,6 +53,10 @@ const props = defineProps({
   label: {
     type: String,
     default: "",
+  },
+  max: {
+    type: String,
+    default: null,
   },
   modelValue: {
     type: [String, Number],
