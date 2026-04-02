@@ -26,8 +26,7 @@
       <CoreInput
         :model-value="endereco.numero"
         clearable
-        label="Número*"
-        required
+        label="Número"
         type="number"
         @input="updateEnderecoField('numero', $event)"
       />

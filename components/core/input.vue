@@ -35,8 +35,8 @@ const props = defineProps({
     default: false,
   },
   counter: {
-    type: Number,
-    default: 0,
+    type: [Number, Boolean],
+    default: false,
   },
   disabled: {
     type: Boolean,

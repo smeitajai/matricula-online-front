@@ -34,7 +34,7 @@
                 <v-icon class="section-icon" color="primary"
                   >mdi-account-circle-outline</v-icon
                 >
-                <span class="section-title">Dados do Aluno(a)</span>
+                <span class="section-title">Dados do Aluno</span>
               </div>
 
               <div class="fields-group">
@@ -44,7 +44,7 @@
                     :model-value="formData.cpf"
                     :counter="11"
                     clearable
-                    label="CPF do aluno(a)*"
+                    label="CPF do aluno*"
                     :loading="loading"
                     persistent-hint
                     placeholder="12345678901"
@@ -55,7 +55,7 @@
                     :model-value="formData.nome"
                     autofocus
                     clearable
-                    label="Nome do aluno(a)*"
+                    label="Nome do aluno*"
                     required
                     @input="updateField('nome', $event)"
                   />
@@ -64,7 +64,7 @@
                     :max="dataMaximaHoje"
                     :validate="[validateDataNaoFutura]"
                     clearable
-                    label="Data de nascimento*"
+                    label="Data de nascimento do aluno*"
                     required
                     type="date"
                     @input="updateField('dataNascimento', $event)"
@@ -75,7 +75,7 @@
                       :model-value="formData.genero"
                       item-title="label"
                       item-value="value"
-                      label="Gênero*"
+                      label="Gênero do aluno*"
                       :rules="[(v) => !!v || 'Campo obrigatório']"
                       variant="outlined"
                       @update:model-value="updateGenero($event)"
@@ -87,7 +87,7 @@
                       :model-value="formData.nacionalidade"
                       item-title="label"
                       item-value="value"
-                      label="Nacionalidade*"
+                      label="Nacionalidade do aluno*"
                       :rules="[(v) => !!v || 'Campo obrigatório']"
                       variant="outlined"
                       @update:model-value="updateField('nacionalidade', $event)"
@@ -112,7 +112,7 @@
                   <CoreInput
                     :model-value="formData.nomeMae"
                     clearable
-                    label="Filiação 1 *"
+                    label="Filiação 1 (mãe biológica, se houver)*"
                     required
                     @input="updateField('nomeMae', $event)"
                   />
@@ -122,11 +122,11 @@
                     clearable
                     :loading="loading"
                     hint="Digite apenas números"
-                    label="CPF da filiação 1 *"
+                    label="CPF da filiação 1*"
                     required
                     persistent-hint
                     :validate="[validateCpfFiliacaoDiferenteDoAluno]"
-                    @input="updateField('cpfMae', $event)"
+                    @input="updateCpfField('cpfMae', $event)"
                   />
                   <CoreInput
                     :model-value="formData.nomePai"
@@ -142,7 +142,7 @@
                     label="CPF da filiação 2"
                     persistent-hint
                     :validate="[validateCpfFiliacaoDiferenteDoAluno]"
-                    @input="updateField('cpfPai', $event)"
+                    @input="updateCpfField('cpfPai', $event)"
                   />
                 </v-row>
                 <v-alert
@@ -224,18 +224,21 @@
                       @update:model-value="updateGrauParentesco($event)"
                     />
                   </v-col>
+                  <CoreInput
+                    v-if="formData.grauParentesco === 'conselho_tutelar'"
+                    :model-value="formData.conselheiroNome"
+                    clearable
+                    label="Nome do conselheiro"
+                    @input="updateField('conselheiroNome', $event)"
+                  />
                 </v-row>
               </div>
-
-              <v-divider class="section-divider" />
-
               <div class="fields-group">
-                <span class="fields-group-label">Informações pessoais</span>
                 <v-row dense>
                   <CoreInput
                     :model-value="formData.responsavelNome"
                     clearable
-                    label="Nome do(a) responsável legal*"
+                    label="Nome do responsável legal*"
                     required
                     @input="updateField('responsavelNome', $event)"
                   />
@@ -244,10 +247,10 @@
                     :counter="11"
                     clearable
                     hint="Digite apenas números"
-                    label="CPF do(a) responsável legal*"
+                    label="CPF do responsável legal*"
                     persistent-hint
                     required
-                    @input="updateField('cpfResponsavel', $event)"
+                    @input="updateCpfField('cpfResponsavel', $event)"
                   />
                 </v-row>
               </div>
@@ -259,7 +262,9 @@
                 <v-row dense>
                   <CoreInput
                     :model-value="formData.emailResponsavel"
+                    :validate="[validateEmailField]"
                     clearable
+                    full-width
                     label="E-mail de contato*"
                     placeholder="email@email.com"
                     required
@@ -273,16 +278,23 @@
                     @input="updateField('telefoneResponsavel', $event)"
                   />
                   <CoreInput
+                    :model-value="formData.falarComTelefoneResponsavel"
+                    clearable
+                    required
+                    label="Falar com*"
+                    @input="updateField('falarComTelefoneResponsavel', $event)"
+                  />
+                  <CoreInput
                     :model-value="formData.telefone2"
                     clearable
                     label="Segundo telefone de contato"
                     @input="updateField('telefone2', $event)"
                   />
                   <CoreInput
-                    :model-value="formData.conselheiroNome"
+                    :model-value="formData.falarComTelefone2"
                     clearable
-                    label="Nome do(a) conselheiro(a)"
-                    @input="updateField('conselheiroNome', $event)"
+                    label="Falar com"
+                    @input="updateField('falarComTelefone2', $event)"
                   />
                 </v-row>
               </div>
@@ -330,35 +342,31 @@
                 <v-icon class="section-icon" color="primary"
                   >mdi-tune-variant</v-icon
                 >
-                <span class="section-title">Preferências da Solicitação de Matrícula</span>
+                <span class="section-title">Solicitação de Vaga</span>
               </div>
-
-              <div class="fields-group">
-                <span class="fields-group-label">Localização e turno</span>
                 <v-row dense>
-                  <v-col cols="12" class="py-1 px-1" md="6">
-                    <v-select
-                      :items="cursoOptions"
-                      :model-value="formData.cursoId"
-                      item-title="nome"
-                      item-value="id"
-                      label="Curso"
-                      variant="outlined"
-                      @update:model-value="updateField('cursoId', $event)"
-                    />
-                  </v-col>
                   <v-col cols="12" class="py-1 px-1" md="6">
                     <v-select
                       :items="etapaOptions"
                       :model-value="formData.etapa"
                       item-title="nome"
-                      label="Etapa*"
+                      label="Ano Escolar*"
                       return-object
                       :rules="[(v) => !!v || 'Campo obrigatório']"
                       variant="outlined"
                       @update:model-value="updateField('etapa', $event)"
                     />
                   </v-col>
+                </v-row>
+
+              <div class="fields-group">
+                <v-row class="ma-0">
+                  <span class="fields-group-label ma-0">Preferências para Escolha de Vaga</span>
+                </v-row>
+                <v-row class="mx-0 mt-0 mb-3">
+                  <small style="color: rgb(141, 141, 141)" class="font-italic">As preferências estão sujeitas à disponibilidade de vagas</small>
+                </v-row>
+                <v-row dense>
                   <v-col cols="12" class="py-1 px-1" md="6">
                     <v-select
                       :items="turnoOptions"
@@ -665,6 +673,7 @@
 import { computed, ref } from "vue";
 import { useDisplay } from "vuetify";
 import validateCPF from "../../utils/validateCPF";
+import validateEmail from "../../utils/validateEmail";
 
 const props = defineProps({
   formData: {
@@ -732,7 +741,6 @@ const generoOptions = [
 ];
 
 const grauParentescoOptions = [
-  { label: "Próprio Aluno", value: "proprio_aluno" },
   { label: "Filiação 1", value: "filiacao_1" },
   { label: "Filiação 2", value: "filiacao_2" },
   { label: "Outro", value: "outro" },
@@ -765,10 +773,10 @@ const showAddressStepError = ref(false);
 const totalSteps = 5;
 
 const steps = [
-  { title: "Aluno", value: 1 },
+  { title: "Informações Pessoais", value: 1 },
   { title: "Responsável Legal", value: 2 },
   { title: "Endereço", value: 3 },
-  { title: "Preferências", value: 4 },
+  { title: "Solicitação de Vaga", value: 4 },
   { title: "Documentos", value: 5 },
 ];
 
@@ -789,6 +797,11 @@ const normalizeCpf = (value) => (value || "").replace(/\D/g, "");
 const validateDataNaoFutura = (value) => {
   if (!value) return true;
   return value <= dataMaximaHoje || "A data de nascimento nao pode ser futura.";
+};
+
+const validateEmailField = (value) => {
+  if (!value) return true;
+  return validateEmail(value) || "Informe um e-mail valido.";
 };
 
 const cpfFiliacaoIgualAoAlunoError = computed(() => {
@@ -900,6 +913,10 @@ const updateField = (field, value) => {
     ...props.formData,
     [field]: value,
   });
+};
+
+const updateCpfField = (field, value) => {
+  updateField(field, normalizeCpf(value));
 };
 
 const updateGrauParentesco = (value) => {

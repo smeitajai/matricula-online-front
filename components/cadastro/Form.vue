@@ -283,13 +283,14 @@ const hasInscricaoAtiva = ref(false);
 const alunoCarregadoErudio = ref(null);
 const alunoState = useAluno();
 const validateAddress = ref(true);
+const CURSO_PRE_CADASTRO_ID = 10;
 
 const { data: etapas } = await useFetch("/api/etapas");
 const { data: etapasCurso, refresh: carregarEtapasCurso } = await useLazyFetch(
   "/api/etapas",
   {
     query: computed(() => {
-      const curso = dadosForm.value.cursoId;
+      const curso = dadosForm.value.cursoId || CURSO_PRE_CADASTRO_ID;
       return curso ? { curso } : {};
     }),
     default: () => [],
@@ -477,6 +478,9 @@ watch(
         ? dadosForm.value.etapa
         : null;
     }
+  },
+  {
+    immediate: true,
   },
 );
 
@@ -1136,6 +1140,8 @@ async function preencherDadosFormulario(dados = {}) {
     email: dados.email || "",
     telefone1: dados.telefone1 || "",
     telefone2: dados.telefone2 || "",
+    falarComTelefoneResponsavel: dados.falarComTelefoneResponsavel || "",
+    falarComTelefone2: dados.falarComTelefone2 || "",
     genero: dados.genero || "",
     estadoCivilId: dados.estadoCivil?.id || dados.estadoCivilId || null,
     racaId: dados.raca?.id || dados.racaId || null,
@@ -1161,7 +1167,7 @@ async function preencherDadosFormulario(dados = {}) {
       dados.dataExpedicaoCertidaoNascimento || "",
     nis: dados.nis || "",
     protocoloRequerimentoCpf: dados.protocoloRequerimentoCpf || "",
-    cursoId: dados.cursoId || dadosForm.value.cursoId || null,
+    cursoId: dados.cursoId || dadosForm.value.cursoId || CURSO_PRE_CADASTRO_ID,
     turnoPreferencialId:
       dados.turnoPreferencialId || dadosForm.value.turnoPreferencialId || null,
     enderecoId,
@@ -1445,6 +1451,8 @@ function createEmptyDadosForm() {
     telefone1: "",
     telefoneResponsavel: "",
     telefone2: "",
+    falarComTelefoneResponsavel: "",
+    falarComTelefone2: "",
     genero: "",
     estadoCivilId: null,
     racaId: null,
@@ -1469,7 +1477,7 @@ function createEmptyDadosForm() {
     dataExpedicaoCertidaoNascimento: "",
     nis: "",
     protocoloRequerimentoCpf: "",
-    cursoId: null,
+    cursoId: CURSO_PRE_CADASTRO_ID,
     bairroPreferencial: "",
     turnoPreferencialId: null,
     turnoAtualId: null,
