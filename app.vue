@@ -8,7 +8,7 @@
 
 <script setup>
 useHead({
-  title: "Matrícula Online",
+  title: "Portal de Matrículas",
   meta: [
     {
       name: "description",

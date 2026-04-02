@@ -5,16 +5,12 @@
       <!-- Hero Header -->
       <div class="hero-banner">
         <div class="hero-content">
-          <div class="hero-badge">
-            <v-icon size="16" color="primary">mdi-school-outline</v-icon>
-            <span>Itajaí/SC</span>
-          </div>
-          <h1 class="hero-title">Matrícula Online</h1>
+          <h1 class="hero-title">Portal de Matrículas</h1>
           <p>
-            Seja bem-vindo(a) ao sistema de matrículas Online do Município de Itajaí/SC.
+            Seja bem-vindo(a) ao Portal de Matrículas do Município de Itajaí/SC.
           </p>
           <p>
-            Realize sua matrícula de forma simples, rápida e segura.
+            Realize sua solicitação de matrícula ou transferência de forma simples, rápida e segura.
           </p>
         </div>
         <div class="hero-illustration" aria-hidden="true">
@@ -63,10 +59,6 @@
 
         <!-- Enrollment Buttons -->
         <template v-if="showBtn">
-          <div class="section-label">
-            <v-icon size="16" class="mr-1">mdi-pencil-outline</v-icon>
-            Iniciar matrícula
-          </div>
           <div class="enrollment-grid">
             <CoreButton v-for="p in processo" :key="p.id" :label="p.nome" :link="'/cadastro?tipo=' + p.id"
               color="primary" rounded="lg" size="x-large" block variant="flat" class="enrollment-btn" />
@@ -77,7 +69,7 @@
         <!-- Document Links -->
         <div class="section-label">
           <v-icon size="16" class="mr-1">mdi-file-document-multiple-outline</v-icon>
-          Documentos
+          Documento(s)
         </div>
         <div class="docs-list">
           <CoreButton :color="themeColor" :prepend-color="themeColor" :text-color="themeColor" block

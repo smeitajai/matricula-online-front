@@ -35,12 +35,13 @@
       :turno-options="turnos || []"
       :unidade-options="unidadeOptions"
       @buscar-por-cpf="buscarAlunoPorCpfPreCadastro"
+      @buscar-irmao-por-cpf="buscarIrmaoPorCpfPreCadastro"
       @cpf-invalido="onCpfInvalidoPreCadastro"
       @update:documentos="documentos = $event"
       @update:endereco="dadosEndereco = $event"
-      @update:formData="dadosForm = $event"
+      @update:form-data="dadosForm = $event"
       @update:genero="dadosForm.genero = $event"
-      @validateAddress="validateAddress = $event"
+      @validate-address="validateAddress = $event"
       @submit="onSubmit()"
     />
 
@@ -229,10 +230,7 @@
       </template>
     </v-row>
 
-    <v-row
-      v-if="dadosForm.processoEtapa?.tipo !== 'MATRICULA'"
-      justify="end"
-    >
+    <v-row v-if="dadosForm.processoEtapa?.tipo !== 'MATRICULA'" justify="end">
       <!-- <CoreButton
         label="salvar"
         prepend-icon="mdi-content-save"
@@ -287,49 +285,51 @@ const alunoState = useAluno();
 const validateAddress = ref(true);
 
 const { data: etapas } = await useFetch("/api/etapas");
-const {
-  data: etapasCurso,
-  refresh: carregarEtapasCurso,
-} = await useLazyFetch("/api/etapas", {
-  query: computed(() => {
-    const curso = dadosForm.value.cursoId;
-    return curso ? { curso } : {};
-  }),
-  default: () => [],
-  immediate: false,
-  server: false,
-  watch: false,
-});
+const { data: etapasCurso, refresh: carregarEtapasCurso } = await useLazyFetch(
+  "/api/etapas",
+  {
+    query: computed(() => {
+      const curso = dadosForm.value.cursoId;
+      return curso ? { curso } : {};
+    }),
+    default: () => [],
+    immediate: false,
+    server: false,
+    watch: false,
+  },
+);
 
 const { data: processos } = await useFetch("/api/processos");
-const {
-  data: cursos,
-  refresh: carregarCursos,
-} = await useLazyFetch("/api/cursos", {
-  default: () => [],
-  immediate: false,
-  server: false,
-});
+const { data: cursos, refresh: carregarCursos } = await useLazyFetch(
+  "/api/cursos",
+  {
+    default: () => [],
+    immediate: false,
+    server: false,
+  },
+);
 const { data: turnos } = await useFetch("/api/turnos");
-const {
-  data: unidades,
-  refresh: carregarUnidades,
-} = await useLazyFetch("/api/pre-cadastro/unidades", {
-  query: computed(() => {
-    const bairro = getBairroPreferencialId();
-    const etapaOfertada = Number(
-      dadosForm.value.etapa?.idExterno || dadosForm.value.etapa?.id,
-    );
+const { data: unidades, refresh: carregarUnidades } = await useLazyFetch(
+  "/api/pre-cadastro/unidades",
+  {
+    query: computed(() => {
+      const bairro = getBairroPreferencialId();
+      const etapaOfertada = Number(
+        dadosForm.value.etapa?.idExterno || dadosForm.value.etapa?.id,
+      );
 
-    if (!bairro) return {};
+      if (!bairro) return {};
 
-    return etapaOfertada ? { bairro, "etapa-ofertada": etapaOfertada } : { bairro };
-  }),
-  default: () => [],
-  immediate: false,
-  server: false,
-  watch: false,
-});
+      return etapaOfertada
+        ? { bairro, "etapa-ofertada": etapaOfertada }
+        : { bairro };
+    }),
+    default: () => [],
+    immediate: false,
+    server: false,
+    watch: false,
+  },
+);
 
 const unidadeOptions = computed(() =>
   Array.isArray(unidades.value)
@@ -368,9 +368,10 @@ const { data: processoEtapas, error: errorProcessoEtapas } = await useFetch(
 onMounted(() => {
   const tipo = Number(route.query.tipo);
 
-  etapaAtivaAtual.value = processos.value
-    ?.flatMap(p => p.processoEtapas)
-    .find(etapa => etapa.id === tipo) || null;
+  etapaAtivaAtual.value =
+    processos.value
+      ?.flatMap((p) => p.processoEtapas)
+      .find((etapa) => etapa.id === tipo) || null;
 
   carregarCursos();
   carregarBairrosPreferenciais();
@@ -401,7 +402,9 @@ const isTransferenciaInferida = computed(
   () => dadosForm.value.tipoInscricaoInferido === "TRANSFERENCIA",
 );
 
-const bairroPreferencialSelecionadoId = computed(() => getBairroPreferencialId());
+const bairroPreferencialSelecionadoId = computed(() =>
+  getBairroPreferencialId(),
+);
 
 const limparEstadoFormulario = () => {
   showAllInputs.value = false;
@@ -455,7 +458,6 @@ watch(
 watch(
   () => dadosForm.value.cursoId,
   async (cursoIdAtual, cursoIdAnterior) => {
-
     if (!cursoIdAtual) {
       etapasCurso.value = [];
       dadosForm.value.etapa = null;
@@ -470,10 +472,7 @@ watch(
         )
       : false;
 
-    if (
-      cursoIdAtual !== cursoIdAnterior ||
-      !etapaSelecionadaAindaExiste
-    ) {
+    if (cursoIdAtual !== cursoIdAnterior || !etapaSelecionadaAindaExiste) {
       dadosForm.value.etapa = etapaSelecionadaAindaExiste
         ? dadosForm.value.etapa
         : null;
@@ -484,7 +483,6 @@ watch(
 watch(
   bairroPreferencialSelecionadoId,
   async (bairroIdAtual, bairroIdAnterior) => {
-
     if (!bairroIdAtual) {
       unidades.value = [];
       dadosForm.value.unidadeEnsinoId = null;
@@ -548,9 +546,16 @@ const carregarAlunoPreCadastro = async (cpf) => {
 
 const validarPreCadastro = async (cpf = dadosForm.value.cpf) => {
   const processoEtapa = dadosForm.value.processoEtapa || null;
+  const dadosIrmao = {
+    possuiIrmaoMatriculado: Boolean(dadosForm.value.possuiIrmaoMatriculado),
+    cpfIrmao: dadosForm.value.cpfIrmao || "",
+    nomeIrmao: dadosForm.value.nomeIrmao || "",
+    cpfIrmaoError: dadosForm.value.cpfIrmaoError || "",
+  };
 
   dadosForm.value = {
     ...createEmptyDadosForm(),
+    ...dadosIrmao,
     processoEtapa,
     cpf,
     cpfCnpj: cpf,
@@ -595,6 +600,58 @@ const buscarAlunoPorCpfPreCadastro = async (cpf) => {
 const onCpfInvalidoPreCadastro = () => {
   message.value = "Erro: CPF Inválido.";
   showMessage.value = true;
+};
+
+const buscarIrmaoPorCpfPreCadastro = async (cpf) => {
+  const cpfNormalizado = normalizeDigits(cpf);
+
+  if (!cpfNormalizado || cpfNormalizado.length !== 11) {
+    return;
+  }
+
+  if (cpfNormalizado === normalizeDigits(dadosForm.value.cpf)) {
+    dadosForm.value = {
+      ...dadosForm.value,
+      nomeIrmao: "",
+      cpfIrmaoError: "O CPF do irmão não pode ser igual ao CPF do aluno(a).",
+    };
+    return;
+  }
+
+  const ordem = etapaAtivaAtual.value?.ordem || etapaAtiva.value?.ordem;
+
+  if (!ordem) {
+    dadosForm.value = {
+      ...dadosForm.value,
+      nomeIrmao: "",
+      cpfIrmaoError: "Não foi possível validar o irmão no momento.",
+    };
+    return;
+  }
+
+  const data = await carregarAlunoPreCadastro(cpfNormalizado);
+
+  if (
+    error.value ||
+    data.value?.statusCode ||
+    data.value?.error ||
+    !data.value?.cpf
+  ) {
+    dadosForm.value = {
+      ...dadosForm.value,
+      nomeIrmao: "",
+      cpfIrmaoError:
+        data.value?.message || "Irmão não encontrado na rede municipal.",
+    };
+    return;
+  }
+
+  dadosForm.value = {
+    ...dadosForm.value,
+    cpfIrmao: cpfNormalizado,
+    nomeIrmao: data.nome || "",
+    cpfIrmaoError: "",
+  };
 };
 
 const carregarAlunoMatriculaOnline = async (cpf = dadosForm.value.cpf) => {
@@ -782,9 +839,7 @@ const onSubmit = async () => {
       (showMessage.value = true)
     );
 
-  if (
-    !normalizeDigits(dadosForm.value.cpfResponsavel)
-  )
+  if (!normalizeDigits(dadosForm.value.cpfResponsavel))
     return (
       (message.value = "Informe o CPF do(a) responsável."),
       (showMessage.value = true)
@@ -805,6 +860,22 @@ const onSubmit = async () => {
       (showMessage.value = true)
     );
 
+  if (
+    dadosForm.value.possuiIrmaoMatriculado &&
+    (!normalizeDigits(dadosForm.value.cpfIrmao) || !dadosForm.value.nomeIrmao)
+  )
+    return (
+      (message.value =
+        "Informe um CPF de irmão válido e aguarde a localização na rede municipal."),
+      (showMessage.value = true)
+    );
+
+  if (dadosForm.value.possuiIrmaoMatriculado && dadosForm.value.cpfIrmaoError)
+    return (
+      (message.value = dadosForm.value.cpfIrmaoError),
+      (showMessage.value = true)
+    );
+
   if (!validatePreCadastroDocuments())
     return (
       (message.value =
@@ -812,10 +883,7 @@ const onSubmit = async () => {
       (showMessage.value = true)
     );
 
-  if (
-    isTransferenciaInferida.value &&
-    !validateTurnoTransferencia()
-  )
+  if (isTransferenciaInferida.value && !validateTurnoTransferencia())
     return (
       (message.value =
         "O turno preferencial deve ser diferente do turno atual para transferência."),
@@ -1099,6 +1167,12 @@ async function preencherDadosFormulario(dados = {}) {
     enderecoId,
     etapa: dados.etapa || dadosForm.value.etapa || null,
     unidadeEnsinoId: dados.unidadeEnsinoId || dadosForm.value.unidadeEnsinoId,
+    possuiIrmaoMatriculado: Boolean(
+      dados.possuiIrmaoMatriculado || dadosForm.value.possuiIrmaoMatriculado,
+    ),
+    cpfIrmao: dados.cpfIrmao || dadosForm.value.cpfIrmao || "",
+    nomeIrmao: dados.nomeIrmao || dadosForm.value.nomeIrmao || "",
+    cpfIrmaoError: dadosForm.value.cpfIrmaoError || "",
   };
 
   if (endereco?.logradouro || endereco?.bairro || endereco?.cep) {
@@ -1221,6 +1295,9 @@ function buildSincronizacaoErudioPayload(inscricaoId) {
       unidadeEnsinoId,
       etapaId,
       turnoId,
+      cpfIrmao: dadosForm.value.possuiIrmaoMatriculado
+        ? normalizeDigits(dadosForm.value.cpfIrmao)
+        : null,
       emailResponsavel: normalizeOptionalValue(
         dadosForm.value.emailResponsavel || dadosForm.value.email,
       ),
@@ -1398,6 +1475,10 @@ function createEmptyDadosForm() {
     turnoAtualId: null,
     turnoAtualNome: "",
     criancaAbrigo: false,
+    possuiIrmaoMatriculado: false,
+    cpfIrmao: "",
+    nomeIrmao: "",
+    cpfIrmaoError: "",
     processoJudicial: "",
     tipoInscricaoInferido: "CADASTRO",
     enderecoId: null,

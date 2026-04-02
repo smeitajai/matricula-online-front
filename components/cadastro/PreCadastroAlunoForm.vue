@@ -9,12 +9,17 @@
         hide-actions
         class="stepper-header-only"
       >
-        <template #[`item.${i}`] v-for="(_, i) in steps" :key="i" />
+        <template v-for="(_, i) in steps" #[`item.${i}`] :key="i" />
       </v-stepper>
     </div>
 
     <div v-if="mobile" class="mobile-step-title">
-      <v-chip color="primary" variant="tonal" size="small" class="mobile-step-chip">
+      <v-chip
+        color="primary"
+        variant="tonal"
+        size="small"
+        class="mobile-step-chip"
+      >
         {{ currentStep }}/{{ totalSteps }}
       </v-chip>
       {{ currentStepLabel }}
@@ -26,7 +31,9 @@
           <v-form ref="stepOneForm">
             <div class="form-section">
               <div class="section-header">
-                <v-icon class="section-icon" color="primary">mdi-account-circle-outline</v-icon>
+                <v-icon class="section-icon" color="primary"
+                  >mdi-account-circle-outline</v-icon
+                >
                 <span class="section-title">Dados do Aluno(a)</span>
               </div>
 
@@ -116,6 +123,7 @@
                     label="CPF da filiação 1 *"
                     required
                     persistent-hint
+                    :validate="[validateCpfFiliacaoDiferenteDoAluno]"
                     @input="updateField('cpfMae', $event)"
                   />
                   <CoreInput
@@ -131,15 +139,25 @@
                     hint="Digite apenas números"
                     label="CPF da filiação 2"
                     persistent-hint
+                    :validate="[validateCpfFiliacaoDiferenteDoAluno]"
                     @input="updateField('cpfPai', $event)"
                   />
                 </v-row>
+                <v-alert
+                  v-if="cpfFiliacaoIgualAoAlunoError"
+                  type="error"
+                  variant="tonal"
+                  density="compact"
+                  class="mt-2"
+                >
+                  {{ cpfFiliacaoIgualAoAlunoError }}
+                </v-alert>
               </div>
 
               <v-divider class="section-divider" />
 
               <div class="fields-group">
-                <span class="fields-group-label">Documentos</span>
+                <span class="fields-group-label">Documentos do Aluno</span>
                 <v-row dense>
                   <CoreInput
                     :model-value="formData.numeroRg"
@@ -171,19 +189,9 @@
                     clearable
                     label="Data de expedição da certidão"
                     type="date"
-                    @input="updateField('dataExpedicaoCertidaoNascimento', $event)"
-                  />
-                  <CoreInput
-                    :model-value="formData.nis"
-                    clearable
-                    label="NIS"
-                    @input="updateField('nis', $event)"
-                  />
-                  <CoreInput
-                    :model-value="formData.pisPasep"
-                    clearable
-                    label="PIS/PASEP"
-                    @input="updateField('pisPasep', $event)"
+                    @input="
+                      updateField('dataExpedicaoCertidaoNascimento', $event)
+                    "
                   />
                 </v-row>
               </div>
@@ -195,12 +203,13 @@
           <v-form ref="stepTwoForm">
             <div class="form-section">
               <div class="section-header">
-                <v-icon class="section-icon" color="primary">mdi-account-tie-outline</v-icon>
+                <v-icon class="section-icon" color="primary"
+                  >mdi-account-tie-outline</v-icon
+                >
                 <span class="section-title">Dados do Responsável</span>
               </div>
 
               <div class="fields-group">
-                <span class="fields-group-label">Grau de parentesco</span>
                 <v-row dense>
                   <v-col cols="12" class="py-1 px-1" md="6">
                     <v-select
@@ -208,7 +217,7 @@
                       :model-value="formData.grauParentesco"
                       item-title="label"
                       item-value="value"
-                      label="Grau de parentesco"
+                      label="Responsável Legal"
                       variant="outlined"
                       @update:model-value="updateGrauParentesco($event)"
                     />
@@ -224,7 +233,7 @@
                   <CoreInput
                     :model-value="formData.responsavelNome"
                     clearable
-                    label="Nome do(a) responsável pela solicitação da matrícula*"
+                    label="Nome do(a) responsável legal*"
                     required
                     @input="updateField('responsavelNome', $event)"
                   />
@@ -233,7 +242,7 @@
                     :counter="11"
                     clearable
                     hint="Digite apenas números"
-                    label="CPF do(a) responsável pela solicitação da matrícula*"
+                    label="CPF do(a) responsável legal*"
                     persistent-hint
                     required
                     @input="updateField('cpfResponsavel', $event)"
@@ -249,7 +258,7 @@
                   <CoreInput
                     :model-value="formData.emailResponsavel"
                     clearable
-                    label="E-mail do(a) responsável pela matrícula*"
+                    label="E-mail de contato*"
                     placeholder="email@email.com"
                     required
                     @input="updateField('emailResponsavel', $event)"
@@ -257,14 +266,14 @@
                   <CoreInput
                     :model-value="formData.telefoneResponsavel"
                     clearable
-                    label="Telefone do(a) responsável pela matrícula*"
+                    label="Telefone de contato*"
                     required
                     @input="updateField('telefoneResponsavel', $event)"
                   />
                   <CoreInput
                     :model-value="formData.telefone2"
                     clearable
-                    label="Telefone adicional do(a) responsável"
+                    label="Segundo telefone de contato"
                     @input="updateField('telefone2', $event)"
                   />
                   <CoreInput
@@ -282,7 +291,9 @@
         <v-window-item :value="3">
           <div class="form-section">
             <div class="section-header">
-              <v-icon class="section-icon" color="primary">mdi-map-marker-outline</v-icon>
+              <v-icon class="section-icon" color="primary"
+                >mdi-map-marker-outline</v-icon
+              >
               <span class="section-title">Endereço do Aluno</span>
             </div>
 
@@ -312,10 +323,12 @@
 
         <v-window-item :value="4">
           <v-form ref="stepFourForm">
-            <div class="form-section">
+          <div class="form-section">
               <div class="section-header">
-                <v-icon class="section-icon" color="primary">mdi-tune-variant</v-icon>
-                <span class="section-title">Preferências de Matrícula</span>
+                <v-icon class="section-icon" color="primary"
+                  >mdi-tune-variant</v-icon
+                >
+                <span class="section-title">Preferências da Solicitação de Matrícula</span>
               </div>
 
               <div class="fields-group">
@@ -353,7 +366,9 @@
                       label="Turno Preferencial*"
                       :rules="[(v) => !!v || 'Campo obrigatório']"
                       variant="outlined"
-                      @update:model-value="updateField('turnoPreferencialId', $event)"
+                      @update:model-value="
+                        updateField('turnoPreferencialId', $event)
+                      "
                     />
                   </v-col>
                   <v-col cols="12" class="py-1 px-1" md="6">
@@ -366,19 +381,23 @@
                       label="Bairro Preferencial*"
                       :rules="[(v) => !!v || 'Campo obrigatório']"
                       variant="outlined"
-                      @update:model-value="updateField('bairroPreferencial', $event)"
+                      @update:model-value="
+                        updateField('bairroPreferencial', $event)
+                      "
                     />
                   </v-col>
                   <v-col cols="12" class="py-1 px-1" md="6">
                     <v-select
+                      :disabled="!bairrosPreferenciais.length"
                       :items="unidadeOptions"
                       :model-value="formData.unidadeEnsinoId"
-                      item-title="nome"
+                      item-title="nomeCompleto"
                       item-value="idExterno"
-                      label="Unidade de Ensino*"
-                      :rules="[(v) => !!v || 'Campo obrigatório']"
+                      label="Unidade de Ensino Preferencial"
                       variant="outlined"
-                      @update:model-value="updateField('unidadeEnsinoId', $event)"
+                      @update:model-value="
+                        updateField('unidadeEnsinoId', $event)
+                      "
                     />
                   </v-col>
                 </v-row>
@@ -387,14 +406,14 @@
               <v-divider class="section-divider" />
 
               <div class="fields-group">
-                <span class="fields-group-label">Situação especial</span>
+                <span class="fields-group-label">Informações Complementares</span>
                 <v-row dense>
                   <v-col cols="12" class="py-0 px-1">
                     <v-checkbox
                       :model-value="formData.criancaAbrigo"
                       color="primary"
                       hide-details
-                      label="Criança em abrigo"
+                      label="Aluno em acolhimento institucional (abrigo)"
                       @update:model-value="updateField('criancaAbrigo', $event)"
                     />
                   </v-col>
@@ -407,13 +426,54 @@
                     required
                     @update:model-value="updateDocumento('anexo_cras', $event)"
                   />
-                  <CoreInput
-                    :model-value="formData.processoJudicial"
-                    clearable
-                    full-width
-                    label="Processo Judicial"
-                    @input="updateField('processoJudicial', $event)"
-                  />
+                  <v-col cols="12" class="py-0 px-1">
+                    <v-checkbox
+                      :model-value="formData.possuiIrmaoMatriculado"
+                      color="primary"
+                      hide-details
+                      label="Possui irmã(o) matriculado na rede municipal"
+                      @update:model-value="updatePossuiIrmaoMatriculado($event)"
+                    />
+                  </v-col>
+                  <template v-if="formData.possuiIrmaoMatriculado">
+                    <CoreInput
+                      :model-value="formData.cpfIrmao"
+                      :counter="11"
+                      clearable
+                      hint="Digite apenas números"
+                      label="CPF do irmão"
+                      persistent-hint
+                      :validate="[validateCpfIrmaoDiferenteDoAluno]"
+                      @input="updateCpfIrmao($event)"
+                    />
+                    <v-col cols="12" class="py-1 px-1">
+                      <v-alert
+                        v-if="formData.nome"
+                        type="info"
+                        variant="tonal"
+                        density="compact"
+                      >
+                        Irmão localizado: {{ formData.nome }}
+                      </v-alert>
+                      <v-alert
+                        v-else-if="formData.cpfIrmaoError"
+                        type="error"
+                        variant="tonal"
+                        density="compact"
+                      >
+                        {{ formData.cpfIrmaoError }}
+                      </v-alert>
+                    </v-col>
+                  </template>
+                  <v-col cols="12" class="py-0 px-1">
+                      <v-checkbox
+                        :model-value="formData.possuiIrmaoMatriculado"
+                        color="primary"
+                        hide-details
+                        label="Aluno não está frequentando a escola"
+                        @update:model-value="updatePossuiIrmaoMatriculado($event)"
+                      />
+                    </v-col>
                 </v-row>
               </div>
             </div>
@@ -424,7 +484,9 @@
           <v-form ref="stepFiveForm">
             <div class="form-section">
               <div class="section-header">
-                <v-icon class="section-icon" color="primary">mdi-file-document-multiple-outline</v-icon>
+                <v-icon class="section-icon" color="primary"
+                  >mdi-file-document-multiple-outline</v-icon
+                >
                 <span class="section-title">Documentos</span>
               </div>
 
@@ -437,7 +499,9 @@
                     clearable
                     label="Certidão de nascimento ou documento de identidade do estudante*"
                     required
-                    @update:model-value="updateDocumento('certidao_identidade', $event)"
+                    @update:model-value="
+                      updateDocumento('certidao_identidade', $event)
+                    "
                   />
                   <CoreFileInput
                     :model-value="documentos.cpf_rg_responsavel"
@@ -445,15 +509,9 @@
                     clearable
                     label="CPF e RG dos pais ou responsáveis, ou guarda*"
                     required
-                    @update:model-value="updateDocumento('cpf_rg_responsavel', $event)"
-                  />
-                  <CoreFileInput
-                    :model-value="documentos.declaracao_vacinacao"
-                    chips
-                    clearable
-                    label="Declaração de vacinação atualizada*"
-                    required
-                    @update:model-value="updateDocumento('declaracao_vacinacao', $event)"
+                    @update:model-value="
+                      updateDocumento('cpf_rg_responsavel', $event)
+                    "
                   />
                   <CoreFileInput
                     :model-value="documentos.cartao_cns"
@@ -469,7 +527,9 @@
                     clearable
                     label="Comprovante de residência atualizado*"
                     required
-                    @update:model-value="updateDocumento('comprovante_residencia', $event)"
+                    @update:model-value="
+                      updateDocumento('comprovante_residencia', $event)
+                    "
                   />
                   <CoreFileInput
                     :model-value="documentos.foto_estudante"
@@ -477,7 +537,9 @@
                     clearable
                     label="Fotografia 3x4 do estudante*"
                     required
-                    @update:model-value="updateDocumento('foto_estudante', $event)"
+                    @update:model-value="
+                      updateDocumento('foto_estudante', $event)
+                    "
                   />
                 </v-row>
               </div>
@@ -492,14 +554,30 @@
                     chips
                     clearable
                     label="Declaração do proprietário da residência"
-                    @update:model-value="updateDocumento('declaracao_proprietario_residencia', $event)"
+                    @update:model-value="
+                      updateDocumento(
+                        'declaracao_proprietario_residencia',
+                        $event,
+                      )
+                    "
                   />
                   <CoreFileInput
                     :model-value="documentos.cartao_social"
                     chips
                     clearable
                     label="Cartão Social - NIS"
-                    @update:model-value="updateDocumento('cartao_social', $event)"
+                    @update:model-value="
+                      updateDocumento('cartao_social', $event)
+                    "
+                  />
+                  <CoreFileInput
+                    :model-value="documentos.declaracao_vacinacao"
+                    chips
+                    clearable
+                    label="Declaração de vacinação atualizada"
+                    @update:model-value="
+                      updateDocumento('declaracao_vacinacao', $event)
+                    "
                   />
                   <CoreFileInput
                     :model-value="documentos.cartao_bpc"
@@ -513,14 +591,18 @@
                     chips
                     clearable
                     label="Tutela provisória ou comprovante do processo judicial"
-                    @update:model-value="updateDocumento('tutela_provisoria', $event)"
+                    @update:model-value="
+                      updateDocumento('tutela_provisoria', $event)
+                    "
                   />
                   <CoreFileInput
                     :model-value="documentos.laudo_medico"
                     chips
                     clearable
                     label="Laudo médico"
-                    @update:model-value="updateDocumento('laudo_medico', $event)"
+                    @update:model-value="
+                      updateDocumento('laudo_medico', $event)
+                    "
                   />
                 </v-row>
               </div>
@@ -529,7 +611,6 @@
         </v-window-item>
       </v-window>
     </v-card-text>
-
 
     <div class="step-actions-wrapper">
       <div class="step-actions">
@@ -649,10 +730,11 @@ const generoOptions = [
 ];
 
 const grauParentescoOptions = [
-  { label: "Próprio aluno", value: "proprio_aluno" },
+  { label: "Próprio Aluno", value: "proprio_aluno" },
   { label: "Filiação 1", value: "filiacao_1" },
   { label: "Filiação 2", value: "filiacao_2" },
-  { label: "Conselho tutelar", value: "conselho_tutelar" },
+  { label: "Outro", value: "outro" },
+  { label: "Conselho Tutelar", value: "conselho_tutelar" },
 ];
 
 const emit = defineEmits([
@@ -661,6 +743,7 @@ const emit = defineEmits([
   "update:endereco",
   "update:documentos",
   "buscar-por-cpf",
+  "buscar-irmao-por-cpf",
   "cpf-invalido",
   "validateAddress",
   "submit",
@@ -679,7 +762,7 @@ const totalSteps = 5;
 
 const steps = [
   { title: "Aluno", value: 1 },
-  { title: "Responsável pela Matrícula", value: 2 },
+  { title: "Responsável Legal", value: 2 },
   { title: "Endereço", value: 3 },
   { title: "Preferências", value: 4 },
   { title: "Documentos", value: 5 },
@@ -697,6 +780,25 @@ const isAlunoEstrangeiro = computed(
   () => props.formData.nacionalidade === "ESTRANGEIRO",
 );
 
+const normalizeCpf = (value) => (value || "").replace(/\D/g, "");
+
+const cpfFiliacaoIgualAoAlunoError = computed(() => {
+  const cpfAluno = normalizeCpf(props.formData.cpf);
+  const cpfMae = normalizeCpf(props.formData.cpfMae);
+  const cpfPai = normalizeCpf(props.formData.cpfPai);
+
+  if (!cpfAluno) return "";
+  if (cpfMae && cpfMae === cpfAluno) {
+    return "O CPF da filiação 1 não pode ser igual ao CPF do aluno(a).";
+  }
+
+  if (cpfPai && cpfPai === cpfAluno) {
+    return "O CPF da filiação 2 não pode ser igual ao CPF do aluno(a).";
+  }
+
+  return "";
+});
+
 const validateAddressPayload = (endereco = {}) =>
   Boolean(
     endereco.cep && endereco.bairro && endereco.logradouro && endereco.numero,
@@ -712,12 +814,35 @@ const hasValue = (value) => {
   return value !== null && value !== undefined && value !== "";
 };
 
+const validateCpfFiliacaoDiferenteDoAluno = (value) => {
+  const cpfAluno = normalizeCpf(props.formData.cpf);
+  const cpfFiliacao = normalizeCpf(value);
+
+  if (!cpfAluno || !cpfFiliacao) return true;
+  return (
+    cpfFiliacao !== cpfAluno ||
+    "O CPF da filiação não pode ser igual ao CPF do aluno(a)."
+  );
+};
+
+const validateCpfIrmaoDiferenteDoAluno = (value) => {
+  const cpfAluno = normalizeCpf(props.formData.cpf);
+  const cpfIrmao = normalizeCpf(value);
+
+  if (!cpfAluno || !cpfIrmao) return true;
+  return (
+    cpfIrmao !== cpfAluno ||
+    "O CPF do irmão não pode ser igual ao CPF do aluno(a)."
+  );
+};
+
 const validateStepOnePayload = () =>
   hasValue(props.formData.cpf) &&
   hasValue(props.formData.nome) &&
   hasValue(props.formData.dataNascimento) &&
   hasValue(props.formData.genero) &&
   hasValue(props.formData.nacionalidade) &&
+  !cpfFiliacaoIgualAoAlunoError.value &&
   (!props.isCpfCnpjObrigatorio || hasValue(props.formData.cpfCnpj)) &&
   (!props.isProtocoloCpfObrigatorio ||
     hasValue(props.formData.protocoloRequerimentoCpf));
@@ -789,9 +914,8 @@ const updateGrauParentesco = (value) => {
     ...props.formData,
     ...dadosResponsavel,
     grauParentesco: value,
-    conselheiroNome: value === "conselho_tutelar"
-      ? props.formData.conselheiroNome
-      : "",
+    conselheiroNome:
+      value === "conselho_tutelar" ? props.formData.conselheiroNome : "",
   });
 };
 
@@ -825,12 +949,21 @@ const updateDocumento = (field, value) => {
 };
 
 const updateCpf = (value) => {
-  const cpf = (value || "").replace(/\D/g, "");
+  const cpf = normalizeCpf(value);
+  const cpfIrmaoAtual = normalizeCpf(props.formData.cpfIrmao);
+  const cpfIrmaoIgual = cpf && cpfIrmaoAtual && cpf === cpfIrmaoAtual;
 
   emit("update:formData", {
     ...props.formData,
     cpf,
     cpfCnpj: cpf,
+    ...(cpfIrmaoIgual
+      ? {
+          nomeIrmao: "",
+          cpfIrmaoError:
+            "O CPF do irmão não pode ser igual ao CPF do aluno(a).",
+        }
+      : {}),
   });
 
   if (cpf.length !== 11) return;
@@ -842,16 +975,60 @@ const updateCpf = (value) => {
 
   emit("buscar-por-cpf", cpf);
 };
+
+const updatePossuiIrmaoMatriculado = (value) => {
+  const possuiIrmaoMatriculado = Boolean(value);
+
+  emit("update:formData", {
+    ...props.formData,
+    possuiIrmaoMatriculado,
+    cpfIrmao: possuiIrmaoMatriculado ? props.formData.cpfIrmao : "",
+    nomeIrmao: possuiIrmaoMatriculado ? props.formData.nomeIrmao : "",
+    cpfIrmaoError: "",
+  });
+};
+
+const updateCpfIrmao = (value) => {
+  const cpfIrmao = normalizeCpf(value);
+  const cpfAluno = normalizeCpf(props.formData.cpf);
+
+  emit("update:formData", {
+    ...props.formData,
+    cpfIrmao,
+    nomeIrmao: "",
+    cpfIrmaoError:
+      cpfIrmao && cpfAluno && cpfIrmao === cpfAluno
+        ? "O CPF do irmão não pode ser igual ao CPF do aluno(a)."
+        : "",
+  });
+
+  if (!cpfIrmao || cpfIrmao.length !== 11) return;
+
+  if (!validateCPF(cpfIrmao)) {
+    emit("update:formData", {
+      ...props.formData,
+      cpfIrmao,
+      nomeIrmao: "",
+      cpfIrmaoError: "CPF do irmão inválido.",
+    });
+    return;
+  }
+
+  if (cpfAluno && cpfIrmao === cpfAluno) {
+    return;
+  }
+
+  emit("buscar-irmao-por-cpf", cpfIrmao);
+};
 </script>
 
 <style scoped>
 .matricula-stepper {
-  background:
-    linear-gradient(
-      180deg,
-      rgba(var(--v-theme-surface), 1) 0%,
-      rgba(var(--v-theme-surface), 0.98) 100%
-    );
+  background: linear-gradient(
+    180deg,
+    rgba(var(--v-theme-surface), 1) 0%,
+    rgba(var(--v-theme-surface), 0.98) 100%
+  );
   border-radius: 12px;
   overflow: visible;
   border: 1px solid rgba(var(--v-border-color), 0.45);
@@ -859,12 +1036,11 @@ const updateCpf = (value) => {
 }
 
 .stepper-wrapper {
-  background:
-    linear-gradient(
-      135deg,
-      rgba(var(--v-theme-primary), 0.08) 0%,
-      rgba(var(--v-theme-surface), 1) 45%
-    );
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v-theme-primary), 0.08) 0%,
+    rgba(var(--v-theme-surface), 1) 45%
+  );
   border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
   border-radius: 12px 12px 0 0;
   overflow: hidden;
@@ -877,12 +1053,11 @@ const updateCpf = (value) => {
 .step-content {
   min-height: 420px;
   overflow: visible;
-  background:
-    linear-gradient(
-      180deg,
-      rgba(var(--v-theme-surface), 0.9) 0%,
-      rgba(var(--v-theme-surface-bright), 0.95) 100%
-    );
+  background: linear-gradient(
+    180deg,
+    rgba(var(--v-theme-surface), 0.9) 0%,
+    rgba(var(--v-theme-surface-bright), 0.95) 100%
+  );
 }
 
 .mobile-step-title {
