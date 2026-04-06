@@ -4,7 +4,6 @@
       <v-stepper
         v-model="currentStep"
         :alt-labels="!mobile"
-        flat
         :items="stepperItems"
         hide-actions
         class="stepper-header-only"
@@ -337,34 +336,39 @@
 
         <v-window-item :value="4">
           <v-form ref="stepFourForm">
-          <div class="form-section">
+            <div class="form-section">
               <div class="section-header">
                 <v-icon class="section-icon" color="primary"
                   >mdi-tune-variant</v-icon
                 >
                 <span class="section-title">Solicitação de Vaga</span>
               </div>
-                <v-row dense>
-                  <v-col cols="12" class="py-1 px-1" md="6">
-                    <v-select
-                      :items="etapaOptions"
-                      :model-value="formData.etapa"
-                      item-title="nome"
-                      label="Ano Escolar*"
-                      return-object
-                      :rules="[(v) => !!v || 'Campo obrigatório']"
-                      variant="outlined"
-                      @update:model-value="updateField('etapa', $event)"
-                    />
-                  </v-col>
-                </v-row>
+              <v-row dense>
+                <v-col cols="12" class="py-1 px-1" md="6">
+                  <v-select
+                    :items="etapaOptions"
+                    :model-value="formData.etapa"
+                    item-title="nome"
+                    label="Ano Escolar*"
+                    return-object
+                    :rules="[(v) => !!v || 'Campo obrigatório']"
+                    variant="outlined"
+                    @update:model-value="updateField('etapa', $event)"
+                  />
+                </v-col>
+              </v-row>
 
               <div class="fields-group">
                 <v-row class="ma-0">
-                  <span class="fields-group-label ma-0">Preferências para Escolha de Vaga</span>
+                  <span class="fields-group-label ma-0"
+                    >Preferências para Escolha de Vaga</span
+                  >
                 </v-row>
                 <v-row class="mx-0 mt-0 mb-3">
-                  <small style="color: rgb(141, 141, 141)" class="font-italic">As preferências estão sujeitas à disponibilidade de vagas</small>
+                  <small style="color: rgb(141, 141, 141)" class="font-italic"
+                    >As preferências estão sujeitas à disponibilidade de
+                    vagas</small
+                  >
                 </v-row>
                 <v-row dense>
                   <v-col cols="12" class="py-1 px-1" md="6">
@@ -416,7 +420,9 @@
               <v-divider class="section-divider" />
 
               <div class="fields-group">
-                <span class="fields-group-label">Informações Complementares</span>
+                <span class="fields-group-label"
+                  >Informações Complementares</span
+                >
                 <v-row dense>
                   <v-col cols="12" class="py-0 px-1">
                     <v-checkbox
@@ -476,14 +482,14 @@
                     </v-col>
                   </template>
                   <v-col cols="12" class="py-0 px-1">
-                      <v-checkbox
-                        :model-value="formData.possuiIrmaoMatriculado"
-                        color="primary"
-                        hide-details
-                        label="Aluno não está frequentando a escola"
-                        @update:model-value="updatePossuiIrmaoMatriculado($event)"
-                      />
-                    </v-col>
+                    <v-checkbox
+                      :model-value="formData.possuiIrmaoMatriculado"
+                      color="primary"
+                      hide-details
+                      label="Aluno não está frequentando a escola"
+                      @update:model-value="updatePossuiIrmaoMatriculado($event)"
+                    />
+                  </v-col>
                 </v-row>
               </div>
             </div>
@@ -831,6 +837,10 @@ const cpfFiliacaoIgualAoAlunoError = computed(() => {
 
   if (cpfPai && cpfPai === cpfAluno) {
     return "O CPF da filiação 2 não pode ser igual ao CPF do aluno(a).";
+  }
+
+  if (cpfMae && cpfPai && cpfMae === cpfPai) {
+    return "O CPF da filiação 1 e 2 nao podem ser iguais.";
   }
 
   return "";
