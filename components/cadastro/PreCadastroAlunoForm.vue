@@ -49,6 +49,7 @@
                     placeholder="12345678901"
                     required
                     @input="updateCpf($event)"
+                    max-length="11"
                   />
                   <CoreInput
                     :model-value="formData.nome"
@@ -483,7 +484,7 @@
                   </template>
                   <v-col cols="12" class="py-0 px-1">
                     <v-checkbox
-                      :model-value="formData.possuiIrmaoMatriculado"
+                      :model-value="formData.frequentandoEscola"
                       color="primary"
                       hide-details
                       label="Aluno não está frequentando a escola"
@@ -541,7 +542,7 @@
                     clearable
                     label="CPF da filiação 2"
                     @update:model-value="
-                      updateDocumento('cpf_rg_responsavel', $event)
+                      updateDocumento('cpf_rg_responsavel_2', $event)
                     "
                   />
                   <CoreFileInput
