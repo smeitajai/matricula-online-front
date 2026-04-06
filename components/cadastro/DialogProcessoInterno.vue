@@ -12,7 +12,7 @@
       </v-col>
       <v-col cols="12"> Possíveis impedimentos: </v-col>
       <v-col cols="12">
-        - Neste momento, a matrícula on-line está disponível apenas para
+        - Neste momento, a matrícula online está disponível apenas para
         <!-- <span class="font-weight-bold">{{ etapaAtiva.nome || "" }}.</span> -->
         estudantes que já frequentam uma unidade de ensino municipal.
       </v-col>

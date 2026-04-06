@@ -1,20 +1,5 @@
 <template>
   <v-form ref="form" class="pa-10">
-    <v-row class="mb-3">
-      <CoreInput
-        v-model="dadosForm.cpf"
-        :counter="11"
-        :disabled="!etapaAtiva"
-        clearable
-        full-width
-        hint="Digite apenas números"
-        label="CPF do aluno(a)*"
-        persistent-hint
-        placeholder="123456789000"
-        required
-        @input="((dadosForm.cpf = $event), onInputCPF())"
-      />
-    </v-row>
     <template v-if="loading">
       <v-row v-for="n in 4" :key="n" class="align-skeleton-loading">
         <v-col cols="6" class="py-0">
@@ -32,7 +17,51 @@
           ></v-skeleton-loader></v-col
       ></v-row>
     </template>
-    <v-row v-if="showAllInputs">
+
+    <!-- TODO: retirar essa quantidade ridícula de props -->
+    <CadastroPreCadastroAlunoForm
+      :bairros-preferenciais="bairrosPreferenciais || []"
+      :documentos="documentos"
+      :endereco="dadosEndereco"
+      :processo-etapas="processoEtapas"
+      :etapa-options="etapasCurso"
+      :form-data="dadosForm"
+      :is-cpf-cnpj-obrigatorio="isCpfCnpjObrigatorio"
+      :is-protocolo-cpf-obrigatorio="isProtocoloCpfObrigatorio"
+      :loading-bairros="loadingBairros"
+      :loading="loading"
+      :nacionalidade-options="nacionalidadeOptions"
+      :curso-options="Array.isArray(cursos) ? cursos : []"
+      :turno-options="turnos || []"
+      :unidade-options="unidadeOptions"
+      @buscar-por-cpf="buscarAlunoPorCpfPreCadastro"
+      @buscar-irmao-por-cpf="buscarIrmaoPorCpfPreCadastro"
+      @cpf-invalido="onCpfInvalidoPreCadastro"
+      @update:documentos="documentos = $event"
+      @update:endereco="dadosEndereco = $event"
+      @update:form-data="dadosForm = $event"
+      @update:genero="dadosForm.genero = $event"
+      @validate-address="validateAddress = $event"
+      @submit="onSubmit()"
+    />
+
+    <v-row v-if="dadosForm.processoEtapa?.tipo === 'TRANSFERENCIA'">
+      <v-row>
+        <CoreInput
+          v-model="dadosForm.cpf"
+          :counter="11"
+          :disabled="isEtapaAtivaSelecionada && !etapaAtiva"
+          clearable
+          full-width
+          hint="Digite apenas números"
+          label="CPF do aluno(a)*"
+          persistent-hint
+          placeholder="123456789000"
+          required
+          @input="((dadosForm.cpf = $event), onInputCPFPorTipo())"
+        />
+      </v-row>
+      <CoreFormSubtitle label="Responsável" />
       <CoreInput
         v-model="dadosForm.responsavelNome"
         autofocus
@@ -49,7 +78,6 @@
         placeholder="email@email.com"
         @input="dadosForm.email = $event"
       />
-
       <CoreInput
         v-model="dadosForm.telefone1"
         clearable
@@ -58,7 +86,6 @@
         required
         @input="dadosForm.telefone1 = $event"
       />
-
       <CoreInput
         v-model="dadosForm.telefone2"
         clearable
@@ -68,6 +95,7 @@
         @input="dadosForm.telefone2 = $event"
       />
 
+      <CoreFormSubtitle label="Aluno(a)" />
       <CoreInput
         v-model="dadosForm.nome"
         disabled
@@ -96,117 +124,119 @@
         @input="dadosForm.etapa = $event"
       /> -->
 
-      <v-col cols="12">
-        <v-divider></v-divider>
-      </v-col>
+      <template v-if="isEtapaAtivaSelecionada">
+        <v-col cols="12">
+          <v-divider></v-divider>
+        </v-col>
 
-      <v-col cols="12">
-        <p>
-          Informe os documentos, conforme item 2.2.4 do Edital de Matrícula
-          2026.
-        </p>
-        <p class="font-italic text-body-2">
-          Os documentos marcados com (*) são obrigatórios
-        </p>
-      </v-col>
+        <v-col cols="12">
+          <p>
+            Informe os documentos, conforme item 2.2.4 do Edital de Matrícula
+            2026.
+          </p>
+          <p class="font-italic text-body-2">
+            Os documentos marcados com (*) são obrigatórios
+          </p>
+        </v-col>
 
-      <CoreFileInput
-        v-model="documentos.certidao_identidade"
-        chips
-        clearable
-        label="Certidão de nascimento ou documento de identidade do estudante*"
-        required
-      />
+        <CoreFileInput
+          v-model="documentos.certidao_identidade"
+          chips
+          clearable
+          label="Certidão de nascimento ou documento de identidade do estudante*"
+          required
+        />
 
-      <CoreFileInput
-        v-model="documentos.cpf_rg_responsavel1"
-        chips
-        clearable
-        counter
-        label="CPF e RG do responsável 1*"
-        required
-      />
+        <CoreFileInput
+          v-model="documentos.cpf_rg_responsavel1"
+          chips
+          clearable
+          counter
+          label="CPF e RG do responsável 1*"
+          required
+        />
 
-      <CoreFileInput
-        v-model="documentos.cpf_rg_responsavel2"
-        chips
-        clearable
-        counter
-        label="CPF e RG do responsável 2"
-      />
+        <CoreFileInput
+          v-model="documentos.cpf_rg_responsavel2"
+          chips
+          clearable
+          counter
+          label="CPF e RG do responsável 2"
+        />
 
-      <CoreFileInput
-        v-model="documentos.comprovante_residencia"
-        chips
-        clearable
-        label="Comprovante de residência*"
-        required
-      />
+        <CoreFileInput
+          v-model="documentos.comprovante_residencia"
+          chips
+          clearable
+          label="Comprovante de residência*"
+          required
+        />
 
-      <CoreFileInput
-        v-model="documentos.foto_estudante"
-        chips
-        clearable
-        label="Foto do(a) estudante (Rosto com fundo branco)*"
-        required
-      />
+        <CoreFileInput
+          v-model="documentos.foto_estudante"
+          chips
+          clearable
+          label="Foto do(a) estudante (Rosto com fundo branco)*"
+          required
+        />
 
-      <CoreFileInput
-        v-model="documentos.declaracao_vacinacao"
-        chips
-        clearable
-        label="Declaração de vacinação"
-        @input="documentos.declaracao_vacinacao = $event"
-      />
+        <CoreFileInput
+          v-model="documentos.declaracao_vacinacao"
+          chips
+          clearable
+          label="Declaração de vacinação"
+          @update:model-value="documentos.declaracao_vacinacao = $event"
+        />
 
-      <CoreFileInput
-        v-model="documentos.cartao_cns"
-        chips
-        clearable
-        label="Cartão Nacional de Saúde (CNS)"
-        @input="documentos.cartao_cns = $event"
-      />
+        <CoreFileInput
+          v-model="documentos.cartao_cns"
+          chips
+          clearable
+          label="Cartão Nacional de Saúde (CNS)"
+          @update:model-value="documentos.cartao_cns = $event"
+        />
 
-      <CoreFileInput
-        v-model="documentos.cartao_social"
-        chips
-        clearable
-        label="Cartão Social (NIS)"
-        @input="documentos.cartao_social = $event"
-      />
+        <CoreFileInput
+          v-model="documentos.cartao_social"
+          chips
+          clearable
+          label="Cartão Social (NIS)"
+          @update:model-value="documentos.cartao_social = $event"
+        />
 
-      <CoreFileInput
-        v-model="documentos.cartao_bpc"
-        chips
-        clearable
-        label="Cartão Benefício de Prestação Continuada (BPC)"
-        @input="documentos.cartao_bpc = $event"
-      />
+        <CoreFileInput
+          v-model="documentos.cartao_bpc"
+          chips
+          clearable
+          label="Cartão Benefício de Prestação Continuada (BPC)"
+          @update:model-value="documentos.cartao_bpc = $event"
+        />
 
-      <CoreFileInput
-        v-model="documentos.tutela_provisoria"
-        chips
-        clearable
-        label="Tutela provisória"
-        @input="documentos.tutela_provisoria = $event"
-      />
+        <CoreFileInput
+          v-model="documentos.tutela_provisoria"
+          chips
+          clearable
+          label="Tutela provisória"
+          @update:model-value="documentos.tutela_provisoria = $event"
+        />
 
-      <CoreFileInput
-        v-model="documentos.laudo_medico"
-        chips
-        clearable
-        label="Laudo Médico"
-        @input="documentos.laudo_medico = $event"
-      />
+        <CoreFileInput
+          v-model="documentos.laudo_medico"
+          chips
+          clearable
+          label="Laudo Médico"
+          @update:model-value="documentos.laudo_medico = $event"
+        />
+      </template>
     </v-row>
 
-    <v-row v-if="showAllInputs" justify="end">
-      <CoreButton
+    <v-row v-if="dadosForm.processoEtapa?.tipo !== 'MATRICULA'" justify="end">
+      <!-- <CoreButton
         label="salvar"
         prepend-icon="mdi-content-save"
         :loading="loadingButton"
         @click="onSubmit()"
-      />
+      /> -->
     </v-row>
 
     <CoreSnackbar
@@ -232,21 +262,18 @@
 </template>
 
 <script setup>
-const { data: etapas } = await useFetch("/api/etapas");
-const { data: processo } = await useFetch("/api/processos/em-andamento");
-
-const emit = defineEmits(["submit"]);
-
-//const ANO_INSCRICAO = new Date().getFullYear() + 1;
-
+const route = useRoute();
+const router = useRouter();
 const showAllInputs = ref(false);
 const showDialogProcessoExterno = ref(false);
 const showDialogProcessoInterno = ref(false);
 const showMessage = ref(false);
 const message = ref("");
-const form = ref(null);
+const opcaoProcessoSelecionada = ref(null);
 const etapaAtiva = ref(null);
-const dadosForm = ref({});
+const etapaAtivaAtual = ref(null);
+const dadosForm = ref(createEmptyDadosForm());
+const dadosEndereco = ref(createEmptyEndereco());
 const documentos = ref({});
 const loading = ref(false);
 const loadingButton = ref(false);
@@ -254,24 +281,247 @@ const timeout = ref(5000);
 const hasInscricaoAtiva = ref(false);
 const alunoCarregadoErudio = ref(null);
 const alunoState = useAluno();
+const validateAddress = ref(true);
+const CURSO_PRE_CADASTRO_ID = 10;
+
+const { data: etapas } = await useFetch("/api/etapas");
+const { data: etapasCurso, refresh: carregarEtapasCurso } = await useLazyFetch(
+  "/api/etapas",
+  {
+    query: computed(() => {
+      const curso = dadosForm.value.cursoId || CURSO_PRE_CADASTRO_ID;
+      return curso ? { curso } : {};
+    }),
+    default: () => [],
+    immediate: false,
+    server: false,
+    watch: false,
+  },
+);
+
+const { data: processos } = await useFetch("/api/processos");
+const { data: cursos, refresh: carregarCursos } = await useLazyFetch(
+  "/api/cursos",
+  {
+    default: () => [],
+    immediate: false,
+    server: false,
+  },
+);
+const { data: turnos } = await useFetch("/api/turnos");
+const { data: unidades, refresh: carregarUnidades } = await useLazyFetch(
+  "/api/pre-cadastro/unidades",
+  {
+    query: computed(() => {
+      const bairro = getBairroPreferencialId();
+      const etapaOfertada = Number(
+        dadosForm.value.etapa?.idExterno || dadosForm.value.etapa?.id,
+      );
+
+      if (!bairro) return {};
+
+      return etapaOfertada
+        ? { bairro, "etapa-ofertada": etapaOfertada }
+        : { bairro };
+    }),
+    default: () => [],
+    immediate: false,
+    server: false,
+    watch: false,
+  },
+);
+
+const unidadeOptions = computed(() =>
+  Array.isArray(unidades.value)
+    ? unidades.value.map((unidade) => ({
+        ...unidade,
+        idExterno: String(unidade?.idExterno ?? unidade?.id ?? ""),
+      }))
+    : [],
+);
+const {
+  data: bairrosPreferenciais,
+  pending: loadingBairros,
+  refresh: carregarBairrosPreferenciais,
+} = await useLazyFetch("/api/pre-cadastro/bairros", {
+  default: () => [],
+  immediate: false,
+  server: false,
+});
+
+const emit = defineEmits(["submit"]);
+
+//const ANO_INSCRICAO = new Date().getFullYear() + 1;
+
+const OPCAO_PRE_CADASTRO_ID = "pre-cadastro";
+
+const nacionalidadeOptions = [
+  { label: "Brasileiro", value: "BRASILEIRO" },
+  { label: "Naturalizado", value: "NATURALIZADO" },
+  { label: "Estrangeiro", value: "ESTRANGEIRO" },
+];
+
+const { data: processoEtapas, error: errorProcessoEtapas } = await useFetch(
+  `/api/processo-etapas?processoId=${route.query.tipo}`,
+);
 
 onMounted(() => {
-  etapaAtiva.value =
-    processo.value && processo.value.processoEtapas
-      ? processo.value.processoEtapas.find((etapa) => etapa.emAndamento)
-      : null;
+  const tipo = Number(route.query.tipo);
 
-  if (!etapaAtiva.value) {
+  etapaAtivaAtual.value =
+    processos.value
+      ?.flatMap((p) => p.processoEtapas)
+      .find((etapa) => etapa.id === tipo) || null;
+
+  carregarCursos();
+  carregarBairrosPreferenciais();
+
+  if (!etapaAtivaAtual.value) {
     message.value = "Erro: Nenhuma etapa em andamento.";
     return (showMessage.value = true);
   }
+
+  syncOpcaoProcessoPorTipo();
 });
 
-const onInputCPF = async () => {
+const isEtapaAtivaSelecionada = computed(
+  () =>
+    !!opcaoProcessoSelecionada.value &&
+    opcaoProcessoSelecionada.value.id !== OPCAO_PRE_CADASTRO_ID,
+);
+
+const isCpfCnpjObrigatorio = computed(
+  () => dadosForm.value.nacionalidade !== "ESTRANGEIRO",
+);
+
+const isProtocoloCpfObrigatorio = computed(
+  () => dadosForm.value.nacionalidade === "ESTRANGEIRO",
+);
+
+const isTransferenciaInferida = computed(
+  () => dadosForm.value.tipoInscricaoInferido === "TRANSFERENCIA",
+);
+
+const bairroPreferencialSelecionadoId = computed(() =>
+  getBairroPreferencialId(),
+);
+
+const limparEstadoFormulario = () => {
+  showAllInputs.value = false;
+  showDialogProcessoExterno.value = false;
+  showDialogProcessoInterno.value = false;
+  dadosForm.value = createEmptyDadosForm();
+  dadosEndereco.value = createEmptyEndereco();
+  documentos.value = {};
+  loading.value = false;
+  loadingButton.value = false;
+  timeout.value = 5000;
+  hasInscricaoAtiva.value = false;
+  alunoCarregadoErudio.value = null;
+  validateAddress.value = true;
+};
+const onChangeOpcaoProcesso = async (opcao) => {
+  opcaoProcessoSelecionada.value = opcao;
+  limparEstadoFormulario();
+
+  etapaAtiva.value =
+    opcao && opcao.id !== OPCAO_PRE_CADASTRO_ID ? etapaAtivaAtual.value : null;
+
+  if (opcao?.id === OPCAO_PRE_CADASTRO_ID) {
+    dadosForm.value.etapa = etapaAtivaAtual.value || null;
+    if (!bairrosPreferenciais.value?.length) {
+      await carregarBairrosPreferenciais();
+    }
+    showAllInputs.value = true;
+  }
+};
+
+const syncOpcaoProcessoPorTipo = async () => {
+  if (!etapaAtivaAtual.value) return;
+
+  const tipoSelecionado = route.query.tipo;
+  const opcao =
+    tipoSelecionado === OPCAO_PRE_CADASTRO_ID
+      ? { id: OPCAO_PRE_CADASTRO_ID, nome: "Pré cadastro" }
+      : etapaAtivaAtual.value;
+
+  await onChangeOpcaoProcesso(opcao);
+};
+
+watch(
+  () => route.query.tipo,
+  async () => {
+    await syncOpcaoProcessoPorTipo();
+  },
+);
+
+watch(
+  () => dadosForm.value.cursoId,
+  async (cursoIdAtual, cursoIdAnterior) => {
+    if (!cursoIdAtual) {
+      etapasCurso.value = [];
+      dadosForm.value.etapa = null;
+      return;
+    }
+
+    await carregarEtapasCurso();
+
+    const etapaSelecionadaAindaExiste = Array.isArray(etapasCurso.value)
+      ? etapasCurso.value.some(
+          (etapa) => String(etapa?.id) === String(dadosForm.value.etapa?.id),
+        )
+      : false;
+
+    if (cursoIdAtual !== cursoIdAnterior || !etapaSelecionadaAindaExiste) {
+      dadosForm.value.etapa = etapaSelecionadaAindaExiste
+        ? dadosForm.value.etapa
+        : null;
+    }
+  },
+  {
+    immediate: true,
+  },
+);
+
+watch(
+  bairroPreferencialSelecionadoId,
+  async (bairroIdAtual, bairroIdAnterior) => {
+    if (!bairroIdAtual) {
+      unidades.value = [];
+      dadosForm.value.unidadeEnsinoId = null;
+      return;
+    }
+
+    await carregarUnidades();
+
+    const unidadeSelecionadaAindaExiste = Array.isArray(unidadeOptions.value)
+      ? unidadeOptions.value.some(
+          (unidade) =>
+            String(unidade?.idExterno) ===
+            String(dadosForm.value.unidadeEnsinoId),
+        )
+      : false;
+
+    if (bairroIdAtual !== bairroIdAnterior || !unidadeSelecionadaAindaExiste) {
+      dadosForm.value.unidadeEnsinoId = unidadeSelecionadaAindaExiste
+        ? dadosForm.value.unidadeEnsinoId
+        : null;
+    }
+  },
+);
+
+const onInputCPFPorTipo = async () => {
+  if (isEtapaAtivaSelecionada.value) {
+    return onInputCPFEtapaAtiva();
+  }
+};
+
+const onInputCPFEtapaAtiva = async () => {
   showAllInputs.value = false;
 
   if (dadosForm.value.cpf && dadosForm.value.cpf.length)
     dadosForm.value.cpf = dadosForm.value.cpf.replace(/\D/g, "");
+  dadosForm.value.cpfCnpj = dadosForm.value.cpf;
 
   if (dadosForm.value.cpf && dadosForm.value.cpf.length == 11) {
     return validateCPF(dadosForm.value.cpf)
@@ -280,10 +530,129 @@ const onInputCPF = async () => {
   }
 };
 
-const carregarAlunoMatriculaOnline = async () => {
+const carregarAlunoPreCadastro = async (cpf) => {
+  const { data: alunoPreCadastro, error } = await useFetch(
+    "/api/pre-cadastro/aluno",
+    {
+      query: {
+        cpf,
+      },
+    },
+  );
+
+  if (Array.isArray(alunoPreCadastro.value)) {
+    return alunoPreCadastro.value.length ? alunoPreCadastro.value[0] : null;
+  }
+
+  return alunoPreCadastro.value;
+};
+
+const validarPreCadastro = async (cpf = dadosForm.value.cpf) => {
+  const processoEtapa = dadosForm.value.processoEtapa || null;
+  const dadosIrmao = {
+    possuiIrmaoMatriculado: Boolean(dadosForm.value.possuiIrmaoMatriculado),
+    cpfIrmao: dadosForm.value.cpfIrmao || "",
+    nomeIrmao: dadosForm.value.nomeIrmao || "",
+    cpfIrmaoError: dadosForm.value.cpfIrmaoError || "",
+  };
+
+  dadosForm.value = {
+    ...createEmptyDadosForm(),
+    ...dadosIrmao,
+    processoEtapa,
+    cpf,
+    cpfCnpj: cpf,
+  };
+  loading.value = true;
+
+  const [alunoPreCadastro, alunoMatriculaOnline] = await Promise.all([
+    carregarAlunoPreCadastro(cpf),
+    carregarAlunoMatriculaOnline(cpf),
+  ]);
+
+  if(alunoPreCadastro?.id) {
+    dadosForm.value.erudioPessoaId = alunoPreCadastro.id
+  }
+
+  loading.value = false;
+
+  if (
+    !alunoPreCadastro ||
+    (typeof alunoPreCadastro === "object" &&
+      !Array.isArray(alunoPreCadastro) &&
+      !Object.keys(alunoPreCadastro).length)
+  ) {
+    dadosForm.value = {
+      ...dadosForm.value,
+      ...(alunoMatriculaOnline?.id ? { id: alunoMatriculaOnline.id } : {}),
+      tipoInscricaoInferido: "CADASTRO",
+    };
+    showAllInputs.value = true;
+    return;
+  }
+
+  await preencherDadosFormulario(alunoPreCadastro);
+  if (alunoMatriculaOnline?.id) {
+    dadosForm.value.id = alunoMatriculaOnline.id;
+  }
+  dadosForm.value.tipoInscricaoInferido = "CADASTRO";
+
+  showAllInputs.value = true;
+};
+
+const buscarAlunoPorCpfPreCadastro = async (cpf) => {
+  await validarPreCadastro(cpf);
+};
+
+const onCpfInvalidoPreCadastro = () => {
+  message.value = "Erro: CPF Inválido.";
+  showMessage.value = true;
+};
+
+const buscarIrmaoPorCpfPreCadastro = async (cpf) => {
+  const cpfNormalizado = normalizeDigits(cpf);
+
+  if (!cpfNormalizado || cpfNormalizado.length !== 11) {
+    return;
+  }
+
+  const ordem = etapaAtivaAtual.value?.ordem || etapaAtiva.value?.ordem;
+
+  if (!ordem) {
+    dadosForm.value = {
+      ...dadosForm.value,
+      nomeIrmao: "",
+      cpfIrmaoError: "Não foi possível validar o irmão no momento.",
+    };
+    return;
+  }
+
+  const data = await carregarAlunoPreCadastro(cpfNormalizado);
+
+  console.log("Resposta da API ao buscar irmão por CPF:", data);
+
+  if (!data || data?.statusCode || data?.error || !data?.cpf) {
+    dadosForm.value = {
+      ...dadosForm.value,
+      nomeIrmao: "",
+      cpfIrmaoError:
+        data?.message || "Irmão não encontrado na rede municipal.",
+    };
+    return;
+  }
+
+  dadosForm.value = {
+    ...dadosForm.value,
+    cpfIrmao: cpfNormalizado,
+    nomeIrmao: data?.nome || "",
+    cpfIrmaoError: "",
+  };
+};
+
+const carregarAlunoMatriculaOnline = async (cpf = dadosForm.value.cpf) => {
   const { data, error } = await useFetch("/api/alunos", {
     query: {
-      cpf: dadosForm.value.cpf,
+      cpf,
     },
   });
 
@@ -339,7 +708,11 @@ const carregarAlunoErudio = async () => {
 };
 
 const validarInscricao = async () => {
-  dadosForm.value = { cpf: dadosForm.value.cpf };
+  dadosForm.value = {
+    ...createEmptyDadosForm(),
+    cpf: dadosForm.value.cpf,
+    cpfCnpj: dadosForm.value.cpf,
+  };
 
   if (!etapaAtiva.value)
     return (
@@ -352,7 +725,7 @@ const validarInscricao = async () => {
   const aluno = await carregarAlunoMatriculaOnline(); // Verifica se o aluno existe no Matricula On-line
 
   if (aluno) {
-    dadosForm.value = { ...aluno };
+    await preencherDadosFormulario(aluno);
     hasInscricaoAtiva.value = await possuiInscricaoEtapaAtiva(aluno); // Verifica se já possui inscricao na etapa ativa
 
     if (hasInscricaoAtiva.value) {
@@ -397,8 +770,10 @@ const validarInscricao = async () => {
       }
 
       dadosForm.value = {
+        ...createEmptyDadosForm(),
         ...dadosForm.value,
         cpf: alunoErudio.cpf,
+        cpfCnpj: alunoErudio.cpf,
         nome: alunoErudio.nome,
         responsavelNome: alunoErudio.responsavelNome,
         dataNascimento: alunoErudio.dataNascimento,
@@ -429,66 +804,181 @@ const validarInscricao = async () => {
 };
 
 const onSubmit = async () => {
-  const { valid } = await form.value.validate();
-  if (!valid)
+  if (!validateAddressPayload(dadosEndereco.value))
     return (
-      (message.value = "Verifique os campos obrigatórios e tente novamente."),
+      (message.value = "Preencha os campos obrigatórios do endereço."),
       (showMessage.value = true)
     );
 
-  if (dadosForm.value.email && !validateEmail(dadosForm.value.email))
+  if (!normalizeOptionalValue(dadosForm.value.emailResponsavel))
+    return (
+      (message.value = "Informe o e-mail do(a) responsável."),
+      (showMessage.value = true)
+    );
+
+  if (dadosForm.value.email && !validateEmail(dadosForm.value.emailResponsavel))
     return (
       (message.value = "Erro: E-mail inválido."), (showMessage.value = true)
     );
 
-  if (dadosForm.value.email && !dadosForm.value.email.length)
-    delete dadosForm.value.email;
+  if (!normalizeOptionalValue(dadosForm.value.telefone1))
+    return (
+      (message.value = "Informe o telefone do(a) responsável."),
+      (showMessage.value = true)
+    );
+
+  if (!normalizeDigits(dadosForm.value.cpfResponsavel))
+    return (
+      (message.value = "Informe o CPF do(a) responsável."),
+      (showMessage.value = true)
+    );
+
+  if (isCpfCnpjObrigatorio.value && !normalizeDigits(dadosForm.value.cpfCnpj))
+    return (
+      (message.value = "Informe o CPF/CNPJ do aluno(a)."),
+      (showMessage.value = true)
+    );
+
+  if (
+    isProtocoloCpfObrigatorio.value &&
+    !normalizeOptionalValue(dadosForm.value.protocoloRequerimentoCpf)
+  )
+    return (
+      (message.value = "Informe o protocolo de requerimento do CPF."),
+      (showMessage.value = true)
+    );
+
+  if (
+    dadosForm.value.possuiIrmaoMatriculado &&
+    (!normalizeDigits(dadosForm.value.cpfIrmao) || !dadosForm.value.nomeIrmao)
+  )
+    return (
+      (message.value =
+        "Informe um CPF de irmão válido e aguarde a localização na rede municipal."),
+      (showMessage.value = true)
+    );
+
+  if (dadosForm.value.possuiIrmaoMatriculado && dadosForm.value.cpfIrmaoError)
+    return (
+      (message.value = dadosForm.value.cpfIrmaoError),
+      (showMessage.value = true)
+    );
+
+  // if (!validatePreCadastroDocuments())
+  //   return (
+  //     (message.value =
+  //       "Anexe todos os documentos obrigatórios do pré-cadastro."),
+  //     (showMessage.value = true)
+  //   );
+
+  if (isTransferenciaInferida.value && !validateTurnoTransferencia())
+    return (
+      (message.value =
+        "O turno preferencial deve ser diferente do turno atual para transferência."),
+      (showMessage.value = true)
+    );
 
   loadingButton.value = true;
 
-  dadosForm.value.id ? editarAluno() : criarAluno();
+  await (dadosForm.value.id ? editarPessoa() : criarPessoa());
 };
 
-const editarAluno = async () => {
-  const dadosAluno = { ...dadosForm.value };
-  delete dadosAluno.etapa;
-  delete dadosAluno.unidadeEnsinoId;
+const editarPessoa = async () => {
+  const enderecoId = await persistirEndereco();
+  if (!enderecoId) return;
 
-  const { data: alunoEditado, error } = await useFetch("/api/alunos", {
+  const { data: pessoaEditada, error } = await useFetch("/api/pessoas", {
     method: "PUT",
-    body: dadosAluno,
+    body: buildPessoaPayload(enderecoId),
   });
 
-  if (error.value || alunoEditado.value.statusCode) {
-    message.value = error.value || alunoEditado.value.message;
+  if (error.value || pessoaEditada.value.statusCode) {
+    message.value = error.value || pessoaEditada.value.message;
     loadingButton.value = false;
     return (showMessage.value = true);
   }
 
-  alunoState.value = alunoEditado.value; // Grava o aluno editado no State
+  alunoState.value = pessoaEditada.value; // Grava a pessoa editada no State
 
-  salvarInscricao();
+  const inscricaoCriada = await salvarInscricao();
+  if (!inscricaoCriada) return;
+
+  await salvarDocumentos(inscricaoCriada);
 };
 
-const criarAluno = async () => {
-  const dadosAluno = { ...dadosForm.value };
-  delete dadosAluno.id;
-  delete dadosAluno.etapa;
-  delete dadosAluno.unidadeEnsinoId;
-  const { data: alunoCriado, error } = await useFetch("/api/alunos", {
+const criarPessoa = async () => {
+  const payload = buildAlunoPayload();
+  if (!payload) return;
+
+  const { data: pessoaCriada, error } = await useFetch("/api/pessoas", {
     method: "POST",
-    body: dadosAluno,
+    body: payload,
   });
 
-  if (error.value || alunoCriado.value.statusCode) {
-    message.value = error.value || alunoCriado.value.message;
+  if (
+    error.value ||
+    pessoaCriada.value?.error ||
+    pessoaCriada.value?.statusCode
+  ) {
+    message.value =
+      error.value || pessoaCriada.value?.message || "Erro ao salvar pessoa.";
     loadingButton.value = false;
-    return (showMessage.value = true);
+    showMessage.value = true;
+    return;
   }
 
-  alunoState.value = alunoCriado.value; // Grava o aluno criado no State
+  if (!pessoaCriada.value?.id) {
+    message.value = "Pessoa criada sem retorno válido da API.";
+    loadingButton.value = false;
+    showMessage.value = true;
+    return;
+  }
 
-  salvarInscricao();
+  alunoState.value = pessoaCriada.value;
+
+  const inscricaoCriada = await salvarInscricao();
+  if (!inscricaoCriada) return;
+
+  const sincronizacaoConcluida = await sincronizarAlunoErudio(inscricaoCriada);
+  if (!sincronizacaoConcluida) return;
+
+  await salvarDocumentos(inscricaoCriada);
+};
+
+// TODO: adicionar funcao de remover endereço caso a inclusao de pessoa dê errado
+const persistirEndereco = async () => {
+  const dadosMapeados = {
+    logradouro: normalizeOptionalValue(dadosEndereco.value.logradouro),
+    bairro: normalizeOptionalValue(dadosEndereco.value.bairro),
+    cep: dadosEndereco.value.cep ? dadosEndereco.value.cep.toString() : null,
+    numero: dadosEndereco.value.numero
+      ? dadosEndereco.value.numero.toString()
+      : null,
+    complemento: normalizeOptionalValue(dadosEndereco.value.complemento),
+  };
+
+  const endpoint = dadosForm.value.enderecoId ? "PUT" : "POST";
+  if (dadosForm.value.enderecoId) dadosMapeados.id = dadosForm.value.enderecoId;
+
+  const { data: enderecoSalvo, error } = await useFetch("/api/enderecos", {
+    method: endpoint,
+    body: dadosMapeados,
+  });
+
+  if (
+    error.value ||
+    enderecoSalvo.value?.error ||
+    enderecoSalvo.value?.statusCode
+  ) {
+    message.value =
+      error.value || enderecoSalvo.value?.message || "Erro ao salvar endereço.";
+    loadingButton.value = false;
+    showMessage.value = true;
+    return null;
+  }
+
+  dadosForm.value.enderecoId = enderecoSalvo.value.id;
+  return enderecoSalvo.value.id;
 };
 
 const salvarInscricao = async () => {
@@ -498,12 +988,12 @@ const salvarInscricao = async () => {
       alunoId: alunoState.value.id.toString(),
       processoEtapaId: etapaAtiva.value.id,
       unidadeEnsinoProximoAnoId:
-        alunoCarregadoErudio.value.unidadeEnsinoProximoAnoId?.toString() ||
+        alunoCarregadoErudio.value?.unidadeEnsinoProximoAnoId?.toString() ||
         "16142",
       etapaProximoAnoId:
-        alunoCarregadoErudio.value.etapaProximoAnoId?.toString() || "1",
+        alunoCarregadoErudio.value?.etapaProximoAnoId?.toString() || "1",
       turnoProximoAnoId:
-        alunoCarregadoErudio.value.turnoProximoAnoId?.toString() || "1",
+        alunoCarregadoErudio.value?.turnoProximoAnoId?.toString() || "1",
     },
   });
 
@@ -513,7 +1003,36 @@ const salvarInscricao = async () => {
     return (showMessage.value = true);
   }
 
-  salvarDocumentos(inscricaoCriada.value);
+  return inscricaoCriada.value;
+};
+
+const sincronizarAlunoErudio = async (inscricao) => {
+  const payload = buildSincronizacaoErudioPayload(inscricao);
+  if (!payload) return false;
+
+  const { data: sincronizacao, error } = await useFetch(
+    "/api/erudio/alunos/sincronizar",
+    {
+      method: "POST",
+      body: payload,
+    },
+  );
+
+  if (
+    error.value ||
+    sincronizacao.value?.statusCode ||
+    sincronizacao.value?.error
+  ) {
+    message.value =
+      error.value ||
+      sincronizacao.value?.message ||
+      "Erro ao sincronizar aluno no Erudio.";
+    loadingButton.value = false;
+    showMessage.value = true;
+    return false;
+  }
+
+  return true;
 };
 
 const normalizeFiles = (value) => {
@@ -529,9 +1048,12 @@ const salvarDocumentos = async (inscricao) => {
 
   const categoriasDocumentos = {
     certidao_identidade: documentos.value.certidao_identidade,
+    cpf_rg_responsavel: documentos.value.cpf_rg_responsavel,
     cpf_rg_responsavel1: documentos.value.cpf_rg_responsavel1,
     cpf_rg_responsavel2: documentos.value.cpf_rg_responsavel2,
     comprovante_residencia: documentos.value.comprovante_residencia,
+    declaracao_proprietario_residencia:
+      documentos.value.declaracao_proprietario_residencia,
     foto_estudante: documentos.value.foto_estudante,
     declaracao_vacinacao: documentos.value.declaracao_vacinacao,
     cartao_cns: documentos.value.cartao_cns,
@@ -539,6 +1061,8 @@ const salvarDocumentos = async (inscricao) => {
     cartao_bpc: documentos.value.cartao_bpc,
     tutela_provisoria: documentos.value.tutela_provisoria,
     laudo_medico: documentos.value.laudo_medico,
+    anexo_cras: documentos.value.anexo_cras,
+    comprovante_de_escolaridade: documentos.value.comprovante_de_escolaridade,
   };
 
   let listaNomes = [];
@@ -564,17 +1088,413 @@ const salvarDocumentos = async (inscricao) => {
     return (showMessage.value = true);
   }
 
-  gerarprotocolo(inscricao);
+  await gerarprotocolo(inscricao);
 };
 
 const gerarprotocolo = async (inscricao) => {
-  await navigateTo({
-    path: "/protocolo",
-    query: {
-      inscricao: inscricao.id,
-    },
-  });
+  const query = {
+    inscricao: inscricao.id || inscricao.inscricao || "",
+    protocolo: inscricao.protocolo || "",
+  };
+
+  try {
+    return await router.push({
+      path: "/cadastro/solicitacao-efetivada",
+      query,
+    });
+  } catch (_) {
+    if (import.meta.client) {
+      const search = new URLSearchParams(query).toString();
+      window.location.href = `/cadastro/solicitacao-efetivada?${search}`;
+    }
+  }
 };
+
+async function preencherDadosFormulario(dados = {}) {
+  const endereco = dados.endereco || null;
+  const enderecoId = endereco?.id || dados.enderecoId || null;
+
+  dadosForm.value = {
+    ...createEmptyDadosForm(),
+    ...dadosForm.value,
+    id: dados.id || null,
+    cpf: dados.cpf || dados.cpfCnpj || dadosForm.value.cpf || "",
+    cpfCnpj: dados.cpfCnpj || dados.cpf || dadosForm.value.cpf || "",
+    nome: dados.nome || "",
+    dataNascimento: dados.dataNascimento || "",
+    email: dados.email || "",
+    telefone1: dados.telefone1 || "",
+    telefone2: dados.telefone2 || "",
+    falarComTelefoneResponsavel: dados.falarComTelefoneResponsavel || "",
+    falarComTelefone2: dados.falarComTelefone2 || "",
+    genero: dados.genero || "",
+    estadoCivilId: dados.estadoCivil?.id || dados.estadoCivilId || null,
+    racaId: dados.raca?.id || dados.racaId || null,
+    nacionalidade: dados.nacionalidade || "BRASILEIRO",
+    paisOrigemId: dados.paisOrigem?.id || dados.paisOrigemId || null,
+    naturalidadeId: dados.naturalidade?.id || dados.naturalidadeId || null,
+    nomeMae: dados.nomeMae || "",
+    cpfMae: dados.cpfMae || "",
+    nomePai: dados.nomePai || "",
+    cpfPai: dados.cpfPai || "",
+    responsavelNome: dados.responsavelNome || "",
+    cpfResponsavel: dados.cpfResponsavel || "",
+    conselheiroNome: dados.conselheiroNome || "",
+    grauParentesco: dados.grauParentesco || "",
+    nomeSocial: Boolean(dados.nomeSocial),
+    registroCivil: dados.registroCivil || "",
+    numeroRg: dados.numeroRg || "",
+    dataExpedicaoRg: dados.dataExpedicaoRg || "",
+    orgaoExpedidorRg: dados.orgaoExpedidorRg || "",
+    pisPasep: dados.pisPasep || "",
+    certidaoNascimento: dados.certidaoNascimento || "",
+    dataExpedicaoCertidaoNascimento:
+      dados.dataExpedicaoCertidaoNascimento || "",
+    nis: dados.nis || "",
+    protocoloRequerimentoCpf: dados.protocoloRequerimentoCpf || "",
+    cursoId: dados.cursoId || dadosForm.value.cursoId || CURSO_PRE_CADASTRO_ID,
+    turnoPreferencialId:
+      dados.turnoPreferencialId || dadosForm.value.turnoPreferencialId || null,
+    enderecoId,
+    etapa: dados.etapa || dadosForm.value.etapa || null,
+    unidadeEnsinoId: dados.unidadeEnsinoId || dadosForm.value.unidadeEnsinoId,
+    possuiIrmaoMatriculado: Boolean(
+      dados.possuiIrmaoMatriculado || dadosForm.value.possuiIrmaoMatriculado,
+    ),
+    cpfIrmao: dados.cpfIrmao || dadosForm.value.cpfIrmao || "",
+    nomeIrmao: dados.nomeIrmao || dadosForm.value.nomeIrmao || "",
+    cpfIrmaoError: dadosForm.value.cpfIrmaoError || "",
+  };
+
+  if (endereco?.logradouro || endereco?.bairro || endereco?.cep) {
+    dadosEndereco.value = {
+      ...createEmptyEndereco(),
+      ...endereco,
+    };
+    return;
+  }
+
+  if (enderecoId) {
+    await carregarEndereco(enderecoId);
+    return;
+  }
+
+  dadosEndereco.value = createEmptyEndereco();
+}
+
+async function carregarEndereco(id) {
+  const { data: endereco, error } = await useFetch(`/api/enderecos/${id}`);
+
+  if (error.value || endereco.value?.error || endereco.value?.statusCode) {
+    dadosEndereco.value = createEmptyEndereco();
+    return;
+  }
+
+  dadosEndereco.value = {
+    ...createEmptyEndereco(),
+    ...endereco.value,
+  };
+}
+
+function buildPessoaPayload(enderecoId) {
+  const payload = {
+    id: dadosForm.value.id || undefined,
+    nome: normalizeOptionalValue(dadosForm.value.nome),
+    dataNascimento: normalizeOptionalValue(dadosForm.value.dataNascimento),
+    cpfCnpj: normalizeDigits(dadosForm.value.cpfCnpj),
+    email: normalizeOptionalValue(dadosForm.value.email),
+    telefone1: normalizeOptionalValue(dadosForm.value.telefone1),
+    telefone2: normalizeOptionalValue(dadosForm.value.telefone2),
+    genero: normalizeOptionalValue(dadosForm.value.genero),
+    estadoCivil: buildReference(dadosForm.value.estadoCivilId),
+    raca: buildReference(dadosForm.value.racaId),
+    nacionalidade: normalizeOptionalValue(dadosForm.value.nacionalidade),
+    paisOrigem: buildReference(dadosForm.value.paisOrigemId),
+    naturalidade: buildReference(dadosForm.value.naturalidadeId),
+    nomeMae: normalizeOptionalValue(dadosForm.value.nomeMae),
+    cpfMae: normalizeDigits(dadosForm.value.cpfMae),
+    nomePai: normalizeOptionalValue(dadosForm.value.nomePai),
+    cpfPai: normalizeDigits(dadosForm.value.cpfPai),
+    responsavelNome: normalizeOptionalValue(dadosForm.value.responsavelNome),
+    cpfResponsavel: normalizeDigits(dadosForm.value.cpfResponsavel),
+    conselheiroNome: normalizeOptionalValue(dadosForm.value.conselheiroNome),
+    grauParentesco: normalizeOptionalValue(dadosForm.value.grauParentesco),
+    nomeSocial: Boolean(dadosForm.value.nomeSocial),
+    registroCivil: normalizeOptionalValue(dadosForm.value.registroCivil),
+    endereco: buildReference(enderecoId),
+    numeroRg: normalizeOptionalValue(dadosForm.value.numeroRg),
+    dataExpedicaoRg: normalizeOptionalValue(dadosForm.value.dataExpedicaoRg),
+    orgaoExpedidorRg: normalizeOptionalValue(dadosForm.value.orgaoExpedidorRg),
+    pisPasep: normalizeOptionalValue(dadosForm.value.pisPasep),
+    certidaoNascimento: normalizeOptionalValue(
+      dadosForm.value.certidaoNascimento,
+    ),
+    dataExpedicaoCertidaoNascimento: normalizeOptionalValue(
+      dadosForm.value.dataExpedicaoCertidaoNascimento,
+    ),
+    nis: normalizeOptionalValue(dadosForm.value.nis),
+    protocoloRequerimentoCpf: normalizeOptionalValue(
+      dadosForm.value.protocoloRequerimentoCpf,
+    ),
+  };
+
+  return payload;
+}
+
+function buildAlunoPayload() {
+  let payload = {
+    nome: normalizeOptionalValue(dadosForm.value.nome),
+    cpf: normalizeDigits(dadosForm.value.cpf),
+    email: normalizeOptionalValue(dadosForm.value.email),
+    dataNascimento: normalizeOptionalValue(dadosForm.value.dataNascimento),
+    telefone1: dadosForm.value.telefone1,
+    telefone2: dadosForm.value.telefone2,
+    responsavelNome: normalizeOptionalValue(dadosForm.value.responsavelNome),
+  };
+  console.log("Payload para criação de aluno:", payload);
+  return payload;
+}
+
+function buildSincronizacaoErudioPayload(inscricao) {
+  const etapaId = Number(
+    dadosForm.value.etapa?.idExterno || dadosForm.value.etapa?.id,
+  );
+  const unidadeEnsinoId = Number(dadosForm.value.unidadeEnsinoId);
+  const turnoId = Number(dadosForm.value.turnoPreferencialId);
+  const bairroPreferencialId = getBairroPreferencialId();
+
+  if (!unidadeEnsinoId || !etapaId || !turnoId) {
+    const camposPendentes = [];
+
+    if (!unidadeEnsinoId) camposPendentes.push("unidade de ensino");
+    if (!etapaId) camposPendentes.push("etapa");
+    if (!turnoId) camposPendentes.push("turno");
+
+    message.value = `Não foi possível sincronizar com o Erudio porque ${camposPendentes.join(", ")} não ${camposPendentes.length > 1 ? "foram informados" : "foi informado"}.`;
+    loadingButton.value = false;
+    showMessage.value = true;
+    return null;
+  }
+
+  return {
+    pessoa: buildErudioPessoaPayload(),
+    rematricula: {
+      protocolo: inscricao.protocolo || "",
+      naoFrequentando: dadosForm.value.naoFrequentando || false,
+      tipo:
+        dadosForm.value.tipoInscricaoInferido === "TRANSFERENCIA"
+          ? "TRANSFERENCIA"
+          : "MATRICULA",
+      bairroPreferencialId,
+      bairroPretendido: bairroPreferencialId,
+      unidadeEnsinoId,
+      etapaId,
+      turnoId,
+      cpfIrmao: dadosForm.value.possuiIrmaoMatriculado
+        ? normalizeDigits(dadosForm.value.cpfIrmao)
+        : null,
+      emailResponsavel: normalizeOptionalValue(
+        dadosForm.value.emailResponsavel || dadosForm.value.email,
+      ),
+      telefone1: normalizeOptionalValue(
+        dadosForm.value.telefone1,
+      ),
+      inscricaoId: normalizeOptionalValue(inscricao.id),
+    },
+  };
+}
+
+function getBairroPreferencialId() {
+  const bairroPreferencial = normalizeOptionalValue(
+    dadosForm.value.bairroPreferencial,
+  );
+
+  if (!bairroPreferencial || !Array.isArray(bairrosPreferenciais.value)) {
+    return null;
+  }
+
+  const bairroSelecionado = bairrosPreferenciais.value.find(
+    (bairro) => bairro?.nome === bairroPreferencial,
+  );
+
+  return Number(bairroSelecionado?.id) || null;
+}
+
+function buildErudioPessoaPayload() {
+  return {
+    id: dadosForm.value.erudioPessoaId || null,
+    nome: normalizeOptionalValue(dadosForm.value.nome),
+    cpfCnpj: normalizeDigits(dadosForm.value.cpfCnpj || dadosForm.value.cpf),
+    dataNascimento: normalizeOptionalValue(dadosForm.value.dataNascimento),
+    email: normalizeOptionalValue(
+      dadosForm.value.emailResponsavel || dadosForm.value.email,
+    ),
+    telefone1: normalizeOptionalValue(
+      dadosForm.value.telefone1,
+    ),
+    naoFrequentando: dadosForm.value.naoFrequentando || false,
+    telefone2: normalizeOptionalValue(dadosForm.value.telefone2),
+    genero: normalizeOptionalValue(dadosForm.value.genero),
+    estadoCivil: buildReference(dadosForm.value.estadoCivilId),
+    raca: buildReference(dadosForm.value.racaId),
+    nacionalidade: normalizeOptionalValue(dadosForm.value.nacionalidade),
+    paisOrigem: buildReference(dadosForm.value.paisOrigemId),
+    naturalidade: buildReference(dadosForm.value.naturalidadeId),
+    nomeMae: normalizeOptionalValue(dadosForm.value.nomeMae),
+    cpfMae: normalizeDigits(dadosForm.value.cpfMae),
+    nomePai: normalizeOptionalValue(dadosForm.value.nomePai),
+    cpfPai: normalizeDigits(dadosForm.value.cpfPai),
+    responsavelNome: normalizeOptionalValue(dadosForm.value.responsavelNome),
+    cpfResponsavel: normalizeDigits(dadosForm.value.cpfResponsavel),
+    conselheiroNome: normalizeOptionalValue(dadosForm.value.conselheiroNome),
+    grauParentesco: normalizeOptionalValue(dadosForm.value.grauParentesco),
+    nomeSocial: Boolean(dadosForm.value.nomeSocial),
+    registroCivil: normalizeOptionalValue(dadosForm.value.registroCivil),
+    numeroRg: normalizeOptionalValue(dadosForm.value.numeroRg),
+    dataExpedicaoRg: normalizeOptionalValue(dadosForm.value.dataExpedicaoRg),
+    orgaoExpedidorRg: normalizeOptionalValue(dadosForm.value.orgaoExpedidorRg),
+    pisPasep: normalizeOptionalValue(dadosForm.value.pisPasep),
+    certidaoNascimento: normalizeOptionalValue(
+      dadosForm.value.certidaoNascimento,
+    ),
+    dataExpedicaoCertidaoNascimento: normalizeOptionalValue(
+      dadosForm.value.dataExpedicaoCertidaoNascimento,
+    ),
+    nis: normalizeOptionalValue(dadosForm.value.nis),
+    protocoloRequerimentoCpf: normalizeOptionalValue(
+      dadosForm.value.protocoloRequerimentoCpf,
+    ),
+    endereco: {
+      cep: normalizeOptionalValue(dadosEndereco.value.cep),
+      bairro: normalizeOptionalValue(dadosEndereco.value.bairro),
+      logradouro: normalizeOptionalValue(dadosEndereco.value.logradouro),
+      numero: normalizeOptionalValue(dadosEndereco.value.numero),
+      complemento: normalizeOptionalValue(dadosEndereco.value.complemento),
+    },
+  };
+}
+
+function buildReference(id) {
+  return id ? { id } : null;
+}
+
+function normalizeOptionalValue(value) {
+  if (value === undefined || value === null) return null;
+
+  if (typeof value === "string") {
+    const normalized = value.trim();
+    return normalized.length ? normalized : null;
+  }
+
+  return value;
+}
+
+function normalizeDigits(value) {
+  const normalized = normalizeOptionalValue(value);
+  if (typeof normalized !== "string") return normalized;
+
+  const digits = normalized.replace(/\D/g, "");
+  return digits.length ? digits : null;
+}
+
+function validateAddressPayload(endereco = {}) {
+  return Boolean(
+    endereco.cep && endereco.bairro && endereco.logradouro && endereco.numero,
+  );
+}
+
+function validatePreCadastroDocuments() {
+  const obrigatorios = [
+    "certidao_identidade",
+    "cpf_rg_responsavel",
+    "declaracao_vacinacao",
+    "cartao_cns",
+    "comprovante_residencia",
+    "foto_estudante",
+  ];
+
+  if (dadosForm.value.criancaAbrigo) {
+    obrigatorios.push("anexo_cras");
+  }
+
+  return obrigatorios.every(
+    (campo) => normalizeFiles(documentos.value[campo]).length,
+  );
+}
+
+function validateTurnoTransferencia() {
+  return (
+    !dadosForm.value.turnoAtualId ||
+    String(dadosForm.value.turnoAtualId) !==
+      String(dadosForm.value.turnoPreferencialId)
+  );
+}
+
+function createEmptyDadosForm() {
+  return {
+    id: null,
+    cpf: "",
+    cpfCnpj: "",
+    nome: "",
+    dataNascimento: "",
+    email: "",
+    emailResponsavel: "",
+    telefone1: "",
+    telefoneResponsavel: "",
+    telefone2: "",
+    falarComTelefoneResponsavel: "",
+    falarComTelefone2: "",
+    genero: "",
+    estadoCivilId: null,
+    racaId: null,
+    nacionalidade: "BRASILEIRO",
+    paisOrigemId: null,
+    naturalidadeId: null,
+    nomeMae: "",
+    cpfMae: "",
+    nomePai: "",
+    cpfPai: "",
+    responsavelNome: "",
+    cpfResponsavel: "",
+    conselheiroNome: "",
+    grauParentesco: "",
+    nomeSocial: false,
+    registroCivil: "",
+    numeroRg: "",
+    dataExpedicaoRg: "",
+    orgaoExpedidorRg: "",
+    pisPasep: "",
+    certidaoNascimento: "",
+    dataExpedicaoCertidaoNascimento: "",
+    nis: "",
+    protocoloRequerimentoCpf: "",
+    cursoId: CURSO_PRE_CADASTRO_ID,
+    bairroPreferencial: "",
+    turnoPreferencialId: null,
+    turnoAtualId: null,
+    turnoAtualNome: "",
+    criancaAbrigo: false,
+    possuiIrmaoMatriculado: false,
+    cpfIrmao: "",
+    nomeIrmao: "",
+    cpfIrmaoError: "",
+    processoJudicial: "",
+    tipoInscricaoInferido: "CADASTRO",
+    enderecoId: null,
+    etapa: null,
+    unidadeEnsinoId: null,
+  };
+}
+
+function createEmptyEndereco() {
+  return {
+    cep: null,
+    bairro: null,
+    logradouro: null,
+    numero: null,
+    complemento: null,
+  };
+}
 </script>
 
 <style scoped>

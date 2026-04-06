@@ -1,6 +1,13 @@
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
-  const response = await fetch(`${config.public.baseURL}/etapas`);
+  const query = getQuery(event);
+  const url = new URL(`${config.public.baseURL}/etapas`);
+
+  if (query.curso) {
+    url.searchParams.append("curso", String(query.curso));
+  }
+
+  const response = await fetch(url);
   const data = await response.json();
   return data;
 });

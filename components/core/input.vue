@@ -9,20 +9,28 @@
       :disabled="disabled"
       :hint="hint"
       :label="label"
+      :max="max"
       :persistent-hint="persistentHint"
       :placeholder="placeholder"
       :rules="validationRules"
       :type="type"
       :variant="variant"
+      :maxLength="maxLength"
       @click:append-inner="appendInnerClick"
     />
   </v-col>
 </template>
 
 <script setup>
+import { max } from 'date-fns';
+
 const props = defineProps({
   appendInnerIcon: {
     type: String,
+    default: null,
+  },
+  maxLength: {
+    type: Number,
     default: null,
   },
   autofocus: {
@@ -34,8 +42,8 @@ const props = defineProps({
     default: false,
   },
   counter: {
-    type: Number,
-    default: 0,
+    type: [Number, Boolean],
+    default: false,
   },
   disabled: {
     type: Boolean,
@@ -52,6 +60,10 @@ const props = defineProps({
   label: {
     type: String,
     default: "",
+  },
+  max: {
+    type: String,
+    default: null,
   },
   modelValue: {
     type: [String, Number],

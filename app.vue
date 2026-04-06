@@ -8,11 +8,11 @@
 
 <script setup>
 useHead({
-  title: "Matrícula On-line",
+  title: "Portal de Matrículas",
   meta: [
     {
       name: "description",
-      content: "Sistema de matrícula on-line do município de Itajaí/SC",
+      content: "Sistema de matrícula online do município de Itajaí/SC",
     },
   ],
 });

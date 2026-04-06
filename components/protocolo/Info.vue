@@ -2,7 +2,7 @@
   <v-row class="ma-5 pt-10">
     <v-col cols="12" class="text-center">
       <v-img
-        src="/logo_educacao.png"
+        src="/flag_educacao.png"
         max-width="300"
         class="mx-auto mb-4"
       ></v-img>
@@ -23,19 +23,11 @@
       confirmar a unidade de ensino e o turno definido.
     </v-col> -->
     <v-col cols="12">
-      O(a) aluno(a)
-      {{ inscricao.aluno.nome }} - CPF [{{ inscricao.aluno.cpf }}], foi
-      encaminhado(a) para o {{ inscricao.etapa.nome }} na unidade -
-      {{ inscricao.unidadeEnsino.nome }} - turno {{ inscricao.turno.nome }}.
+      A solicitação na etapa do {{ inscricao.etapa.nome }} para o aluno {{ inscricao.aluno.nome }}, inscrito sob o CPF {{ inscricao.aluno.cpf }}, foi recebida pela Secretaria Municipal de Educação de Itajaí.
+      O Departamento da Central de Matrículas realizará a análise da solicitação e entrará em contato por telefone, WhatsApp ou e-mail assim que o processo for concluído.
     </v-col>
     <v-col cols="12" class="text-justify">
-      Os documentos foram recebidos para o processo de rematrícula. Informamos
-      que isso ainda não garante a rematrícula, pois todos os documentos serão
-      analisados e conferidos pela escola. A matrícula só estará efetivada após
-      a conferência e confirmação se todos os documentos exigidos foram
-      entregues corretamente. Após a verificação, entraremos em contato para
-      confirmar a conclusão do processo ou solicitar informações complementares,
-      se necessário.
+      Caso sejam identificadas inconsistências nos dados ou na documentação apresentada, você será contatado pelos meios de comunicação informados.
     </v-col>
   </v-row>
 </template>

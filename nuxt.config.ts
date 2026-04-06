@@ -1,5 +1,22 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
+const apiBaseURL =
+  process.env.NODE_ENV === "production"
+    ? process.env.NUXT_PUBLIC_API_PROD || process.env.API_PROD
+    : process.env.NUXT_PUBLIC_API_DEV ||
+      process.env.API_DEV ||
+      "http://localhost:3000";
+
+const erudioBaseURL =
+  process.env.NODE_ENV === "production"
+    ? process.env.NUXT_PUBLIC_ERUDIO_URL_PROD ||
+      process.env.ERUDIO_URL_PROD ||
+      process.env.NUXT_PUBLIC_API_PROD ||
+      process.env.API_PROD
+    : process.env.NUXT_PUBLIC_ERUDIO_URL_DEV ||
+      process.env.ERUDIO_URL_DEV ||
+      "http://localhost";
+
 export default defineNuxtConfig({
   devtools: { enabled: true },
 
@@ -28,10 +45,8 @@ export default defineNuxtConfig({
     apiSecret: "123",
     // Keys within public, will be also exposed to the client-side
     public: {
-      baseURL:
-        process.env.NODE_ENV === "production"
-          ? process.env.API_PROD
-          : process.env.API_DEV,
+      baseURL: apiBaseURL,
+      erudioBaseURL,
     },
   },
 

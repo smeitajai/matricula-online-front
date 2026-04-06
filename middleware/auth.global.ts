@@ -5,6 +5,7 @@ export default defineNuxtRouteMiddleware((to) => {
     "index",
     "login",
     "cadastro",
+    "cadastro-solicitacao-efetivada",
     "cadastro-vagas",
     "protocolo",
     "ajuda",
