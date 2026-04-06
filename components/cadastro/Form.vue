@@ -616,15 +616,6 @@ const buscarIrmaoPorCpfPreCadastro = async (cpf) => {
     return;
   }
 
-  if (cpfNormalizado === normalizeDigits(dadosForm.value.cpf)) {
-    dadosForm.value = {
-      ...dadosForm.value,
-      nomeIrmao: "",
-      cpfIrmaoError: "O CPF do irmão não pode ser igual ao CPF do aluno(a).",
-    };
-    return;
-  }
-
   const ordem = etapaAtivaAtual.value?.ordem || etapaAtiva.value?.ordem;
 
   if (!ordem) {
@@ -638,17 +629,14 @@ const buscarIrmaoPorCpfPreCadastro = async (cpf) => {
 
   const data = await carregarAlunoPreCadastro(cpfNormalizado);
 
-  if (
-    error.value ||
-    data.value?.statusCode ||
-    data.value?.error ||
-    !data.value?.cpf
-  ) {
+  console.log("Resposta da API ao buscar irmão por CPF:", data);
+
+  if (!data || data?.statusCode || data?.error || !data?.cpf) {
     dadosForm.value = {
       ...dadosForm.value,
       nomeIrmao: "",
       cpfIrmaoError:
-        data.value?.message || "Irmão não encontrado na rede municipal.",
+        data?.message || "Irmão não encontrado na rede municipal.",
     };
     return;
   }
@@ -656,7 +644,7 @@ const buscarIrmaoPorCpfPreCadastro = async (cpf) => {
   dadosForm.value = {
     ...dadosForm.value,
     cpfIrmao: cpfNormalizado,
-    nomeIrmao: data.nome || "",
+    nomeIrmao: data?.nome || "",
     cpfIrmaoError: "",
   };
 };

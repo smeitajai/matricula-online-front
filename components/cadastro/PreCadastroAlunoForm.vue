@@ -465,12 +465,12 @@
                     />
                     <v-col cols="12" class="py-1 px-1">
                       <v-alert
-                        v-if="formData.nome"
+                        v-if="formData.nomeIrmao"
                         type="info"
                         variant="tonal"
                         density="compact"
                       >
-                        Irmão localizado: {{ formData.nome }}
+                        Irmão localizado: {{ formData.nomeIrmao }}
                       </v-alert>
                       <v-alert
                         v-else-if="formData.cpfIrmaoError"
