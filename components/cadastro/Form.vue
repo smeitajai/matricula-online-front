@@ -269,7 +269,6 @@ const showDialogProcessoExterno = ref(false);
 const showDialogProcessoInterno = ref(false);
 const showMessage = ref(false);
 const message = ref("");
-const form = ref(null);
 const opcaoProcessoSelecionada = ref(null);
 const etapaAtiva = ref(null);
 const etapaAtivaAtual = ref(null);
@@ -570,6 +569,10 @@ const validarPreCadastro = async (cpf = dadosForm.value.cpf) => {
     carregarAlunoPreCadastro(cpf),
     carregarAlunoMatriculaOnline(cpf),
   ]);
+
+  if(alunoPreCadastro?.id) {
+    dadosForm.value.erudioPessoaId = alunoPreCadastro.id
+  }
 
   loading.value = false;
 
@@ -1326,6 +1329,7 @@ function getBairroPreferencialId() {
 
 function buildErudioPessoaPayload() {
   return {
+    id: dadosForm.value.erudioPessoaId || null,
     nome: normalizeOptionalValue(dadosForm.value.nome),
     cpfCnpj: normalizeDigits(dadosForm.value.cpfCnpj || dadosForm.value.cpf),
     dataNascimento: normalizeOptionalValue(dadosForm.value.dataNascimento),
