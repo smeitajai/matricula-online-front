@@ -821,7 +821,7 @@ const onSubmit = async () => {
       (message.value = "Erro: E-mail inválido."), (showMessage.value = true)
     );
 
-  if (!normalizeOptionalValue(dadosForm.value.telefoneResponsavel))
+  if (!normalizeOptionalValue(dadosForm.value.telefone1))
     return (
       (message.value = "Informe o telefone do(a) responsável."),
       (showMessage.value = true)
@@ -1007,7 +1007,7 @@ const salvarInscricao = async () => {
 };
 
 const sincronizarAlunoErudio = async (inscricao) => {
-  const payload = buildSincronizacaoErudioPayload(inscricao?.id);
+  const payload = buildSincronizacaoErudioPayload(inscricao);
   if (!payload) return false;
 
   const { data: sincronizacao, error } = await useFetch(
@@ -1062,6 +1062,7 @@ const salvarDocumentos = async (inscricao) => {
     tutela_provisoria: documentos.value.tutela_provisoria,
     laudo_medico: documentos.value.laudo_medico,
     anexo_cras: documentos.value.anexo_cras,
+    comprovante_de_escolaridade: documentos.value.comprovante_de_escolaridade,
   };
 
   let listaNomes = [];
@@ -1241,18 +1242,20 @@ function buildPessoaPayload(enderecoId) {
 }
 
 function buildAlunoPayload() {
-  return {
+  let payload = {
     nome: normalizeOptionalValue(dadosForm.value.nome),
     cpf: normalizeDigits(dadosForm.value.cpf),
     email: normalizeOptionalValue(dadosForm.value.email),
     dataNascimento: normalizeOptionalValue(dadosForm.value.dataNascimento),
-    telefone1: normalizeOptionalValue(dadosForm.value.telefone1),
-    telefone2: normalizeOptionalValue(dadosForm.value.telefone2),
+    telefone1: dadosForm.value.telefone1,
+    telefone2: dadosForm.value.telefone2,
     responsavelNome: normalizeOptionalValue(dadosForm.value.responsavelNome),
   };
+  console.log("Payload para criação de aluno:", payload);
+  return payload;
 }
 
-function buildSincronizacaoErudioPayload(inscricaoId) {
+function buildSincronizacaoErudioPayload(inscricao) {
   const etapaId = Number(
     dadosForm.value.etapa?.idExterno || dadosForm.value.etapa?.id,
   );
@@ -1276,6 +1279,8 @@ function buildSincronizacaoErudioPayload(inscricaoId) {
   return {
     pessoa: buildErudioPessoaPayload(),
     rematricula: {
+      protocolo: inscricao.protocolo || "",
+      naoFrequentando: dadosForm.value.naoFrequentando || false,
       tipo:
         dadosForm.value.tipoInscricaoInferido === "TRANSFERENCIA"
           ? "TRANSFERENCIA"
@@ -1291,10 +1296,10 @@ function buildSincronizacaoErudioPayload(inscricaoId) {
       emailResponsavel: normalizeOptionalValue(
         dadosForm.value.emailResponsavel || dadosForm.value.email,
       ),
-      telefoneResponsavel: normalizeOptionalValue(
-        dadosForm.value.telefoneResponsavel || dadosForm.value.telefone1,
+      telefone1: normalizeOptionalValue(
+        dadosForm.value.telefone1,
       ),
-      inscricaoId: normalizeOptionalValue(inscricaoId),
+      inscricaoId: normalizeOptionalValue(inscricao.id),
     },
   };
 }
@@ -1325,8 +1330,9 @@ function buildErudioPessoaPayload() {
       dadosForm.value.emailResponsavel || dadosForm.value.email,
     ),
     telefone1: normalizeOptionalValue(
-      dadosForm.value.telefoneResponsavel || dadosForm.value.telefone1,
+      dadosForm.value.telefone1,
     ),
+    naoFrequentando: dadosForm.value.naoFrequentando || false,
     telefone2: normalizeOptionalValue(dadosForm.value.telefone2),
     genero: normalizeOptionalValue(dadosForm.value.genero),
     estadoCivil: buildReference(dadosForm.value.estadoCivilId),

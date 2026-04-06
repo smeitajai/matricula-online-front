@@ -271,11 +271,11 @@
                     @input="updateField('emailResponsavel', $event)"
                   />
                   <CoreInput
-                    :model-value="formData.telefoneResponsavel"
+                    :model-value="formData.telefone1"
                     clearable
                     label="Telefone de contato*"
                     required
-                    @input="updateField('telefoneResponsavel', $event)"
+                    @input="updateField('telefone1', $event)"
                   />
                   <CoreInput
                     :model-value="formData.falarComTelefoneResponsavel"
@@ -488,7 +488,7 @@
                       color="primary"
                       hide-details
                       label="Aluno não está frequentando a escola"
-                      @update:model-value="updatePossuiIrmaoMatriculado($event)"
+                      @update:model-value="updateFrequentandoEscola($event)"
                     />
                   </v-col>
                 </v-row>
@@ -516,6 +516,16 @@
               <div class="fields-group">
                 <span class="fields-group-label">Obrigatórios</span>
                 <v-row dense>
+                  <CoreFileInput
+                    :model-value="documentos.comprovante_de_escolaridade"
+                    chips
+                    clearable
+                    label="Comprovante de escolaridade*"
+                    required
+                    @update:model-value="
+                      updateDocumento('comprovante_de_escolaridade', $event)
+                    "
+                  />
                   <CoreFileInput
                     :model-value="documentos.certidao_identidade"
                     chips
@@ -1037,6 +1047,15 @@ const updatePossuiIrmaoMatriculado = (value) => {
     cpfIrmao: possuiIrmaoMatriculado ? props.formData.cpfIrmao : "",
     nomeIrmao: possuiIrmaoMatriculado ? props.formData.nomeIrmao : "",
     cpfIrmaoError: "",
+  });
+};
+
+const updateFrequentandoEscola = (value) => {
+  const frequentandoEscola = Boolean(value);
+
+  emit("update:formData", {
+    ...props.formData,
+    frequentandoEscola,
   });
 };
 
