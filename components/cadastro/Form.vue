@@ -974,12 +974,12 @@ const salvarInscricao = async () => {
       alunoId: alunoState.value.id.toString(),
       processoEtapaId: etapaAtiva.value.id,
       unidadeEnsinoProximoAnoId:
-        alunoCarregadoErudio.value?.unidadeEnsinoProximoAnoId?.toString() ||
-        "16142",
+        dadosForm.value.unidadeEnsinoId ||
+        "",
       etapaProximoAnoId:
-        alunoCarregadoErudio.value?.etapaProximoAnoId?.toString() || "1",
+        String(dadosForm.value.etapa.id),
       turnoProximoAnoId:
-        alunoCarregadoErudio.value?.turnoProximoAnoId?.toString() || "1",
+        String(dadosForm.value.turnoPreferencialId),
     },
   });
 
@@ -1249,10 +1249,9 @@ function buildSincronizacaoErudioPayload(inscricao) {
   const turnoId = Number(dadosForm.value.turnoPreferencialId);
   const bairroPreferencialId = getBairroPreferencialId();
 
-  if (!unidadeEnsinoId || !etapaId || !turnoId) {
+  if (!etapaId || !turnoId) {
     const camposPendentes = [];
 
-    if (!unidadeEnsinoId) camposPendentes.push("unidade de ensino");
     if (!etapaId) camposPendentes.push("etapa");
     if (!turnoId) camposPendentes.push("turno");
 
