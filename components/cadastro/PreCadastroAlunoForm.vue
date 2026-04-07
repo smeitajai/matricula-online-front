@@ -305,6 +305,7 @@
                     :model-value="formData.telefone1"
                     clearable
                     label="Telefone de contato*"
+                    type="number"
                     required
                     @input="updateField('telefone1', $event)"
                   />
