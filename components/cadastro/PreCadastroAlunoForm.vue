@@ -404,18 +404,16 @@
                 </v-row>
                 <v-row dense>
                   <v-col cols="12" class="py-1 px-1" md="6">
-                    <v-select
-                      :items="turnoOptions"
-                      :model-value="formData.turnoPreferencialId"
-                      item-title="nome"
-                      item-value="id"
-                      label="Turno Preferencial*"
-                      :rules="[(v) => !!v || 'Campo obrigatório']"
-                      variant="outlined"
-                      @update:model-value="
-                        updateField('turnoPreferencialId', $event)
-                      "
-                    />
+                  <v-select
+                    :items="turnoOptionsFiltrados"
+                    :model-value="formData.turnoPreferencialId"
+                    item-title="nome"
+                    item-value="id"
+                    label="Turno Preferencial*"
+                    :rules="[(v) => !!v || 'Campo obrigatório']"
+                    variant="outlined"
+                    @update:model-value="updateField('turnoPreferencialId', $event)"
+                  />
                   </v-col>
                   <v-col cols="12" class="py-1 px-1" md="6">
                     <v-select
@@ -874,6 +872,12 @@ const validateEmailField = (value) => {
   if (!value) return true;
   return validateEmail(value) || "Informe um e-mail valido.";
 };
+
+const turnoOptionsFiltrados = computed(() =>
+  (props.turnoOptions || []).filter(
+    (turno) => turno.nome?.toLowerCase() !== "noturno",
+  ),
+);
 
 const validateResponsavelLegal = (value) => {
   if (!value) return "Selecione o responsável legal.";
