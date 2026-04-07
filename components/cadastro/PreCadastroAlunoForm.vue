@@ -76,7 +76,7 @@
                       item-title="label"
                       item-value="value"
                       label="Gênero do aluno*"
-                      :rules="[(v) => !!v || 'Campo obrigatório']"
+                      :rules="[(v) => v !== undefined || 'Campo obrigatório']"
                       variant="outlined"
                       @update:model-value="updateGenero($event)"
                     />
@@ -141,7 +141,6 @@
                     hint="Digite apenas números"
                     label="CPF da filiação 2"
                     persistent-hint
-                    :validate="[validateCpfFiliacaoDiferenteDoAluno]"
                     @input="updateCpfField('cpfPai', $event)"
                   />
                 </v-row>
@@ -547,15 +546,6 @@
                     "
                   />
                   <CoreFileInput
-                    :model-value="documentos.cpf_rg_responsavel_2"
-                    chips
-                    clearable
-                    label="CPF da filiação 2"
-                    @update:model-value="
-                      updateDocumento('cpf_rg_responsavel_2', $event)
-                    "
-                  />
-                  <CoreFileInput
                     :model-value="documentos.cartao_cns"
                     chips
                     clearable
@@ -627,6 +617,15 @@
                     clearable
                     label="Cartão BPC"
                     @update:model-value="updateDocumento('cartao_bpc', $event)"
+                  />
+                  <CoreFileInput
+                    :model-value="documentos.cpf_rg_responsavel_2"
+                    chips
+                    clearable
+                    label="CPF da filiação 2"
+                    @update:model-value="
+                      updateDocumento('cpf_rg_responsavel_2', $event)
+                    "
                   />
                   <CoreFileInput
                     :model-value="documentos.tutela_provisoria"
@@ -769,7 +768,7 @@ const props = defineProps({
 const generoOptions = [
   { label: "Masculino", value: "M" },
   { label: "Feminino", value: "F" },
-  { label: "Prefiro não informar", value: "NF" },
+  { label: "Prefiro não informar", value: "" },
 ];
 
 const grauParentescoOptions = [
@@ -898,7 +897,7 @@ const validateStepOnePayload = () =>
   hasValue(props.formData.cpf) &&
   hasValue(props.formData.nome) &&
   hasValue(props.formData.dataNascimento) &&
-  hasValue(props.formData.genero) &&
+  props.formData.genero !== undefined &&
   hasValue(props.formData.nacionalidade) &&
   !cpfFiliacaoIgualAoAlunoError.value &&
   (!props.isCpfCnpjObrigatorio || hasValue(props.formData.cpfCnpj)) &&
