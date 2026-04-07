@@ -858,7 +858,7 @@ const cpfFiliacaoIgualAoAlunoError = computed(() => {
 
 const validateAddressPayload = (endereco = {}) =>
   Boolean(
-    endereco.cep && endereco.bairro && endereco.logradouro && endereco.numero,
+    endereco.cep && endereco.bairro && endereco.logradouro,
   );
 
 const validateVuetifyForm = async (formRef) => {
