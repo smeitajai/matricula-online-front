@@ -45,6 +45,7 @@
                     clearable
                     label="CPF do aluno*"
                     :loading="loading"
+                    :disabled="loading"
                     persistent-hint
                     placeholder="12345678901"
                     required
@@ -55,6 +56,8 @@
                     :model-value="formData.nome"
                     autofocus
                     clearable
+                    :loading="loading"
+                    :disabled="loading"
                     label="Nome do aluno*"
                     required
                     @input="updateField('nome', $event)"
@@ -62,6 +65,8 @@
                   <CoreInput
                     :model-value="formData.dataNascimento"
                     :max="dataMaximaHoje"
+                    :loading="loading"
+                    :disabled="loading"
                     :validate="[validateDataNaoFutura]"
                     clearable
                     label="Data de nascimento do aluno*"
@@ -73,6 +78,8 @@
                     <v-select
                       :items="generoOptions"
                       :model-value="formData.genero"
+                      :loading="loading"
+                      :disabled="loading"
                       item-title="label"
                       item-value="value"
                       label="Gênero do aluno*"
@@ -85,6 +92,8 @@
                     <v-select
                       :items="nacionalidadeOptions"
                       :model-value="formData.nacionalidade"
+                      :loading="loading"
+                      :disabled="loading"
                       item-title="label"
                       item-value="value"
                       label="Nacionalidade do aluno*"
@@ -111,6 +120,8 @@
                 <v-row dense>
                   <CoreInput
                     :model-value="formData.nomeMae"
+                    :loading="loading"
+                    :disabled="loading"
                     clearable
                     label="Filiação 1 (mãe biológica, se houver)*"
                     required
@@ -121,6 +132,7 @@
                     :counter="11"
                     clearable
                     :loading="loading"
+                    :disabled="loading"
                     hint="Digite apenas números"
                     label="CPF da filiação 1*"
                     required
@@ -130,6 +142,8 @@
                   />
                   <CoreInput
                     :model-value="formData.nomePai"
+                    :loading="loading"
+                    :disabled="loading"
                     clearable
                     label="Filiação 2"
                     @input="updateField('nomePai', $event)"
@@ -138,6 +152,8 @@
                     :model-value="formData.cpfPai"
                     :counter="11"
                     clearable
+                    :loading="loading"
+                    :disabled="loading"
                     hint="Digite apenas números"
                     label="CPF da filiação 2"
                     persistent-hint
@@ -161,6 +177,8 @@
                 <span class="fields-group-label">Documentos do Aluno</span>
                 <v-row dense>
                   <CoreInput
+                    :loading="loading"
+                    :disabled="loading"
                     :model-value="formData.numeroRg"
                     clearable
                     label="Número do RG"
@@ -168,12 +186,16 @@
                   />
                   <CoreInput
                     :model-value="formData.orgaoExpedidorRg"
+                    :loading="loading"
+                    :disabled="loading"
                     clearable
                     label="Órgão expedidor do RG"
                     @input="updateField('orgaoExpedidorRg', $event)"
                   />
                   <CoreInput
                     :model-value="formData.dataExpedicaoRg"
+                    :loading="loading"
+                    :disabled="loading"
                     clearable
                     label="Data de expedição do RG"
                     type="date"
@@ -181,12 +203,16 @@
                   />
                   <CoreInput
                     :model-value="formData.certidaoNascimento"
+                    :loading="loading"
+                    :disabled="loading"
                     clearable
                     label="Certidão de nascimento"
                     @input="updateField('certidaoNascimento', $event)"
                   />
                   <CoreInput
                     :model-value="formData.dataExpedicaoCertidaoNascimento"
+                    :loading="loading"
+                    :disabled="loading"
                     clearable
                     label="Data de expedição da certidão"
                     type="date"

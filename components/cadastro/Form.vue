@@ -1,24 +1,5 @@
 <template>
   <v-form ref="form" class="pa-10">
-    <template v-if="loading">
-      <v-row v-for="n in 4" :key="n" class="align-skeleton-loading">
-        <v-col cols="6" class="py-0">
-          <v-skeleton-loader type="text"></v-skeleton-loader>
-        </v-col>
-        <v-col cols="6" class="py-0">
-          <v-skeleton-loader type="text"></v-skeleton-loader>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12"
-          ><v-skeleton-loader
-            class="justify-end"
-            type="button"
-          ></v-skeleton-loader></v-col
-      ></v-row>
-    </template>
-
-    <!-- TODO: retirar essa quantidade ridícula de props -->
     <CadastroPreCadastroAlunoForm
       :bairros-preferenciais="bairrosPreferenciais || []"
       :documentos="documentos"
@@ -545,7 +526,7 @@ const carregarAlunoPreCadastro = async (cpf) => {
     return alunoPreCadastro.value.length ? alunoPreCadastro.value[0] : null;
   }
 
-  if(alunoPreCadastro.value.endereco?.bairro?.id) {
+  if(alunoPreCadastro.value?.endereco?.bairro?.id) {
     alunoPreCadastro.value.endereco.bairro = alunoPreCadastro.value.endereco.bairro.nome 
   }
 

@@ -15,6 +15,7 @@
       :rules="validationRules"
       :type="type"
       :variant="variant"
+      :loading="loading"
       :maxLength="maxLength"
       @click:append-inner="appendInnerClick"
     />
@@ -25,6 +26,10 @@
 import { max } from 'date-fns';
 
 const props = defineProps({
+  loading: {
+    type: Boolean,
+    default: false,
+  },
   appendInnerIcon: {
     type: String,
     default: null,
