@@ -313,6 +313,7 @@ const { data: unidades, refresh: carregarUnidades } = await useLazyFetch(
   "/api/pre-cadastro/unidades",
   {
     query: computed(() => {
+      console.log("testes")
       const bairro = getBairroPreferencialId();
       const etapaOfertada = Number(
         dadosForm.value.etapa?.idExterno || dadosForm.value.etapa?.id,
@@ -357,7 +358,7 @@ const OPCAO_PRE_CADASTRO_ID = "pre-cadastro";
 
 const nacionalidadeOptions = [
   { label: "Brasileiro", value: "BRASILEIRO" },
-  { label: "Naturalizado", value: "NATURALIZADO" },
+  { label: "Estrangeiro Naturalizado", value: "ESTRANGEIRO_NATURALIZADO" },
   { label: "Estrangeiro", value: "ESTRANGEIRO" },
 ];
 
@@ -542,6 +543,10 @@ const carregarAlunoPreCadastro = async (cpf) => {
 
   if (Array.isArray(alunoPreCadastro.value)) {
     return alunoPreCadastro.value.length ? alunoPreCadastro.value[0] : null;
+  }
+
+  if(alunoPreCadastro.value.endereco?.bairro?.id) {
+    alunoPreCadastro.value.endereco.bairro = alunoPreCadastro.value.endereco.bairro.nome 
   }
 
   return alunoPreCadastro.value;
@@ -864,12 +869,12 @@ const onSubmit = async () => {
       (showMessage.value = true)
     );
 
-  // if (!validatePreCadastroDocuments())
-  //   return (
-  //     (message.value =
-  //       "Anexe todos os documentos obrigatórios do pré-cadastro."),
-  //     (showMessage.value = true)
-  //   );
+  if (!validatePreCadastroDocuments())
+    return (
+      (message.value =
+        "Anexe todos os documentos obrigatórios do pré-cadastro."),
+      (showMessage.value = true)
+    );
 
   if (isTransferenciaInferida.value && !validateTurnoTransferencia())
     return (
@@ -1399,7 +1404,7 @@ function normalizeDigits(value) {
 
 function validateAddressPayload(endereco = {}) {
   return Boolean(
-    endereco.cep && endereco.bairro && endereco.logradouro && endereco.numero,
+    endereco.cep && endereco.bairro && endereco.logradouro,
   );
 }
 
@@ -1407,10 +1412,10 @@ function validatePreCadastroDocuments() {
   const obrigatorios = [
     "certidao_identidade",
     "cpf_rg_responsavel",
-    "declaracao_vacinacao",
     "cartao_cns",
     "comprovante_residencia",
     "foto_estudante",
+    "comprovante_de_escolaridade"
   ];
 
   if (dadosForm.value.criancaAbrigo) {
@@ -1444,7 +1449,7 @@ function createEmptyDadosForm() {
     telefone2: "",
     falarComTelefoneResponsavel: "",
     falarComTelefone2: "",
-    genero: "",
+    genero: undefined,
     estadoCivilId: null,
     racaId: null,
     nacionalidade: "BRASILEIRO",
