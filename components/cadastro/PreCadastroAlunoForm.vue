@@ -49,6 +49,7 @@
                     persistent-hint
                     placeholder="12345678901"
                     required
+                    :validate="[validateCpfComOnzeDigitos]"
                     @input="updateCpf($event)"
                     max-length="11"
                   />
@@ -135,9 +136,12 @@
                     :disabled="loading"
                     hint="Digite apenas números"
                     label="CPF da filiação 1*"
+                    :validate="[
+                      validateCpfComOnzeDigitos,
+                      validateCpfFiliacaoDiferenteDoAluno
+                    ]"
                     required
                     persistent-hint
-                    :validate="[validateCpfFiliacaoDiferenteDoAluno]"
                     @input="updateCpfField('cpfMae', $event)"
                   />
                   <CoreInput
@@ -243,8 +247,10 @@
                       :items="grauParentescoOptions"
                       :model-value="formData.grauParentesco"
                       item-title="label"
+                      :rules="[validateResponsavelLegal]"
                       item-value="value"
-                      label="Responsável Legal"
+                      required
+                      label="Responsável Legal*"
                       variant="outlined"
                       @update:model-value="updateGrauParentesco($event)"
                     />
@@ -299,6 +305,7 @@
                     :model-value="formData.telefone1"
                     clearable
                     label="Telefone de contato*"
+                    type="number"
                     required
                     @input="updateField('telefone1', $event)"
                   />
@@ -312,6 +319,7 @@
                   <CoreInput
                     :model-value="formData.telefone2"
                     clearable
+                    type="number"
                     label="Segundo telefone de contato"
                     @input="updateField('telefone2', $event)"
                   />
@@ -398,18 +406,16 @@
                 </v-row>
                 <v-row dense>
                   <v-col cols="12" class="py-1 px-1" md="6">
-                    <v-select
-                      :items="turnoOptions"
-                      :model-value="formData.turnoPreferencialId"
-                      item-title="nome"
-                      item-value="id"
-                      label="Turno Preferencial*"
-                      :rules="[(v) => !!v || 'Campo obrigatório']"
-                      variant="outlined"
-                      @update:model-value="
-                        updateField('turnoPreferencialId', $event)
-                      "
-                    />
+                  <v-select
+                    :items="turnoOptionsFiltrados"
+                    :model-value="formData.turnoPreferencialId"
+                    item-title="nome"
+                    item-value="id"
+                    label="Turno Preferencial*"
+                    :rules="[(v) => !!v || 'Campo obrigatório']"
+                    variant="outlined"
+                    @update:model-value="updateField('turnoPreferencialId', $event)"
+                  />
                   </v-col>
                   <v-col cols="12" class="py-1 px-1" md="6">
                     <v-select
@@ -856,9 +862,29 @@ const validateDataNaoFutura = (value) => {
   return value <= dataMaximaHoje || "A data de nascimento nao pode ser futura.";
 };
 
+const validateCpfComOnzeDigitos = (value) => {
+  if (!value) return true;
+
+  return (
+    normalizeCpf(value).length === 11 || "CPF inválido"
+  );
+};
+
 const validateEmailField = (value) => {
   if (!value) return true;
   return validateEmail(value) || "Informe um e-mail valido.";
+};
+
+const turnoOptionsFiltrados = computed(() =>
+  (props.turnoOptions || []).filter(
+    (turno) => turno.nome?.toLowerCase() !== "noturno",
+  ),
+);
+
+const validateResponsavelLegal = (value) => {
+  if (!value) return "Selecione o responsável legal.";
+
+  return true;
 };
 
 const cpfFiliacaoIgualAoAlunoError = computed(() => {
@@ -920,7 +946,7 @@ const validateCpfIrmaoDiferenteDoAluno = (value) => {
 };
 
 const validateStepOnePayload = () =>
-  hasValue(props.formData.cpf) &&
+  normalizeCpf(props.formData.cpf).length === 11 &&
   hasValue(props.formData.nome) &&
   hasValue(props.formData.dataNascimento) &&
   props.formData.genero !== undefined &&
@@ -932,8 +958,8 @@ const validateStepOnePayload = () =>
 
 const validateCurrentStep = async () => {
   if (currentStep.value === 1) {
-    await validateVuetifyForm(stepOneForm.value);
-    return validateStepOnePayload();
+    const isFormValid = await validateVuetifyForm(stepOneForm.value);
+    return isFormValid && validateStepOnePayload();
   }
 
   if (currentStep.value === 2) {
