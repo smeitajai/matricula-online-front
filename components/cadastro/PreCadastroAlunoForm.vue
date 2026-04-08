@@ -319,6 +319,7 @@
                   <CoreInput
                     :model-value="formData.telefone2"
                     clearable
+                    type="number"
                     label="Segundo telefone de contato"
                     @input="updateField('telefone2', $event)"
                   />
