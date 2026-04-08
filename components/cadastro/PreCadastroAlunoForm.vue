@@ -174,58 +174,6 @@
                   {{ cpfFiliacaoIgualAoAlunoError }}
                 </v-alert>
               </div>
-
-              <v-divider class="section-divider" />
-
-              <div class="fields-group">
-                <span class="fields-group-label">Documentos do Aluno</span>
-                <v-row dense>
-                  <CoreInput
-                    :loading="loading"
-                    :disabled="loading"
-                    :model-value="formData.numeroRg"
-                    clearable
-                    label="Número do RG"
-                    @input="updateField('numeroRg', $event)"
-                  />
-                  <CoreInput
-                    :model-value="formData.orgaoExpedidorRg"
-                    :loading="loading"
-                    :disabled="loading"
-                    clearable
-                    label="Órgão expedidor do RG"
-                    @input="updateField('orgaoExpedidorRg', $event)"
-                  />
-                  <CoreInput
-                    :model-value="formData.dataExpedicaoRg"
-                    :loading="loading"
-                    :disabled="loading"
-                    clearable
-                    label="Data de expedição do RG"
-                    type="date"
-                    @input="updateField('dataExpedicaoRg', $event)"
-                  />
-                  <CoreInput
-                    :model-value="formData.certidaoNascimento"
-                    :loading="loading"
-                    :disabled="loading"
-                    clearable
-                    label="Certidão de nascimento"
-                    @input="updateField('certidaoNascimento', $event)"
-                  />
-                  <CoreInput
-                    :model-value="formData.dataExpedicaoCertidaoNascimento"
-                    :loading="loading"
-                    :disabled="loading"
-                    clearable
-                    label="Data de expedição da certidão"
-                    type="date"
-                    @input="
-                      updateField('dataExpedicaoCertidaoNascimento', $event)
-                    "
-                  />
-                </v-row>
-              </div>
             </div>
           </v-form>
         </v-window-item>
@@ -871,24 +819,33 @@ const validateCpfComOnzeDigitos = (value) => {
   );
 };
 
+const cpfQuery = computed(() => normalizeCpf(props.formData.cpf))
+
 const {
   data: preCadastroExistente,
-  refresh: buscarPreCadastroErudio,
-} = await useFetch("/api/pre-cadastro/pre-cadastro", {
-  query: { cpf: props.formData.cpf },
+  execute: buscarPreCadastroErudio,
+} = await useLazyFetch("/api/pre-cadastro/pre-cadastro", {
+  query: computed(() => ({ cpf: cpfQuery.value })),
+  immediate: false,
+  watch: false,
 })
 
-watch(preCadastroExistente, async (value) => {
-  if (!value?.protocolo) return
-
-  await router.push({
-    path: "/cadastro/solicitacao-efetivada",
-    query: {
-      inscricao: value.id || value.inscricao || "",
-      protocolo: value.protocolo || "",
-    },
-  })
+watch(cpfQuery, async (cpf) => {
+  if (cpf?.length === 11) {
+    await buscarPreCadastroErudio()
+  }
+  if(preCadastroExistente.value.id){
+    router.push({
+      path: "/cadastro/solicitacao-efetivada",
+      query: {
+        existente: true,
+        inscricao: preCadastroExistente.value.id,
+        protocolo: preCadastroExistente.value.protocolo,
+      },
+    });
+  }
 })
+
 
 const validateEmailField = (value) => {
   if (!value) return true;

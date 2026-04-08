@@ -870,7 +870,7 @@ const onSubmit = async () => {
 };
 
 const editarPessoa = async () => {
-  const enderecoId = await persistirEndereco();
+  const enderecoId = dadosForm.value.enderecoId ;
   if (!enderecoId) return;
 
   const { data: pessoaEditada, error } = await useFetch("/api/pessoas", {
@@ -888,6 +888,9 @@ const editarPessoa = async () => {
 
   const inscricaoCriada = await salvarInscricao();
   if (!inscricaoCriada) return;
+
+  const sincronizacaoConcluida = await sincronizarAlunoErudio(inscricaoCriada);
+  if (!sincronizacaoConcluida) return;
 
   await salvarDocumentos(inscricaoCriada);
 };
@@ -931,44 +934,9 @@ const criarPessoa = async () => {
   await salvarDocumentos(inscricaoCriada);
 };
 
-// TODO: adicionar funcao de remover endereço caso a inclusao de pessoa dê errado
-const persistirEndereco = async () => {
-  const dadosMapeados = {
-    logradouro: normalizeOptionalValue(dadosEndereco.value.logradouro),
-    bairro: normalizeOptionalValue(dadosEndereco.value.bairro),
-    cep: dadosEndereco.value.cep ? dadosEndereco.value.cep.toString() : null,
-    numero: dadosEndereco.value.numero
-      ? dadosEndereco.value.numero.toString()
-      : null,
-    complemento: normalizeOptionalValue(dadosEndereco.value.complemento),
-  };
-
-  const endpoint = dadosForm.value.enderecoId ? "PUT" : "POST";
-  if (dadosForm.value.enderecoId) dadosMapeados.id = dadosForm.value.enderecoId;
-
-  const { data: enderecoSalvo, error } = await useFetch("/api/enderecos", {
-    method: endpoint,
-    body: dadosMapeados,
-  });
-
-  if (
-    error.value ||
-    enderecoSalvo.value?.error ||
-    enderecoSalvo.value?.statusCode
-  ) {
-    message.value =
-      error.value || enderecoSalvo.value?.message || "Erro ao salvar endereço.";
-    loadingButton.value = false;
-    showMessage.value = true;
-    return null;
-  }
-
-  dadosForm.value.enderecoId = enderecoSalvo.value.id;
-  return enderecoSalvo.value.id;
-};
-
 const salvarInscricao = async () => {
   const { data: inscricaoCriada, error } = await useFetch("/api/inscricoes", {
+    server: false,
     method: "POST",
     body: {
       alunoId: alunoState.value.id.toString(),
@@ -1233,11 +1201,10 @@ function buildAlunoPayload() {
     cpf: normalizeDigits(dadosForm.value.cpf),
     email: normalizeOptionalValue(dadosForm.value.email),
     dataNascimento: normalizeOptionalValue(dadosForm.value.dataNascimento),
-    telefone1: dadosForm.value.telefone1,
-    telefone2: dadosForm.value.telefone2,
+    telefone1: String(dadosForm.value.telefone1),
+    telefone2: String(dadosForm.value.telefone2),
     responsavelNome: normalizeOptionalValue(dadosForm.value.responsavelNome),
   };
-  console.log("Payload para criação de aluno:", payload);
   return payload;
 }
 
@@ -1281,7 +1248,7 @@ function buildSincronizacaoErudioPayload(inscricao) {
       emailResponsavel: normalizeOptionalValue(
         dadosForm.value.emailResponsavel || dadosForm.value.email,
       ),
-      telefone1: normalizeOptionalValue(
+      telefoneResponsavel: normalizeOptionalValue(
         dadosForm.value.telefone1,
       ),
       inscricaoId: normalizeOptionalValue(inscricao.id),
