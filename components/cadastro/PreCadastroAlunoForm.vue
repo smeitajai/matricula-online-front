@@ -50,7 +50,7 @@
                     placeholder="12345678901"
                     required
                     :validate="[validateCpfComOnzeDigitos]"
-                    @input="updateCpf($event)"
+                    @input="updateCpf($event), buscarPreCadastroErudio($event)"
                     max-length="11"
                   />
                   <CoreInput
@@ -173,58 +173,6 @@
                 >
                   {{ cpfFiliacaoIgualAoAlunoError }}
                 </v-alert>
-              </div>
-
-              <v-divider class="section-divider" />
-
-              <div class="fields-group">
-                <span class="fields-group-label">Documentos do Aluno</span>
-                <v-row dense>
-                  <CoreInput
-                    :loading="loading"
-                    :disabled="loading"
-                    :model-value="formData.numeroRg"
-                    clearable
-                    label="Número do RG"
-                    @input="updateField('numeroRg', $event)"
-                  />
-                  <CoreInput
-                    :model-value="formData.orgaoExpedidorRg"
-                    :loading="loading"
-                    :disabled="loading"
-                    clearable
-                    label="Órgão expedidor do RG"
-                    @input="updateField('orgaoExpedidorRg', $event)"
-                  />
-                  <CoreInput
-                    :model-value="formData.dataExpedicaoRg"
-                    :loading="loading"
-                    :disabled="loading"
-                    clearable
-                    label="Data de expedição do RG"
-                    type="date"
-                    @input="updateField('dataExpedicaoRg', $event)"
-                  />
-                  <CoreInput
-                    :model-value="formData.certidaoNascimento"
-                    :loading="loading"
-                    :disabled="loading"
-                    clearable
-                    label="Certidão de nascimento"
-                    @input="updateField('certidaoNascimento', $event)"
-                  />
-                  <CoreInput
-                    :model-value="formData.dataExpedicaoCertidaoNascimento"
-                    :loading="loading"
-                    :disabled="loading"
-                    clearable
-                    label="Data de expedição da certidão"
-                    type="date"
-                    @input="
-                      updateField('dataExpedicaoCertidaoNascimento', $event)
-                    "
-                  />
-                </v-row>
               </div>
             </div>
           </v-form>
@@ -737,6 +685,7 @@ import { computed, ref } from "vue";
 import { useDisplay } from "vuetify";
 import validateCPF from "../../utils/validateCPF";
 import validateEmail from "../../utils/validateEmail";
+const router = useRouter();
 
 const props = defineProps({
   formData: {
@@ -869,6 +818,34 @@ const validateCpfComOnzeDigitos = (value) => {
     normalizeCpf(value).length === 11 || "CPF inválido"
   );
 };
+
+const cpfQuery = computed(() => normalizeCpf(props.formData.cpf))
+
+const {
+  data: preCadastroExistente,
+  execute: buscarPreCadastroErudio,
+} = await useLazyFetch("/api/pre-cadastro/pre-cadastro", {
+  query: computed(() => ({ cpf: cpfQuery.value })),
+  immediate: false,
+  watch: false,
+})
+
+watch(cpfQuery, async (cpf) => {
+  if (cpf?.length === 11) {
+    await buscarPreCadastroErudio()
+  }
+  if(preCadastroExistente.value.id){
+    router.push({
+      path: "/cadastro/solicitacao-efetivada",
+      query: {
+        existente: true,
+        inscricao: preCadastroExistente.value.id,
+        protocolo: preCadastroExistente.value.protocolo,
+      },
+    });
+  }
+})
+
 
 const validateEmailField = (value) => {
   if (!value) return true;
