@@ -50,7 +50,7 @@
                     placeholder="12345678901"
                     required
                     :validate="[validateCpfComOnzeDigitos]"
-                    @input="updateCpf($event)"
+                    @input="updateCpf($event), buscarPreCadastroErudio($event)"
                     max-length="11"
                   />
                   <CoreInput
@@ -737,6 +737,7 @@ import { computed, ref } from "vue";
 import { useDisplay } from "vuetify";
 import validateCPF from "../../utils/validateCPF";
 import validateEmail from "../../utils/validateEmail";
+const router = useRouter();
 
 const props = defineProps({
   formData: {
@@ -869,6 +870,25 @@ const validateCpfComOnzeDigitos = (value) => {
     normalizeCpf(value).length === 11 || "CPF inválido"
   );
 };
+
+const {
+  data: preCadastroExistente,
+  refresh: buscarPreCadastroErudio,
+} = await useFetch("/api/pre-cadastro/pre-cadastro", {
+  query: { cpf: props.formData.cpf },
+})
+
+watch(preCadastroExistente, async (value) => {
+  if (!value?.protocolo) return
+
+  await router.push({
+    path: "/cadastro/solicitacao-efetivada",
+    query: {
+      inscricao: value.id || value.inscricao || "",
+      protocolo: value.protocolo || "",
+    },
+  })
+})
 
 const validateEmailField = (value) => {
   if (!value) return true;
