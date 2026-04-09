@@ -948,6 +948,7 @@ const salvarInscricao = async () => {
         String(dadosForm.value.etapa.id),
       turnoProximoAnoId:
         String(dadosForm.value.turnoPreferencialId),
+      bairroIdExterno: String(getBairroPreferencialId())
     },
   });
 
