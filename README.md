@@ -70,7 +70,7 @@ docker push smeitajai/matricula-online-frontend:latest
 
 ## Deployment
 
-sudo docker rm matricula-online-frontend --force
+docker rm matricula-online-frontend --force
 
 docker rmi smeitajai/matricula-online-frontend
 
