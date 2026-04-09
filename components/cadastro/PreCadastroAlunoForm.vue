@@ -50,7 +50,9 @@
                     placeholder="12345678901"
                     required
                     :validate="[validateCpfComOnzeDigitos]"
-                    @input="updateCpf($event), buscarPreCadastroErudio($event)"
+                    @input="
+                      (updateCpf($event), buscarPreCadastroErudio($event))
+                    "
                     max-length="11"
                   />
                   <CoreInput
@@ -138,7 +140,7 @@
                     label="CPF da filiação 1*"
                     :validate="[
                       validateCpfComOnzeDigitos,
-                      validateCpfFiliacaoDiferenteDoAluno
+                      validateCpfFiliacaoDiferenteDoAluno,
                     ]"
                     required
                     persistent-hint
@@ -354,16 +356,18 @@
                 </v-row>
                 <v-row dense>
                   <v-col cols="12" class="py-1 px-1" md="6">
-                  <v-select
-                    :items="turnoOptionsFiltrados"
-                    :model-value="formData.turnoPreferencialId"
-                    item-title="nome"
-                    item-value="id"
-                    label="Turno Preferencial*"
-                    :rules="[(v) => !!v || 'Campo obrigatório']"
-                    variant="outlined"
-                    @update:model-value="updateField('turnoPreferencialId', $event)"
-                  />
+                    <v-select
+                      :items="turnoOptionsFiltrados"
+                      :model-value="formData.turnoPreferencialId"
+                      item-title="nome"
+                      item-value="id"
+                      label="Turno Preferencial*"
+                      :rules="[(v) => !!v || 'Campo obrigatório']"
+                      variant="outlined"
+                      @update:model-value="
+                        updateField('turnoPreferencialId', $event)
+                      "
+                    />
                   </v-col>
                   <v-col cols="12" class="py-1 px-1" md="6">
                     <v-select
@@ -814,27 +818,27 @@ const validateDataNaoFutura = (value) => {
 const validateCpfComOnzeDigitos = (value) => {
   if (!value) return true;
 
-  return (
-    normalizeCpf(value).length === 11 || "CPF inválido"
-  );
+  return normalizeCpf(value).length === 11 || "CPF inválido";
 };
 
-const cpfQuery = computed(() => normalizeCpf(props.formData.cpf))
+const cpfQuery = computed(() => normalizeCpf(props.formData.cpf));
 
-const {
-  data: preCadastroExistente,
-  execute: buscarPreCadastroErudio,
-} = await useLazyFetch("/api/pre-cadastro/pre-cadastro", {
-  query: computed(() => ({ cpf: cpfQuery.value })),
-  immediate: false,
-  watch: false,
-})
+const { data: preCadastroExistente, execute: buscarPreCadastroErudio } =
+  await useLazyFetch("/api/pre-cadastro/pre-cadastro", {
+    query: computed(() => ({ cpf: cpfQuery.value, emAndamento: 1 })),
+    immediate: false,
+    watch: false,
+  });
 
 watch(cpfQuery, async (cpf) => {
   if (cpf?.length === 11) {
-    await buscarPreCadastroErudio()
+    await buscarPreCadastroErudio();
   }
-  if(preCadastroExistente.value.id){
+
+  if (
+    preCadastroExistente.value.id &&
+    preCadastroExistente.value.emAndamento === true
+  ) {
     router.push({
       path: "/cadastro/solicitacao-efetivada",
       query: {
@@ -844,8 +848,7 @@ watch(cpfQuery, async (cpf) => {
       },
     });
   }
-})
-
+});
 
 const validateEmailField = (value) => {
   if (!value) return true;
@@ -886,9 +889,7 @@ const cpfFiliacaoIgualAoAlunoError = computed(() => {
 });
 
 const validateAddressPayload = (endereco = {}) =>
-  Boolean(
-    endereco.cep && endereco.bairro && endereco.logradouro,
-  );
+  Boolean(endereco.cep && endereco.bairro && endereco.logradouro);
 
 const validateVuetifyForm = async (formRef) => {
   const result = await formRef?.validate();

@@ -888,7 +888,7 @@ const editarPessoa = async () => {
 
   const inscricaoCriada = await salvarInscricao();
   if (!inscricaoCriada) return;
-
+  
   const sincronizacaoConcluida = await sincronizarAlunoErudio(inscricaoCriada);
   if (!sincronizacaoConcluida) return;
 
@@ -955,7 +955,8 @@ const salvarInscricao = async () => {
   if (error.value || inscricaoCriada.value.statusCode) {
     message.value = error.value || inscricaoCriada.value.message;
     loadingButton.value = false;
-    return (showMessage.value = true);
+    showMessage.value = true
+    return false
   }
 
   return inscricaoCriada.value;
