@@ -467,7 +467,7 @@
                   </template>
                   <v-col cols="12" class="py-0 px-1">
                     <v-checkbox
-                      :model-value="formData.frequentandoEscola"
+                      :model-value="formData.naoFrequentando"
                       color="primary"
                       hide-details
                       label="Aluno não está frequentando a escola"
@@ -1080,11 +1080,11 @@ const updatePossuiIrmaoMatriculado = (value) => {
 };
 
 const updateFrequentandoEscola = (value) => {
-  const frequentandoEscola = Boolean(value);
+  const naoFrequentando = Boolean(value);
 
   emit("update:formData", {
     ...props.formData,
-    frequentandoEscola,
+    naoFrequentando,
   });
 };
 
