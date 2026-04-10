@@ -294,7 +294,6 @@ const { data: unidades, refresh: carregarUnidades } = await useLazyFetch(
   "/api/pre-cadastro/unidades",
   {
     query: computed(() => {
-      console.log("testes")
       const bairro = getBairroPreferencialId();
       const etapaOfertada = Number(
         dadosForm.value.etapa?.idExterno || dadosForm.value.etapa?.id,
@@ -614,8 +613,6 @@ const buscarIrmaoPorCpfPreCadastro = async (cpf) => {
   }
 
   const data = await carregarAlunoPreCadastro(cpfNormalizado);
-
-  console.log("Resposta da API ao buscar irmão por CPF:", data);
 
   if (!data || data?.statusCode || data?.error || !data?.cpf) {
     dadosForm.value = {
@@ -1219,23 +1216,10 @@ function buildSincronizacaoErudioPayload(inscricao) {
   const turnoId = Number(dadosForm.value.turnoPreferencialId);
   const bairroPreferencialId = getBairroPreferencialId();
 
-  if (!etapaId || !turnoId) {
-    const camposPendentes = [];
-
-    if (!etapaId) camposPendentes.push("etapa");
-    if (!turnoId) camposPendentes.push("turno");
-
-    message.value = `Não foi possível sincronizar com o Erudio porque ${camposPendentes.join(", ")} não ${camposPendentes.length > 1 ? "foram informados" : "foi informado"}.`;
-    loadingButton.value = false;
-    showMessage.value = true;
-    return null;
-  }
-
   return {
     pessoa: buildErudioPessoaPayload(),
     rematricula: {
-      protocolo: inscricao.protocolo || "",
-      naoFrequentando: dadosForm.value.naoFrequentando || false,
+      protocolo: inscricao.protocolo,
       tipo:
         dadosForm.value.tipoInscricaoInferido === "TRANSFERENCIA"
           ? "TRANSFERENCIA"
@@ -1255,7 +1239,8 @@ function buildSincronizacaoErudioPayload(inscricao) {
         dadosForm.value.telefone1,
       ),
       inscricaoId: normalizeOptionalValue(inscricao.id),
-      naoFrequentando: dadosForm.value.naoFrequentando
+      naoFrequentando: dadosForm.value.naoFrequentando,
+      abrigo: dadosForm.value.criancaAbrigo
     },
   };
 }
@@ -1288,7 +1273,7 @@ function buildErudioPessoaPayload() {
     telefone1: normalizeOptionalValue(
       dadosForm.value.telefone1,
     ),
-    naoFrequentando: dadosForm.value.naoFrequentando || false,
+    naoFrequentando: dadosForm.value.naoFrequentando,
     telefone2: normalizeOptionalValue(dadosForm.value.telefone2),
     genero: normalizeOptionalValue(dadosForm.value.genero),
     estadoCivil: buildReference(dadosForm.value.estadoCivilId),
