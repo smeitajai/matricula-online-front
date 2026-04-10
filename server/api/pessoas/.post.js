@@ -1,9 +1,7 @@
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const config = useRuntimeConfig();
-
-  console.log("body", body);
-
+  
   if (body.sincronizacaoErudio) {
     const syncResponse = await fetch(
       `${config.public.baseURL}/erudio/alunos/sincronizar`,

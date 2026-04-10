@@ -1206,6 +1206,7 @@ function buildAlunoPayload() {
     telefone1: String(dadosForm.value.telefone1),
     telefone2: String(dadosForm.value.telefone2),
     responsavelNome: normalizeOptionalValue(dadosForm.value.responsavelNome),
+    naoFrequentando: dadosForm.value.naoFrequentando,
   };
   return payload;
 }
@@ -1254,6 +1255,7 @@ function buildSincronizacaoErudioPayload(inscricao) {
         dadosForm.value.telefone1,
       ),
       inscricaoId: normalizeOptionalValue(inscricao.id),
+      naoFrequentando: dadosForm.value.naoFrequentando
     },
   };
 }
@@ -1437,6 +1439,7 @@ function createEmptyDadosForm() {
     enderecoId: null,
     etapa: null,
     unidadeEnsinoId: null,
+    naoFrequentando: false
   };
 }
 
