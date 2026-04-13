@@ -1213,6 +1213,7 @@ function buildPessoaPayload(enderecoId) {
     protocoloRequerimentoCpf: normalizeOptionalValue(
       dadosForm.value.protocoloRequerimentoCpf,
     ),
+    naoFrequentando: dadosForm.value.naoFrequentando,
   };
 
   return payload;
@@ -1222,11 +1223,11 @@ function buildAlunoPayload() {
   let payload = {
     nome: normalizeOptionalValue(dadosForm.value.nome),
     cpf: normalizeDigits(dadosForm.value.cpf),
-    email: normalizeOptionalValue(dadosForm.value.email),
-    dataNascimento: normalizeOptionalValue(dadosForm.value.dataNascimento),
+    email: dadosForm.value.email,
+    dataNascimento: dadosForm.value.dataNascimento,
     telefone1: String(dadosForm.value.telefone1),
     telefone2: String(dadosForm.value.telefone2),
-    responsavelNome: normalizeOptionalValue(dadosForm.value.responsavelNome),
+    responsavelNome: dadosForm.value.responsavelNome,
     naoFrequentando: dadosForm.value.naoFrequentando,
   };
   return payload;
