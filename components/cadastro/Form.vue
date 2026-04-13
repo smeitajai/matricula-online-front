@@ -256,6 +256,7 @@ const etapaAtivaAtual = ref(null);
 const dadosForm = ref(createEmptyDadosForm());
 const dadosEndereco = ref(createEmptyEndereco());
 const documentos = ref({});
+const documentosComprimidos = ref({});
 const loading = ref(false);
 const loadingButton = ref(false);
 const timeout = ref(5000);
@@ -394,6 +395,7 @@ const limparEstadoFormulario = () => {
   dadosForm.value = createEmptyDadosForm();
   dadosEndereco.value = createEmptyEndereco();
   documentos.value = {};
+  documentosComprimidos.value = {};
   loading.value = false;
   loadingButton.value = false;
   timeout.value = 5000;
@@ -786,6 +788,27 @@ const validarInscricao = async () => {
   }
 };
 
+const compressAllDocuments = async () => {
+  const { compressImage } = useImageCompressor();
+  
+  // Limpa o estado de documentos comprimidos
+  documentosComprimidos.value = {};
+  
+  // Iterar sobre todos os documentos e comprimir as imagens
+  for (const [key, value] of Object.entries(documentos.value)) {
+    if (Array.isArray(value)) {
+      // Se for array de arquivos, comprime cada um
+      const compressedFiles = await Promise.all(
+        value.map(file => compressImage(file))
+      );
+      documentosComprimidos.value[key] = compressedFiles;
+    } else if (value) {
+      // Se for arquivo único, comprime
+      documentosComprimidos.value[key] = await compressImage(value);
+    }
+  }
+};
+
 const onSubmit = async () => {
   if (!validateAddressPayload(dadosEndereco.value))
     return (
@@ -996,26 +1019,27 @@ const normalizeFiles = (value) => {
 };
 
 const salvarDocumentos = async (inscricao) => {
+  await compressAllDocuments();
   const formData = new FormData();
   formData.append("inscricaoId", inscricao.id);
 
   const categoriasDocumentos = {
-    certidao_identidade: documentos.value.certidao_identidade,
-    cpf_rg_responsavel: documentos.value.cpf_rg_responsavel,
-    cpf_rg_responsavel1: documentos.value.cpf_rg_responsavel1,
-    cpf_rg_responsavel2: documentos.value.cpf_rg_responsavel2,
-    comprovante_residencia: documentos.value.comprovante_residencia,
+    certidao_identidade: documentosComprimidos.value.certidao_identidade,
+    cpf_rg_responsavel: documentosComprimidos.value.cpf_rg_responsavel,
+    cpf_rg_responsavel1: documentosComprimidos.value.cpf_rg_responsavel1,
+    cpf_rg_responsavel2: documentosComprimidos.value.cpf_rg_responsavel2,
+    comprovante_residencia: documentosComprimidos.value.comprovante_residencia,
     declaracao_proprietario_residencia:
-      documentos.value.declaracao_proprietario_residencia,
-    foto_estudante: documentos.value.foto_estudante,
-    declaracao_vacinacao: documentos.value.declaracao_vacinacao,
-    cartao_cns: documentos.value.cartao_cns,
-    cartao_social: documentos.value.cartao_social,
-    cartao_bpc: documentos.value.cartao_bpc,
-    tutela_provisoria: documentos.value.tutela_provisoria,
-    laudo_medico: documentos.value.laudo_medico,
-    anexo_cras: documentos.value.anexo_cras,
-    comprovante_de_escolaridade: documentos.value.comprovante_de_escolaridade,
+      documentosComprimidos.value.declaracao_proprietario_residencia,
+    foto_estudante: documentosComprimidos.value.foto_estudante,
+    declaracao_vacinacao: documentosComprimidos.value.declaracao_vacinacao,
+    cartao_cns: documentosComprimidos.value.cartao_cns,
+    cartao_social: documentosComprimidos.value.cartao_social,
+    cartao_bpc: documentosComprimidos.value.cartao_bpc,
+    tutela_provisoria: documentosComprimidos.value.tutela_provisoria,
+    laudo_medico: documentosComprimidos.value.laudo_medico,
+    anexo_cras: documentosComprimidos.value.anexo_cras,
+    comprovante_de_escolaridade: documentosComprimidos.value.comprovante_de_escolaridade,
   };
 
   let listaNomes = [];
