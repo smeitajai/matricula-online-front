@@ -18,8 +18,5 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  return {
-    bairro: data.bairro || "",
-    logradouro: data.logradouro || "",
-  };
+  return data
 });
