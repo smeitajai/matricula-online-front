@@ -92,17 +92,19 @@ onMounted(async () => {
   }
 });
 
-const carregarCidades = async (uf) => {
-  if (!uf) {
+const carregarCidades = async (estadoSigla, nomeCidade) => {
+  if (!estadoSigla) {
     cidades.value = [];
     return [];
   }
 
+  const query = { estado_sigla: String(estadoSigla).toUpperCase() };
+  const nome = nomeCidade != null ? String(nomeCidade).trim() : "";
+  if (nome) query.nome = nome;
+
   try {
-    let data = await $fetch("/api/erudio/cidades", { query: { uf } });
-    if (!Array.isArray(data) || !data.length) {
-      data = await $fetch("/api/erudio/cidades", { query: { estado: uf } });
-    }
+    const data = await $fetch("/api/erudio/cidades", { query });
+
     cidades.value = Array.isArray(data) ? data : [];
   } catch (error) {
     cidades.value = [];
@@ -155,9 +157,6 @@ watch(
       enderecoPreenchidoPorCep.value = false;
       return;
     }
-    if (cep === ultimoCepBuscado.value) return;
-
-    ultimoCepBuscado.value = cep;
 
     try {
       const dadosCep = await $fetch(`/api/viacep/${cep}`);
@@ -177,19 +176,23 @@ watch(
         estadoSelecionado?.uf ||
         uf
       ).toUpperCase();
-      const cidadesEstado = await carregarCidades(ufEstadoSelecionado);
-      const cidadeSelecionada =
-        cidadesEstado.find(
-          (cidade) => cidade?.nomeCompleto === dadosCep?.localidade,
-        ) || (dadosCep?.localidade ? { nomeCompleto: dadosCep.localidade } : null);
+
+      const cidadesEstado = await carregarCidades(
+        ufEstadoSelecionado,
+        dadosCep?.localidade,
+      );
+      const cidadeSelecionada = cidadesEstado.find((cidade) => {
+        return cidade?.nomeCompleto.includes(dadosCep?.localidade);
+      });
 
       emit("input", {
         ...endereco.value,
         cep,
         estado: estadoSelecionado,
-        bairro: dadosCep?.bairro || endereco.value?.bairro || "",
-        logradouro: dadosCep?.logradouro || endereco.value?.logradouro || "",
+        bairro: endereco.value?.bairro || dadosCep?.bairro ||  "",
+        logradouro: endereco.value?.logradouro || dadosCep?.logradouro || "",
         cidade: cidadeSelecionada,
+        cidadeId: cidadeSelecionada?.id,
       });
       enderecoPreenchidoPorCep.value = true;
 
