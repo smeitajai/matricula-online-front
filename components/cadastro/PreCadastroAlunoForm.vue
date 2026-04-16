@@ -360,7 +360,7 @@
                       :items="turnoOptionsFiltrados"
                       :model-value="formData.turnoPreferencialId"
                       item-title="nome"
-                      item-value="id"
+                      item-value="idExterno"
                       label="Turno Preferencial*"
                       :rules="[(v) => !!v || 'Campo obrigatório']"
                       variant="outlined"
