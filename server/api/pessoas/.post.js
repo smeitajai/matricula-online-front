@@ -8,10 +8,14 @@ export default defineEventHandler(async (event) => {
     dataNascimento: body.dataNascimento.slice(0, 10),
     responsavelNome: body.responsavelNome,
     naoFrequentando: body.naoFrequentando,
-    email: body.email||undefined,
+    email: body.email || undefined,
     telefone1: body.telefone1,
     telefone2: body.telefone2,
   };
+
+  if (body.enderecoId != null) {
+    payload.endereco = { id: body.enderecoId };
+  }
 
   const response = await fetch(`${config.public.baseURL}/alunos`, {
     method: "POST",

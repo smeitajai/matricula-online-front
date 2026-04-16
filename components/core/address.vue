@@ -75,7 +75,6 @@ const props = defineProps({
 const endereco = computed(() => props.modelValue || {});
 
 const form = ref(null);
-const ultimoCepBuscado = ref("");
 const estados = ref([]);
 const cidades = ref([]);
 const enderecoPreenchidoPorCep = ref(false);
@@ -184,16 +183,22 @@ watch(
       const cidadeSelecionada = cidadesEstado.find((cidade) => {
         return cidade?.nomeCompleto.includes(dadosCep?.localidade);
       });
+      
+      const bairroSelecionado = cidadeSelecionada.bairros.find((bairro) => {
+        return bairro?.nome.toLowerCase().includes(dadosCep?.bairro.toLowerCase());
+      });
 
       emit("input", {
         ...endereco.value,
         cep,
         estado: estadoSelecionado,
-        bairro: endereco.value?.bairro || dadosCep?.bairro ||  "",
         logradouro: endereco.value?.logradouro || dadosCep?.logradouro || "",
-        cidade: cidadeSelecionada,
-        cidadeId: cidadeSelecionada?.id,
+        bairro: endereco.value?.bairro || dadosCep?.bairro ||  "",
+        cidade: cidadeSelecionada.nomeCompleto,
+        cidadeId: cidadeSelecionada.id,
+        bairroId: bairroSelecionado.id,
       });
+      
       enderecoPreenchidoPorCep.value = true;
 
       await nextTick();
