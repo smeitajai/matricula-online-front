@@ -923,7 +923,9 @@ const salvarEnderecoErudio = async () => {
 
 const criarPessoa = async () => {
   const enderecoSalvo = await salvarEnderecoErudio();
-  enderecoId.value = enderecoSalvo?.id;
+  if (!enderecoSalvo) return;
+
+  enderecoId.value = enderecoSalvo.id;
 
   dadosForm.value.enderecoId = enderecoId.value;
 

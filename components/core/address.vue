@@ -163,7 +163,7 @@ watch(
       if (!estados.value.length) {
         estados.value = (await $fetch("/api/erudio/estados")) || [];
       }
-      
+
       const estadoSelecionado =
         estados.value.find(
           (estado) =>
@@ -183,9 +183,11 @@ watch(
       const cidadeSelecionada = cidadesEstado.find((cidade) => {
         return cidade?.nomeCompleto.includes(dadosCep?.localidade);
       });
-      
-      const bairroSelecionado = cidadeSelecionada.bairros.find((bairro) => {
-        return bairro?.nome.toLowerCase().includes(dadosCep?.bairro.toLowerCase());
+
+      const bairroSelecionado = cidadeSelecionada?.bairros?.find((bairro) => {
+        return bairro?.nome
+          ?.toLowerCase()
+          .includes((dadosCep?.bairro || "").toLowerCase());
       });
 
       emit("input", {
@@ -193,20 +195,20 @@ watch(
         cep,
         estado: estadoSelecionado,
         logradouro: endereco.value?.logradouro || dadosCep?.logradouro || "",
-        bairro: endereco.value?.bairro || dadosCep?.bairro ||  "",
+        bairro: endereco.value?.bairro || dadosCep?.bairro || "",
         cidade: cidadeSelecionada.nomeCompleto,
         cidadeId: cidadeSelecionada.id,
-        bairroId: bairroSelecionado.id,
+        bairroId: bairroSelecionado?.id,
       });
-      
+
       enderecoPreenchidoPorCep.value = true;
 
       await nextTick();
       await onChange();
     } catch (error) {
       enderecoPreenchidoPorCep.value = false;
-      console.error("Erro ao buscar CEP no ViaCEP:", error);
     }
   },
+  { immediate: true },
 );
 </script>
