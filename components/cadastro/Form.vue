@@ -1244,7 +1244,7 @@ function buildErudioEnderecoPayload() {
   return {
     cep: normalizeDigits(e.cep),
     logradouro: normalizeOptionalValue(e.logradouro),
-    numero: e.numero,
+    numero: Number(e.numero),
     complemento: normalizeOptionalValue(e.complemento),
     bairroId: e.bairroId,
     cidadeId: e.cidadeId,
