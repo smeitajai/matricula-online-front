@@ -264,6 +264,7 @@ const alunoCarregadoErudio = ref(null);
 const alunoState = useAluno();
 const validateAddress = ref(true);
 const CURSO_PRE_CADASTRO_ID = 10;
+const enderecoId = ref(null);
 
 const { data: etapas } = await useFetch("/api/etapas");
 const { data: etapasCurso, refresh: carregarEtapasCurso } = await useLazyFetch(
@@ -320,6 +321,7 @@ const unidadeOptions = computed(() =>
       }))
     : [],
 );
+
 const {
   data: bairrosPreferenciais,
   pending: loadingBairros,
@@ -892,7 +894,41 @@ const editarPessoa = async () => {
   await salvarDocumentos(inscricaoCriada);
 };
 
+const salvarEnderecoErudio = async () => {
+  const enderecoBody = buildErudioEnderecoPayload();
+  const { data: enderecoSalvo, error: errorEndereco } = await useFetch(
+    "/api/erudio/enderecos/erudio",
+    {
+      method: "POST",
+      body: enderecoBody,
+    },
+  );
+  
+  if (
+    errorEndereco.value ||
+    enderecoSalvo.value?.statusCode ||
+    enderecoSalvo.value?.error
+  ) {
+    message.value =
+      errorEndereco.value ||
+      enderecoSalvo.value?.message ||
+      "Erro ao salvar endereço.";
+    loadingButton.value = false;
+    showMessage.value = true;
+    return;
+  }
+
+  return enderecoSalvo.value;
+}
+
 const criarPessoa = async () => {
+  const enderecoSalvo = await salvarEnderecoErudio();
+  if (!enderecoSalvo) return;
+
+  enderecoId.value = enderecoSalvo.id;
+
+  dadosForm.value.enderecoId = enderecoId.value;
+
   const payload = buildAlunoPayload();
   if (!payload) return;
 
@@ -908,13 +944,6 @@ const criarPessoa = async () => {
   ) {
     message.value =
       error.value || pessoaCriada.value?.message || "Erro ao salvar pessoa.";
-    loadingButton.value = false;
-    showMessage.value = true;
-    return;
-  }
-
-  if (!pessoaCriada.value?.id) {
-    message.value = "Pessoa criada sem retorno válido da API.";
     loadingButton.value = false;
     showMessage.value = true;
     return;
@@ -1209,6 +1238,19 @@ function buildAlunoPayload() {
   return payload;
 }
 
+function buildErudioEnderecoPayload() {
+  const e = dadosEndereco.value;
+
+  return {
+    cep: normalizeDigits(e.cep),
+    logradouro: normalizeOptionalValue(e.logradouro),
+    numero: e.numero,
+    complemento: normalizeOptionalValue(e.complemento),
+    bairroId: e.bairroId,
+    cidadeId: e.cidadeId,
+  };
+}
+
 function buildSincronizacaoErudioPayload(inscricao) {
   const etapaId = Number(
     dadosForm.value.etapa?.idExterno || dadosForm.value.etapa?.id,
@@ -1306,13 +1348,7 @@ function buildErudioPessoaPayload() {
     protocoloRequerimentoCpf: normalizeOptionalValue(
       dadosForm.value.protocoloRequerimentoCpf,
     ),
-    endereco: {
-      cep: normalizeOptionalValue(dadosEndereco.value.cep),
-      bairro: normalizeOptionalValue(dadosEndereco.value.bairro),
-      logradouro: normalizeOptionalValue(dadosEndereco.value.logradouro),
-      numero: normalizeOptionalValue(dadosEndereco.value.numero),
-      complemento: normalizeOptionalValue(dadosEndereco.value.complemento),
-    },
+    endereco: { id: enderecoId.value }
   };
 }
 
@@ -1436,6 +1472,8 @@ function createEmptyEndereco() {
     logradouro: null,
     numero: null,
     complemento: null,
+    enderecoId: null,
+    bairroId: null,
   };
 }
 </script>
