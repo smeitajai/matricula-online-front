@@ -24,5 +24,14 @@ export default defineEventHandler(async (event) => {
   });
 
   const data = await response.json();
+
+  if (!response.ok) {
+    throw createError({
+      statusCode: response.status,
+      statusMessage: data?.message || "Erro ao salvar pessoa",
+      data,
+    });
+  }
+
   return data;
 });
