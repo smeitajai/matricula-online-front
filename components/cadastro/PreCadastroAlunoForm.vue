@@ -51,7 +51,7 @@
                     required
                     :validate="[validateCpfComOnzeDigitos]"
                     @input="
-                      (updateCpf($event), buscarPreCadastroErudio($event))
+                      (updateCpf($event))
                     "
                     max-length="11"
                   />
