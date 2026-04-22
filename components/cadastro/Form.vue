@@ -865,7 +865,7 @@ const onSubmit = async () => {
 
   loadingButton.value = true;
 
-  await (dadosForm.value.id ? editarPessoa() : criarPessoa());
+  await (dadosForm.value.id ? editarPessoa() : cadastrarAlunoNovo());
 };
 
 const editarPessoa = async () => {
@@ -921,35 +921,8 @@ const salvarEnderecoErudio = async () => {
   return enderecoSalvo.value;
 }
 
-const criarPessoa = async () => {
-  const enderecoSalvo = await salvarEnderecoErudio();
-  if (!enderecoSalvo) return;
-
-  enderecoId.value = enderecoSalvo.id;
-
-  dadosForm.value.enderecoId = enderecoId.value;
-
-  const payload = buildAlunoPayload();
-  if (!payload) return;
-
-  const { data: pessoaCriada, error } = await useFetch("/api/pessoas", {
-    method: "POST",
-    body: payload,
-  });
-
-  if (
-    error.value ||
-    pessoaCriada.value?.error ||
-    pessoaCriada.value?.statusCode
-  ) {
-    message.value =
-      error.value || pessoaCriada.value?.message || "Erro ao salvar pessoa.";
-    loadingButton.value = false;
-    showMessage.value = true;
-    return;
-  }
-
-  alunoState.value = pessoaCriada.value;
+const cadastrarAlunoNovo = async () => {
+  if (!(await criarPessoaAlunoNovo())) return;
 
   const inscricaoCriada = await salvarInscricao();
   if (!inscricaoCriada) return;
@@ -957,7 +930,73 @@ const criarPessoa = async () => {
   const sincronizacaoConcluida = await sincronizarAlunoErudio(inscricaoCriada);
   if (!sincronizacaoConcluida) return;
 
+  const telefoneSalvo = await salvarTelefonesAlunoNovo(sincronizacaoConcluida);
+  if (!telefoneSalvo.telefone1) return;
+
   await salvarDocumentos(inscricaoCriada);
+};
+
+const salvarTelefonesAlunoNovo = async (aluno) => {
+  const { data: telefoneSalvo, error: errorTelefone } = await useFetch(
+    "/api/erudio/telefones",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        numero: String(dadosForm.value.telefone1),
+        descricao: "CELULAR",
+        falarCom: dadosForm.value.falarComTelefoneResponsavel,
+        pessoa: { id: aluno.pessoa.id },
+      }),
+    },
+  );
+
+  let telefoneSalvo2 = null;
+  if (dadosForm.value.telefone2) {
+    const { data, error } = await useFetch("/api/erudio/telefones", {
+      method: "POST",
+      body: JSON.stringify({
+        numero: String(dadosForm.value.telefone2),
+        descricao: "CELULAR",
+        falarCom: dadosForm.value.falarComTelefone2,
+        pessoa: { id: aluno.pessoa.id },
+      }),
+    });
+
+    if (error.value) throw error.value;
+
+    telefoneSalvo2 = data.value;
+  }
+
+  return {
+    telefone1: telefoneSalvo.value,
+    telefone2: telefoneSalvo2
+  };
+};
+
+const criarPessoaAlunoNovo = async () => {
+  const enderecoSalvo = await salvarEnderecoErudio();
+  if (!enderecoSalvo) return false;
+
+  enderecoId.value = enderecoSalvo.id;
+  dadosForm.value.enderecoId = enderecoId.value;
+
+  const payload = buildAlunoPayload();
+  if (!payload) return false;
+
+  const { data: pessoaCriada, error } = await useFetch("/api/pessoas", {
+    method: "POST",
+    body: payload,
+  });
+
+  if (error.value) {
+    message.value = error.value.statusMessage || "Erro ao salvar pessoa";
+    loadingButton.value = false;
+    showMessage.value = true;
+    return false;
+  }
+
+  alunoState.value = pessoaCriada.value;
+  return true;
 };
 
 const salvarInscricao = async () => {
@@ -1014,7 +1053,7 @@ const sincronizarAlunoErudio = async (inscricao) => {
     return false;
   }
 
-  return true;
+  return sincronizacao.value;
 };
 
 const normalizeFiles = (value) => {
