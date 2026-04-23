@@ -760,7 +760,7 @@ const validarInscricao = async () => {
         cpf: alunoErudio.cpf,
         cpfCnpj: alunoErudio.cpf,
         nome: alunoErudio.nome,
-        responsavelNome: alunoErudio.responsavelNome,
+        responsavelNome: "",
         dataNascimento: alunoErudio.dataNascimento,
         etapa: etapas.value.find((e) => e.id == alunoErudio.etapaId),
         unidadeEnsinoId: alunoErudio.unidadeEnsinoId,
@@ -942,7 +942,7 @@ const salvarTelefonesAlunoNovo = async (aluno) => {
     {
       method: "POST",
       body: JSON.stringify({
-        numero: String(dadosForm.value.telefone1),
+        numero: String(dadosForm.value.telefone1).replace(/\D/g, ""),
         descricao: "CELULAR",
         falarCom: dadosForm.value.falarComTelefoneResponsavel,
         pessoa: { id: aluno.pessoa.id },
@@ -955,7 +955,7 @@ const salvarTelefonesAlunoNovo = async (aluno) => {
     const { data, error } = await useFetch("/api/erudio/telefones", {
       method: "POST",
       body: JSON.stringify({
-        numero: String(dadosForm.value.telefone2),
+        numero: String(dadosForm.value.telefone2).replace(/\D/g, ""),
         descricao: "CELULAR",
         falarCom: dadosForm.value.falarComTelefone2,
         pessoa: { id: aluno.pessoa.id },
@@ -1158,7 +1158,7 @@ async function preencherDadosFormulario(dados = {}) {
     cpfMae: dados.cpfMae || "",
     nomePai: dados.nomePai || "",
     cpfPai: dados.cpfPai || "",
-    responsavelNome: dados.responsavelNome || "",
+    responsavelNome: "",
     cpfResponsavel: dados.cpfResponsavel || "",
     conselheiroNome: dados.conselheiroNome || "",
     grauParentesco: dados.grauParentesco || "",
