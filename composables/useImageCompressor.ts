@@ -11,9 +11,8 @@ export const useImageCompressor = () => {
       maxSizeMB: 1, // 1MB máximo
       maxWidthOrHeight: 1920,
       useWebWorker: true,
-      // Mantém o formato original para evitar aumento de tamanho
       fileType: file.type,
-      quality: 0.8 // Qualidade mais equilibrada para JPEG/PNG
+      quality: 0.8
     };
 
     try {
