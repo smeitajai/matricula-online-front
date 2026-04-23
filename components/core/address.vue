@@ -196,8 +196,8 @@ watch(
         estado: estadoSelecionado,
         logradouro: endereco.value?.logradouro || dadosCep?.logradouro || "",
         bairro: endereco.value?.bairro || dadosCep?.bairro || "",
-        cidade: cidadeSelecionada.nomeCompleto,
-        cidadeId: cidadeSelecionada.id,
+        cidade: cidadeSelecionada?.nomeCompleto ?? dadosCep?.localidade ?? "",
+        cidadeId: cidadeSelecionada?.id,
         bairroId: bairroSelecionado?.id,
       });
 
