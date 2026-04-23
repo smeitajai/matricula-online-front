@@ -256,7 +256,6 @@ const etapaAtivaAtual = ref(null);
 const dadosForm = ref(createEmptyDadosForm());
 const dadosEndereco = ref(createEmptyEndereco());
 const documentos = ref({});
-const documentosComprimidos = ref({});
 const loading = ref(false);
 const loadingButton = ref(false);
 const timeout = ref(5000);
@@ -265,6 +264,7 @@ const alunoCarregadoErudio = ref(null);
 const alunoState = useAluno();
 const validateAddress = ref(true);
 const CURSO_PRE_CADASTRO_ID = 10;
+const enderecoId = ref(null);
 
 const { data: etapas } = await useFetch("/api/etapas");
 const { data: etapasCurso, refresh: carregarEtapasCurso } = await useLazyFetch(
@@ -321,6 +321,7 @@ const unidadeOptions = computed(() =>
       }))
     : [],
 );
+
 const {
   data: bairrosPreferenciais,
   pending: loadingBairros,
@@ -395,7 +396,6 @@ const limparEstadoFormulario = () => {
   dadosForm.value = createEmptyDadosForm();
   dadosEndereco.value = createEmptyEndereco();
   documentos.value = {};
-  documentosComprimidos.value = {};
   loading.value = false;
   loadingButton.value = false;
   timeout.value = 5000;
@@ -882,7 +882,7 @@ const onSubmit = async () => {
 
   loadingButton.value = true;
 
-  await (dadosForm.value.id ? editarPessoa() : criarPessoa());
+  await (dadosForm.value.id ? editarPessoa() : cadastrarAlunoNovo());
 };
 
 const editarPessoa = async () => {
@@ -911,35 +911,35 @@ const editarPessoa = async () => {
   await salvarDocumentos(inscricaoCriada);
 };
 
-const criarPessoa = async () => {
-  const payload = buildAlunoPayload();
-  if (!payload) return;
-
-  const { data: pessoaCriada, error } = await useFetch("/api/pessoas", {
-    method: "POST",
-    body: payload,
-  });
-
+const salvarEnderecoErudio = async () => {
+  const enderecoBody = buildErudioEnderecoPayload();
+  const { data: enderecoSalvo, error: errorEndereco } = await useFetch(
+    "/api/erudio/enderecos/erudio",
+    {
+      method: "POST",
+      body: enderecoBody,
+    },
+  );
+  
   if (
-    error.value ||
-    pessoaCriada.value?.error ||
-    pessoaCriada.value?.statusCode
+    errorEndereco.value ||
+    enderecoSalvo.value?.statusCode ||
+    enderecoSalvo.value?.error
   ) {
     message.value =
-      error.value || pessoaCriada.value?.message || "Erro ao salvar pessoa.";
+      errorEndereco.value ||
+      enderecoSalvo.value?.message ||
+      "Erro ao salvar endereço.";
     loadingButton.value = false;
     showMessage.value = true;
     return;
   }
 
-  if (!pessoaCriada.value?.id) {
-    message.value = "Pessoa criada sem retorno válido da API.";
-    loadingButton.value = false;
-    showMessage.value = true;
-    return;
-  }
+  return enderecoSalvo.value;
+}
 
-  alunoState.value = pessoaCriada.value;
+const cadastrarAlunoNovo = async () => {
+  if (!(await criarPessoaAlunoNovo())) return;
 
   const inscricaoCriada = await salvarInscricao();
   if (!inscricaoCriada) return;
@@ -947,7 +947,73 @@ const criarPessoa = async () => {
   const sincronizacaoConcluida = await sincronizarAlunoErudio(inscricaoCriada);
   if (!sincronizacaoConcluida) return;
 
+  const telefoneSalvo = await salvarTelefonesAlunoNovo(sincronizacaoConcluida);
+  if (!telefoneSalvo.telefone1) return;
+
   await salvarDocumentos(inscricaoCriada);
+};
+
+const salvarTelefonesAlunoNovo = async (aluno) => {
+  const { data: telefoneSalvo, error: errorTelefone } = await useFetch(
+    "/api/erudio/telefones",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        numero: String(dadosForm.value.telefone1),
+        descricao: "CELULAR",
+        falarCom: dadosForm.value.falarComTelefoneResponsavel,
+        pessoa: { id: aluno.pessoa.id },
+      }),
+    },
+  );
+
+  let telefoneSalvo2 = null;
+  if (dadosForm.value.telefone2) {
+    const { data, error } = await useFetch("/api/erudio/telefones", {
+      method: "POST",
+      body: JSON.stringify({
+        numero: String(dadosForm.value.telefone2),
+        descricao: "CELULAR",
+        falarCom: dadosForm.value.falarComTelefone2,
+        pessoa: { id: aluno.pessoa.id },
+      }),
+    });
+
+    if (error.value) throw error.value;
+
+    telefoneSalvo2 = data.value;
+  }
+
+  return {
+    telefone1: telefoneSalvo.value,
+    telefone2: telefoneSalvo2
+  };
+};
+
+const criarPessoaAlunoNovo = async () => {
+  const enderecoSalvo = await salvarEnderecoErudio();
+  if (!enderecoSalvo) return false;
+
+  enderecoId.value = enderecoSalvo.id;
+  dadosForm.value.enderecoId = enderecoId.value;
+
+  const payload = buildAlunoPayload();
+  if (!payload) return false;
+
+  const { data: pessoaCriada, error } = await useFetch("/api/pessoas", {
+    method: "POST",
+    body: payload,
+  });
+
+  if (error.value) {
+    message.value = error.value.statusMessage || "Erro ao salvar pessoa";
+    loadingButton.value = false;
+    showMessage.value = true;
+    return false;
+  }
+
+  alunoState.value = pessoaCriada.value;
+  return true;
 };
 
 const salvarInscricao = async () => {
@@ -1004,7 +1070,7 @@ const sincronizarAlunoErudio = async (inscricao) => {
     return false;
   }
 
-  return true;
+  return sincronizacao.value;
 };
 
 const normalizeFiles = (value) => {
@@ -1015,27 +1081,26 @@ const normalizeFiles = (value) => {
 };
 
 const salvarDocumentos = async (inscricao) => {
-  await compressAllDocuments();
   const formData = new FormData();
   formData.append("inscricaoId", inscricao.id);
 
   const categoriasDocumentos = {
-    certidao_identidade: documentosComprimidos.value.certidao_identidade,
-    cpf_rg_responsavel: documentosComprimidos.value.cpf_rg_responsavel,
-    cpf_rg_responsavel1: documentosComprimidos.value.cpf_rg_responsavel1,
-    cpf_rg_responsavel2: documentosComprimidos.value.cpf_rg_responsavel2,
-    comprovante_residencia: documentosComprimidos.value.comprovante_residencia,
+    certidao_identidade: documentos.value.certidao_identidade,
+    cpf_rg_responsavel: documentos.value.cpf_rg_responsavel,
+    cpf_rg_responsavel1: documentos.value.cpf_rg_responsavel1,
+    cpf_rg_responsavel2: documentos.value.cpf_rg_responsavel2,
+    comprovante_residencia: documentos.value.comprovante_residencia,
     declaracao_proprietario_residencia:
-      documentosComprimidos.value.declaracao_proprietario_residencia,
-    foto_estudante: documentosComprimidos.value.foto_estudante,
-    declaracao_vacinacao: documentosComprimidos.value.declaracao_vacinacao,
-    cartao_cns: documentosComprimidos.value.cartao_cns,
-    cartao_social: documentosComprimidos.value.cartao_social,
-    cartao_bpc: documentosComprimidos.value.cartao_bpc,
-    tutela_provisoria: documentosComprimidos.value.tutela_provisoria,
-    laudo_medico: documentosComprimidos.value.laudo_medico,
-    anexo_cras: documentosComprimidos.value.anexo_cras,
-    comprovante_de_escolaridade: documentosComprimidos.value.comprovante_de_escolaridade,
+      documentos.value.declaracao_proprietario_residencia,
+    foto_estudante: documentos.value.foto_estudante,
+    declaracao_vacinacao: documentos.value.declaracao_vacinacao,
+    cartao_cns: documentos.value.cartao_cns,
+    cartao_social: documentos.value.cartao_social,
+    cartao_bpc: documentos.value.cartao_bpc,
+    tutela_provisoria: documentos.value.tutela_provisoria,
+    laudo_medico: documentos.value.laudo_medico,
+    anexo_cras: documentos.value.anexo_cras,
+    comprovante_de_escolaridade: documentos.value.comprovante_de_escolaridade,
   };
 
   let listaNomes = [];
@@ -1209,6 +1274,7 @@ function buildPessoaPayload(enderecoId) {
     protocoloRequerimentoCpf: normalizeOptionalValue(
       dadosForm.value.protocoloRequerimentoCpf,
     ),
+    naoFrequentando: dadosForm.value.naoFrequentando,
   };
 
   return payload;
@@ -1218,14 +1284,27 @@ function buildAlunoPayload() {
   let payload = {
     nome: normalizeOptionalValue(dadosForm.value.nome),
     cpf: normalizeDigits(dadosForm.value.cpf),
-    email: normalizeOptionalValue(dadosForm.value.email),
-    dataNascimento: normalizeOptionalValue(dadosForm.value.dataNascimento),
+    email: dadosForm.value.email,
+    dataNascimento: dadosForm.value.dataNascimento,
     telefone1: String(dadosForm.value.telefone1),
     telefone2: String(dadosForm.value.telefone2),
-    responsavelNome: normalizeOptionalValue(dadosForm.value.responsavelNome),
+    responsavelNome: dadosForm.value.responsavelNome,
     naoFrequentando: dadosForm.value.naoFrequentando,
   };
   return payload;
+}
+
+function buildErudioEnderecoPayload() {
+  const e = dadosEndereco.value;
+
+  return {
+    cep: normalizeDigits(e.cep),
+    logradouro: normalizeOptionalValue(e.logradouro),
+    numero: Number(e.numero),
+    complemento: normalizeOptionalValue(e.complemento),
+    bairroId: e.bairroId,
+    cidadeId: e.cidadeId,
+  };
 }
 
 function buildSincronizacaoErudioPayload(inscricao) {
@@ -1325,13 +1404,7 @@ function buildErudioPessoaPayload() {
     protocoloRequerimentoCpf: normalizeOptionalValue(
       dadosForm.value.protocoloRequerimentoCpf,
     ),
-    endereco: {
-      cep: normalizeOptionalValue(dadosEndereco.value.cep),
-      bairro: normalizeOptionalValue(dadosEndereco.value.bairro),
-      logradouro: normalizeOptionalValue(dadosEndereco.value.logradouro),
-      numero: normalizeOptionalValue(dadosEndereco.value.numero),
-      complemento: normalizeOptionalValue(dadosEndereco.value.complemento),
-    },
+    endereco: { id: enderecoId.value }
   };
 }
 
@@ -1455,6 +1528,8 @@ function createEmptyEndereco() {
     logradouro: null,
     numero: null,
     complemento: null,
+    enderecoId: null,
+    bairroId: null,
   };
 }
 </script>

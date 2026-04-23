@@ -1,6 +1,6 @@
 <template>
   <div class="matricula-home ma-5">
-    <CoreCard rounded="lg" toolbar elevation="0" class="overflow-hidden">
+    <CoreCard rounded="lg" toolbar elevation="0" class="overflow-hidden bg-slate" >
 
       <!-- Hero Header -->
       <div class="hero-banner">

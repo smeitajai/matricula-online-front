@@ -51,7 +51,7 @@
                     required
                     :validate="[validateCpfComOnzeDigitos]"
                     @input="
-                      (updateCpf($event), buscarPreCadastroErudio($event))
+                      (updateCpf($event))
                     "
                     max-length="11"
                   />
@@ -360,7 +360,7 @@
                       :items="turnoOptionsFiltrados"
                       :model-value="formData.turnoPreferencialId"
                       item-title="nome"
-                      item-value="id"
+                      item-value="idExterno"
                       label="Turno Preferencial*"
                       :rules="[(v) => !!v || 'Campo obrigatório']"
                       variant="outlined"
@@ -837,13 +837,14 @@ watch(cpfQuery, async (cpf) => {
 
   if (
     preCadastroExistente.value.id &&
+    preCadastroExistente.value.inscricaoId &&
     preCadastroExistente.value.emAndamento === true
   ) {
     router.push({
       path: "/cadastro/solicitacao-efetivada",
       query: {
         existente: true,
-        inscricao: preCadastroExistente.value.id,
+        inscricao: preCadastroExistente.value.inscricaoId,
         protocolo: preCadastroExistente.value.protocolo,
       },
     });
@@ -1153,11 +1154,7 @@ const updateCpfIrmao = (value) => {
 .step-content {
   min-height: 420px;
   overflow: visible;
-  background: linear-gradient(
-    180deg,
-    rgba(var(--v-theme-surface), 0.9) 0%,
-    rgba(var(--v-theme-surface-bright), 0.95) 100%
-  );
+  background: var(--v-theme-surface);
 }
 
 .mobile-step-title {
@@ -1298,6 +1295,27 @@ const updateCpfIrmao = (value) => {
   .nav-btn--finish,
   .nav-spacer {
     min-width: unset;
+  }
+}
+
+@media (max-width: 600px) {
+  .step-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .nav-btn,
+  .nav-btn--finish {
+    width: 100%;
+  }
+
+  .nav-spacer {
+    display: none;
+  }
+
+  .step-counter {
+    order: -1;
+    margin-bottom: 8px;
   }
 }
 
