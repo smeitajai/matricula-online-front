@@ -791,19 +791,15 @@ const validarInscricao = async () => {
 const compressAllDocuments = async () => {
   const { compressImage } = useImageCompressor();
   
-  // Limpa o estado de documentos comprimidos
   documentosComprimidos.value = {};
   
-  // Iterar sobre todos os documentos e comprimir as imagens
   for (const [key, value] of Object.entries(documentos.value)) {
     if (Array.isArray(value)) {
-      // Se for array de arquivos, comprime cada um
       const compressedFiles = await Promise.all(
         value.map(file => compressImage(file))
       );
       documentosComprimidos.value[key] = compressedFiles;
     } else if (value) {
-      // Se for arquivo único, comprime
       documentosComprimidos.value[key] = await compressImage(value);
     }
   }
