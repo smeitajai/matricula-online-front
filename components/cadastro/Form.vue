@@ -1224,8 +1224,12 @@ function buildPessoaPayload(enderecoId) {
     dataNascimento: normalizeOptionalValue(dadosForm.value.dataNascimento),
     cpfCnpj: normalizeDigits(dadosForm.value.cpfCnpj),
     email: normalizeOptionalValue(dadosForm.value.email),
-    telefone1: normalizeOptionalValue(dadosForm.value.telefone1),
-    telefone2: normalizeOptionalValue(dadosForm.value.telefone2),
+    telefone1: normalizeOptionalValue(
+      String(dadosForm.value.telefone1 || "").replace(/\D/g, ""),
+    ),
+    telefone2: normalizeOptionalValue(
+      String(dadosForm.value.telefone2 || "").replace(/\D/g, ""),
+    ),
     genero: normalizeOptionalValue(dadosForm.value.genero),
     estadoCivil: buildReference(dadosForm.value.estadoCivilId),
     raca: buildReference(dadosForm.value.racaId),
@@ -1269,8 +1273,8 @@ function buildAlunoPayload() {
     cpf: normalizeDigits(dadosForm.value.cpf),
     email: dadosForm.value.email,
     dataNascimento: dadosForm.value.dataNascimento,
-    telefone1: String(dadosForm.value.telefone1),
-    telefone2: String(dadosForm.value.telefone2),
+    telefone1: String(dadosForm.value.telefone1 || "").replace(/\D/g, ""),
+    telefone2: String(dadosForm.value.telefone2 || "").replace(/\D/g, ""),
     responsavelNome: dadosForm.value.responsavelNome,
     naoFrequentando: dadosForm.value.naoFrequentando,
   };
@@ -1318,7 +1322,7 @@ function buildSincronizacaoErudioPayload(inscricao) {
         dadosForm.value.emailResponsavel || dadosForm.value.email,
       ),
       telefoneResponsavel: normalizeOptionalValue(
-        dadosForm.value.telefone1,
+        String(dadosForm.value.telefone1 || "").replace(/\D/g, ""),
       ),
       inscricaoId: normalizeOptionalValue(inscricao.id),
       naoFrequentando: dadosForm.value.naoFrequentando,
@@ -1353,10 +1357,12 @@ function buildErudioPessoaPayload() {
       dadosForm.value.emailResponsavel || dadosForm.value.email,
     ),
     telefone1: normalizeOptionalValue(
-      dadosForm.value.telefone1,
+      String(dadosForm.value.telefone1 || "").replace(/\D/g, ""),
     ),
     naoFrequentando: dadosForm.value.naoFrequentando,
-    telefone2: normalizeOptionalValue(dadosForm.value.telefone2),
+    telefone2: normalizeOptionalValue(
+      String(dadosForm.value.telefone2 || "").replace(/\D/g, ""),
+    ),
     genero: normalizeOptionalValue(dadosForm.value.genero),
     estadoCivil: buildReference(dadosForm.value.estadoCivilId),
     raca: buildReference(dadosForm.value.racaId),

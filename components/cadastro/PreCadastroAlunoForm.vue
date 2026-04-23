@@ -261,12 +261,27 @@
                       updateField('emailResponsavel', $event))
                     "
                   />
+                  <v-col cols="12" class="py-1 px-1" md="4">
+                    <v-select
+                      :items="tipoTelefoneOptions"
+                      :model-value="tipoTelefone1"
+                      :loading="loading"
+                      :disabled="loading"
+                      item-title="label"
+                      item-value="value"
+                      label="Tipo de telefone*"
+                      :rules="[(v) => !!v || 'Campo obrigatório']"
+                      variant="outlined"
+                      @update:model-value="tipoTelefone1 = $event"
+                    />
+                  </v-col>
                   <CoreInput
                     :model-value="telefone1Visivel"
+                    :md="4"
                     clearable
                     label="Telefone de contato*"
-                    mask="telefone"
-                    max-length="15"
+                    :mask="maskByTipoTelefone(tipoTelefone1)"
+                    :max-length="maxLengthByTipoTelefone(tipoTelefone1)"
                     required
                     @input="
                       ((telefone1Visivel = $event), updateField('telefone1', $event))
@@ -274,16 +289,31 @@
                   />
                   <CoreInput
                     :model-value="formData.falarComTelefoneResponsavel"
+                    :md="4"
                     clearable
                     required
                     label="Falar com*"
                     @input="updateField('falarComTelefoneResponsavel', $event)"
                   />
+                  <v-col cols="12" class="py-1 px-1" md="4">
+                    <v-select
+                      :items="tipoTelefoneOptions"
+                      :model-value="tipoTelefone2"
+                      :loading="loading"
+                      :disabled="loading"
+                      item-title="label"
+                      item-value="value"
+                      label="Tipo do segundo telefone"
+                      variant="outlined"
+                      @update:model-value="tipoTelefone2 = $event"
+                    />
+                  </v-col>
                   <CoreInput
                     :model-value="telefone2Visivel"
+                    :md="4"
                     clearable
-                    mask="telefone"
-                    max-length="15"
+                    :mask="maskByTipoTelefone(tipoTelefone2)"
+                    :max-length="maxLengthByTipoTelefone(tipoTelefone2)"
                     label="Segundo telefone de contato"
                     @input="
                       ((telefone2Visivel = $event), updateField('telefone2', $event))
@@ -291,6 +321,7 @@
                   />
                   <CoreInput
                     :model-value="formData.falarComTelefone2"
+                    :md="4"
                     clearable
                     label="Falar com"
                     @input="updateField('falarComTelefone2', $event)"
@@ -779,6 +810,11 @@ const grauParentescoOptions = [
   { label: "Conselho Tutelar", value: "conselho_tutelar" },
 ];
 
+const tipoTelefoneOptions = [
+  { label: "Celular", value: "celular" },
+  { label: "Residencial", value: "residencial" },
+];
+
 const emit = defineEmits([
   "update:formData",
   "update:genero",
@@ -805,6 +841,8 @@ const showAddressStepError = ref(false);
 const emailResponsavelVisivel = ref("");
 const telefone1Visivel = ref("");
 const telefone2Visivel = ref("");
+const tipoTelefone1 = ref("celular");
+const tipoTelefone2 = ref("celular");
 const enderecoVisivel = ref({});
 const totalSteps = 5;
 
@@ -874,6 +912,20 @@ const validateEmailField = (value) => {
   if (!value) return true;
   return validateEmail(value) || "Informe um e-mail valido.";
 };
+
+const inferTipoTelefone = (value) => {
+  const telefoneNumerico = (value || "").replace(/\D/g, "");
+  return telefoneNumerico.length === 10 ? "residencial" : "celular";
+};
+
+const maskByTipoTelefone = (tipoTelefone) =>
+  tipoTelefone === "residencial" ? "telefoneResidencial" : "telefone";
+
+const maxLengthByTipoTelefone = (tipoTelefone) =>
+  tipoTelefone === "residencial" ? 14 : 15;
+
+tipoTelefone1.value = inferTipoTelefone(props.formData.telefone1);
+tipoTelefone2.value = inferTipoTelefone(props.formData.telefone2);
 
 const turnoOptionsFiltrados = computed(() =>
   (props.turnoOptions || []).filter(

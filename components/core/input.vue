@@ -1,5 +1,5 @@
 <template>
-  <v-col cols="12" class="py-1 px-1" :md="fullWidth ? 12 : 6">
+  <v-col cols="12" class="py-1 px-1" :md="fullWidth ? 12 : md">
     <v-text-field
       v-model="value"
       v-maska="choiceMask[mask] ?? undefined"
@@ -62,6 +62,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  md: {
+    type: [Number, String],
+    default: 6,
+  },
   hint: {
     type: String,
     default: "",
@@ -109,6 +113,7 @@ const emit = defineEmits(["input", "append-inner-click"]);
 const choiceMask = {
   cpf: '###.###.###-##',
   telefone: '(##) #####-####',
+  telefoneResidencial: '(##) ####-####',
 }
 
 const value = computed({
