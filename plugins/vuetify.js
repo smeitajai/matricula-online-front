@@ -6,7 +6,7 @@ const customLightTheme = {
   dark: false,
   colors: {
     background: "#FFFFFF",
-    surface: "#FFFFFF",
+    surface: "#f5f5f5e3",
     primary: "#6200EE",
     "primary-darken-1": "#3700B3",
     secondary: "#03DAC6",

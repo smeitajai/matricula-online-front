@@ -788,6 +788,23 @@ const validarInscricao = async () => {
   }
 };
 
+const compressAllDocuments = async () => {
+  const { compressImage } = useImageCompressor();
+  
+  documentosComprimidos.value = {};
+  
+  for (const [key, value] of Object.entries(documentos.value)) {
+    if (Array.isArray(value)) {
+      const compressedFiles = await Promise.all(
+        value.map(file => compressImage(file))
+      );
+      documentosComprimidos.value[key] = compressedFiles;
+    } else if (value) {
+      documentosComprimidos.value[key] = await compressImage(value);
+    }
+  }
+};
+
 const onSubmit = async () => {
   if (!validateAddressPayload(dadosEndereco.value))
     return (
