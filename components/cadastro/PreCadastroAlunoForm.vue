@@ -48,12 +48,13 @@
                     :disabled="loading"
                     persistent-hint
                     placeholder="12345678901"
+                    mask="cpf"
+                    max-length="14"
                     required
                     :validate="[validateCpfComOnzeDigitos]"
                     @input="
                       (updateCpf($event))
                     "
-                    max-length="11"
                   />
                   <CoreInput
                     :model-value="formData.nome"
@@ -138,6 +139,8 @@
                     :disabled="loading"
                     hint="Digite apenas números"
                     label="CPF da filiação 1*"
+                    max-length="14"
+                    mask="cpf"
                     :validate="[
                       validateCpfComOnzeDigitos,
                       validateCpfFiliacaoDiferenteDoAluno,
@@ -162,6 +165,8 @@
                     :disabled="loading"
                     hint="Digite apenas números"
                     label="CPF da filiação 2"
+                    max-length="14"
+                    mask="cpf"
                     persistent-hint
                     @input="updateCpfField('cpfPai', $event)"
                   />
@@ -229,6 +234,8 @@
                     clearable
                     hint="Digite apenas números"
                     label="CPF do responsável legal*"
+                    max-length="14"
+                    mask="cpf"
                     persistent-hint
                     required
                     @input="updateCpfField('cpfResponsavel', $event)"
@@ -242,39 +249,79 @@
                 <span class="fields-group-label">Contato</span>
                 <v-row dense>
                   <CoreInput
-                    :model-value="formData.emailResponsavel"
+                    :model-value="emailResponsavelVisivel"
                     :validate="[validateEmailField]"
                     clearable
                     full-width
                     label="E-mail de contato*"
                     placeholder="email@email.com"
                     required
-                    @input="updateField('emailResponsavel', $event)"
+                    @input="
+                      ((emailResponsavelVisivel = $event),
+                      updateField('emailResponsavel', $event))
+                    "
                   />
+                  <v-col cols="12" class="py-1 px-1" md="4">
+                    <v-select
+                      :items="tipoTelefoneOptions"
+                      :model-value="tipoTelefone1"
+                      :loading="loading"
+                      :disabled="loading"
+                      item-title="label"
+                      item-value="value"
+                      label="Tipo de telefone*"
+                      :rules="[(v) => !!v || 'Campo obrigatório']"
+                      variant="outlined"
+                      @update:model-value="tipoTelefone1 = $event"
+                    />
+                  </v-col>
                   <CoreInput
-                    :model-value="formData.telefone1"
+                    :model-value="telefone1Visivel"
+                    :md="4"
                     clearable
                     label="Telefone de contato*"
-                    type="number"
+                    :mask="maskByTipoTelefone(tipoTelefone1)"
+                    :max-length="maxLengthByTipoTelefone(tipoTelefone1)"
                     required
-                    @input="updateField('telefone1', $event)"
+                    @input="
+                      ((telefone1Visivel = $event), updateField('telefone1', $event))
+                    "
                   />
                   <CoreInput
                     :model-value="formData.falarComTelefoneResponsavel"
+                    :md="4"
                     clearable
                     required
                     label="Falar com*"
                     @input="updateField('falarComTelefoneResponsavel', $event)"
                   />
+                  <v-col cols="12" class="py-1 px-1" md="4">
+                    <v-select
+                      :items="tipoTelefoneOptions"
+                      :model-value="tipoTelefone2"
+                      :loading="loading"
+                      :disabled="loading"
+                      item-title="label"
+                      item-value="value"
+                      label="Tipo do segundo telefone"
+                      variant="outlined"
+                      @update:model-value="tipoTelefone2 = $event"
+                    />
+                  </v-col>
                   <CoreInput
-                    :model-value="formData.telefone2"
+                    :model-value="telefone2Visivel"
+                    :md="4"
                     clearable
-                    type="number"
+                    :mask="maskByTipoTelefone(tipoTelefone2)"
+                    :max-length="maxLengthByTipoTelefone(tipoTelefone2)"
                     label="Segundo telefone de contato"
-                    @input="updateField('telefone2', $event)"
+                    @input="
+                      ((telefone2Visivel = $event), updateField('telefone2', $event))
+                    "
                   />
                   <CoreInput
                     :model-value="formData.falarComTelefone2"
+                    :md="4"
                     clearable
                     label="Falar com"
                     @input="updateField('falarComTelefone2', $event)"
@@ -308,10 +355,10 @@
               <CoreAddress
                 class="w-100"
                 :rules="[(v) => !!v || 'Campo obrigatório']"
-                :model-value="endereco"
+                :model-value="enderecoVisivel"
                 label="CEP*"
                 required
-                @input="updateEndereco"
+                @input="((enderecoVisivel = $event), updateEndereco($event))"
                 @validate="emit('validateAddress', $event)"
               />
             </div>
@@ -763,6 +810,11 @@ const grauParentescoOptions = [
   { label: "Conselho Tutelar", value: "conselho_tutelar" },
 ];
 
+const tipoTelefoneOptions = [
+  { label: "Celular", value: "celular" },
+  { label: "Residencial", value: "residencial" },
+];
+
 const emit = defineEmits([
   "update:formData",
   "update:genero",
@@ -786,6 +838,12 @@ const stepTwoForm = ref(null);
 const stepFourForm = ref(null);
 const stepFiveForm = ref(null);
 const showAddressStepError = ref(false);
+const emailResponsavelVisivel = ref("");
+const telefone1Visivel = ref("");
+const telefone2Visivel = ref("");
+const tipoTelefone1 = ref("celular");
+const tipoTelefone2 = ref("celular");
+const enderecoVisivel = ref({});
 const totalSteps = 5;
 
 const steps = [
@@ -855,6 +913,20 @@ const validateEmailField = (value) => {
   if (!value) return true;
   return validateEmail(value) || "Informe um e-mail valido.";
 };
+
+const inferTipoTelefone = (value) => {
+  const telefoneNumerico = (value || "").replace(/\D/g, "");
+  return telefoneNumerico.length === 10 ? "residencial" : "celular";
+};
+
+const maskByTipoTelefone = (tipoTelefone) =>
+  tipoTelefone === "residencial" ? "telefoneResidencial" : "telefone";
+
+const maxLengthByTipoTelefone = (tipoTelefone) =>
+  tipoTelefone === "residencial" ? 14 : 15;
+
+tipoTelefone1.value = inferTipoTelefone(props.formData.telefone1);
+tipoTelefone2.value = inferTipoTelefone(props.formData.telefone2);
 
 const turnoOptionsFiltrados = computed(() =>
   (props.turnoOptions || []).filter(
@@ -1042,6 +1114,7 @@ const updateDocumento = (field, value) => {
 
 const updateCpf = (value) => {
   const cpf = normalizeCpf(value);
+  const cpfAnterior = normalizeCpf(props.formData.cpf);
   const cpfIrmaoAtual = normalizeCpf(props.formData.cpfIrmao);
   const cpfIrmaoIgual = cpf && cpfIrmaoAtual && cpf === cpfIrmaoAtual;
 
@@ -1064,6 +1137,8 @@ const updateCpf = (value) => {
     emit("cpf-invalido");
     return;
   }
+
+  if (cpf === cpfAnterior) return;
 
   emit("buscar-por-cpf", cpf);
 };
@@ -1091,6 +1166,7 @@ const updateFrequentandoEscola = (value) => {
 
 const updateCpfIrmao = (value) => {
   const cpfIrmao = normalizeCpf(value);
+  const cpfIrmaoAnterior = normalizeCpf(props.formData.cpfIrmao);
   const cpfAluno = normalizeCpf(props.formData.cpf);
 
   emit("update:formData", {
@@ -1118,6 +1194,8 @@ const updateCpfIrmao = (value) => {
   if (cpfAluno && cpfIrmao === cpfAluno) {
     return;
   }
+
+  if (cpfIrmao === cpfIrmaoAnterior) return;
 
   emit("buscar-irmao-por-cpf", cpfIrmao);
 };

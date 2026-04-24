@@ -1,7 +1,8 @@
 <template>
-  <v-col cols="12" class="py-1 px-1" :md="fullWidth ? 12 : 6">
+  <v-col cols="12" class="py-1 px-1" :md="fullWidth ? 12 : md">
     <v-text-field
       v-model="value"
+      v-maska="choiceMask[mask] ?? undefined"
       :append-inner-icon="appendInnerIcon"
       :autofocus="autofocus"
       :clearable="clearable"
@@ -23,7 +24,6 @@
 </template>
 
 <script setup>
-import { max } from 'date-fns';
 
 const props = defineProps({
   loading: {
@@ -36,6 +36,10 @@ const props = defineProps({
   },
   maxLength: {
     type: Number,
+    default: null,
+  },
+  mask: {
+    type: String,
     default: null,
   },
   autofocus: {
@@ -57,6 +61,10 @@ const props = defineProps({
   fullWidth: {
     type: Boolean,
     default: false,
+  },
+  md: {
+    type: [Number, String],
+    default: 6,
   },
   hint: {
     type: String,
@@ -101,6 +109,12 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["input", "append-inner-click"]);
+
+const choiceMask = {
+  cpf: '###.###.###-##',
+  telefone: '(##) #####-####',
+  telefoneResidencial: '(##) ####-####',
+}
 
 const value = computed({
   get() {
